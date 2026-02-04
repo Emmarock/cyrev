@@ -18,6 +18,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Debug secret
+        run: |
+          echo "DB_URL length: ${#DB_URL}"
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
