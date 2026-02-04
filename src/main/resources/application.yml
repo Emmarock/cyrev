@@ -68,7 +68,7 @@ adapters:
   bitbucket:
     baseurl: https://api.bitbucket.org/2.0
     username: apatababajide@gmail.com
-    app-password: ATATT3xFfGF0rdJV1ewTpAy0fYXDi_VOotvg1ajgckh4_dx_o0lKRnoUbYBKwmSdbhutq003JEeyqvAuNMhUsCdp0sMmnuoycPvxxhGNdMc3SreHIrBrlxg6c_hh65yNBD28D3OcAGD53tySKrfzujWV5DGfcc9J1iq_CbnRUqc6O5mtNoIbyE0=4BABF3B0
+    app-password:
     workspace: cybrookes
 security:
   jwt:

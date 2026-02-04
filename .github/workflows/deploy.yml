@@ -1,0 +1,56 @@
+name: Build and Deploy to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AZURE_CONTAINER_REGISTRY: cyrevregistry.azurecr.io
+  IMAGE_NAME: cyrev-service
+  RESOURCE_GROUP: CyRev
+  CONTAINER_APP_NAME: cyrev-service
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build Spring Boot app
+        run: mvn clean package -DskipTests
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Login to Azure Container Registry
+        run: az acr login --name cyrevregistry
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }} \
+            -t $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:latest \
+            .
+
+      - name: Push Docker image
+        run: |
+          docker push $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }}
+          docker push $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:latest
+
+      - name: Deploy to Azure Container App
+        run: |
+          az containerapp update \
+            --name $CONTAINER_APP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --image $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }}
