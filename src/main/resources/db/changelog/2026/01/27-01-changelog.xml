@@ -25,7 +25,7 @@
             <column name="app" type="VARCHAR(255)"/>
             <column name="role" type="VARCHAR(255)"/>
             <column name="status" type="VARCHAR(255)"/>
-            <column name="failure_reason" type="oid"/>
+            <column name="failure_reason" type="TEXT"/>
         </createTable>
     </changeSet>
     <changeSet id="1769542588580-2" author="apata">
