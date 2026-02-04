@@ -7,4 +7,4 @@ FROM eclipse-temurin:21-jdk-jammy
 COPY target/iam-provisioning-1.0.0.jar app.jar
 
 # Run the jar
-ENTRYPOINT ["java", "-jar", "app.jar --spring.profiles.active=prod"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
