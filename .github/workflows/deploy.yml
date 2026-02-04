@@ -58,4 +58,9 @@ jobs:
           az containerapp update \
             --name $CONTAINER_APP_NAME \
             --resource-group $RESOURCE_GROUP \
-            --image $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }}
+            --image $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }} \
+            --environment-variables \
+              SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
+              SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
+              SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              SPRING_PROFILES_ACTIVE=${{ secrets.SPRING_PROFILE }}
