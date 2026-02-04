@@ -67,7 +67,6 @@ public class AppAssignmentController {
 
     @PostMapping("/request")
     public ResponseEntity<CyrevApiResponse<Void>> requestAppAccess(@CurrentUserId UUID userId, @RequestBody AppAssignmentRequestDTO assignment) throws BadRequestException {
-
         assignmentService.requestAppAccess(userId, assignment);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new CyrevApiResponse<>(
