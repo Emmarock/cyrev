@@ -61,6 +61,3 @@ jobs:
             --image $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }} \
             --set-env-vars \
               SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
-              SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
-              SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              SPRING_PROFILES_ACTIVE=${{ secrets.SPRING_PROFILE }}
