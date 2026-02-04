@@ -18,6 +18,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Debug secret
+        run: |
+          echo "AZURE_CREDENTIALS length: ${#AZURE_CREDENTIALS}"
+        env:
+          AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
