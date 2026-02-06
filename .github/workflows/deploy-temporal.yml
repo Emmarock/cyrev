@@ -30,13 +30,12 @@ jobs:
         run: |
           az extension add --name containerapp --upgrade
 
-      - name: Deploy docker-compose to Azure Container Apps
+      - name: Deploy Temporal Stack
         run: |
           az containerapp compose create \
-            --resource-group CyRev \
+            --resource-group cyrev-rg \
             --environment cyrev-env \
-            --name temporal \
-            --file infra/temporal/docker-compose.yml
+            --compose-file infra/temporal/docker-compose.yml
 
       - name: Expose Temporal UI
         run: |
