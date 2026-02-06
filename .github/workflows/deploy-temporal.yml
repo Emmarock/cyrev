@@ -33,7 +33,7 @@ jobs:
       - name: Deploy Temporal Stack
         run: |
           az containerapp compose create \
-            --resource-group cyrev-rg \
+            --resource-group CyRev \
             --environment cyrev-env \
             --compose-file infra/temporal/docker-compose.yml
 
