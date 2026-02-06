@@ -50,7 +50,7 @@ security:
     expiry: 3600000 # 1 hour
 
 server:
-  port: 9080
+  port: 8080
 
 management:
   endpoints:
