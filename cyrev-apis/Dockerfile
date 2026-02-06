@@ -6,4 +6,4 @@ COPY cyrev-apis/target/cyrev-apis-1.0.0.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
