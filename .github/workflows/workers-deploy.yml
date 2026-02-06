@@ -12,7 +12,10 @@ env:
   TEMPORAL_TARGET: temporal:7233
   SPRING_PROFILES_ACTIVE: prod
   TEMPORAL_TASK_QUEUE: APP_PROVISION_TASK_QUEUE
-
+  AZURE_CONTAINER_REGISTRY: cyrevregistry.azurecr.io
+  IMAGE_NAME: cyrev-workers
+  RESOURCE_GROUP: CyRev
+  CONTAINER_APP_NAME: cyrev-workers
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,20 +31,32 @@ jobs:
       - name: Build project
         run: mvn clean package -pl cyrev-workers -am -DskipTests
 
-      - name: Login to ACR
-        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login ${{ secrets.ACR_LOGIN_SERVER }} \
-          -u ${{ secrets.ACR_USERNAME }} --password-stdin
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Build & push image
+      - name: Login to Azure Container Registry
+        run: az acr login --name cyrevregistry
+
+      - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/cyrev-workers:latest cyrev-workers
-          docker push ${{ secrets.ACR_LOGIN_SERVER }}/cyrev-workers:latest
+          docker build \
+            -f cyrev-apis/Dockerfile \
+            -t $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }} \
+            -t $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:latest \
+            .
+
+      - name: Push Docker image
+        run: |
+          docker push $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }}
+          docker push $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:latest
 
       - name: Deploy to Azure Container App
         run: |
-          az containerapp create \
-            --name cyrev-workers \
-            --resource-group cyrev-rg \
-            --environment cyrev-env \
-            --image <acr>/cyrev-workers:latest \
-            --ingress internal
+          az containerapp update \
+            --name $CONTAINER_APP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --image $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }} \
+            --set-env-vars \
+              SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \

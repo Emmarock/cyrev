@@ -45,7 +45,6 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
-        <!-- Optional but recommended -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -63,7 +62,6 @@
 
     <build>
         <plugins>
-            <!-- Needed to build a runnable worker -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

@@ -1,12 +1,6 @@
 name: Build and Deploy to Azure Container Apps
 
 on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "Deploy environment"
-        required: true
-        default: main
   push:
     branches:
       - main
@@ -56,6 +50,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
+            -f cyrev-apis/Dockerfile \
             -t $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }} \
             -t $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:latest \
             .

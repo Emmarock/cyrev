@@ -1,16 +1,11 @@
 name: Build Cyrev IAM
 
 on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: "Deploy environment"
-        required: true
-        default: main
   push:
     branches: [ main ]
     paths:
-      - "api/**"
+      - "cyrev-apis/**"
+      - "cyrev-workers/**"
       - "common/**"
   pull_request:
 
