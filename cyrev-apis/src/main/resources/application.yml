@@ -37,6 +37,8 @@ logging:
     com.company.iam: DEBUG
 
 temporal:
+  host: ${TEMPORAL_HOST}
+  port: 7233
   enabled: true
   task-queue: USER_PROVISIONING
   namespace: temporal-system

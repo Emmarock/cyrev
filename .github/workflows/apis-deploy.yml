@@ -14,7 +14,8 @@ env:
   IMAGE_NAME: cyrev-service
   RESOURCE_GROUP: CyRev
   CONTAINER_APP_NAME: cyrev-service
-  TEMPORAL_TARGET: temporal:7233
+  TEMPORAL_HOST: temporal
+  TEMPORAL_PORT: 7233
   SPRING_PROFILES_ACTIVE: prod
 
 jobs:
@@ -68,3 +69,5 @@ jobs:
             --image $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }} \
             --set-env-vars \
               SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
+              TEMPORAL_HOST=$TEMPORAL_HOST \
+              TEMPORAL_PORT=TEMPORAL_PORT \

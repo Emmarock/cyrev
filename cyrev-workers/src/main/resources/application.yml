@@ -41,8 +41,8 @@ temporal:
   namespace: temporal-system
   workflow:
     timeout: PT5M # default workflow timeout
-  host: localhost
-  port: 7233
+  host: ${TEMPORAL_HOST:temporal}
+  port: ${TEMPORAL_PORT:7233}
 
 security:
   jwt:

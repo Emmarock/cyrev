@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 )
 public class TemporalConfig {
 
-    @Value("${temporal.host:172.17.0.2}")
+    @Value("${temporal.host:temporal}")
     private String temporalHost;
 
     @Value("${temporal.port:7233}")
@@ -40,8 +40,4 @@ public class TemporalConfig {
                 .setNamespace(namespace)
                 .build());
     }
-
-
-
-
 }
