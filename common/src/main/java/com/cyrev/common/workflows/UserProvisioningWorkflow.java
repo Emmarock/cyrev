@@ -23,4 +23,5 @@ public interface UserProvisioningWorkflow {
 
     @QueryMethod
     ProvisioningState getState();
+
 }

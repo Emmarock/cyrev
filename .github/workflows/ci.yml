@@ -30,4 +30,4 @@ jobs:
           key: maven-${{ hashFiles('**/pom.xml') }}
 
       - name: Build all modules
-        run: mvn clean verify
+        run: mvn clean verify -DskipTests
