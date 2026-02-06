@@ -42,7 +42,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            -f cyrev-apis/Dockerfile \
+            -f cyrev-workers/Dockerfile \
             -t $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }} \
             -t $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:latest \
             .
