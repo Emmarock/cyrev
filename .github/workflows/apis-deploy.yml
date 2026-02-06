@@ -1,6 +1,12 @@
 name: Build and Deploy to Azure Container Apps
 
 on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deploy environment"
+        required: true
+        default: main
   push:
     branches:
       - main
