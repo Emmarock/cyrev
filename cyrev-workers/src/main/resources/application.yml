@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: cyrev-worker
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cyrev_iamdb_dev
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update   # change to validate or none in prod if needed
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+  liquibase:
+    enabled: false
+  mail:
+    host: localhost
+    port: 1025
+    username: ''
+    password: ''
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+  security:
+    user:
+      name: admin
+      password: "{noop}secret123"
+      roles: USER,ADMIN
+logging:
+  level:
+    root: INFO
+    com.company.iam: DEBUG
+
+temporal:
+  enabled: true
+  task-queue: USER_PROVISIONING
+  namespace: temporal-system
+  workflow:
+    timeout: PT5M # default workflow timeout
+  host: localhost
+  port: 7233
+
+security:
+  jwt:
+    secret: VERY_LONG_RANDOM_SECRET_32_CHARS_MIN
+    expiry: 3600000 # 1 hour
+
+server:
+  port: 9080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

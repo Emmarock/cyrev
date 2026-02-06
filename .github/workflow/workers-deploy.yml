@@ -1,0 +1,47 @@
+name: Build & Push cyrev-workers
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "cyrev-workers/**"
+      - "common/**"
+      - "pom.xml"
+
+env:
+  TEMPORAL_TARGET: temporal:7233
+  SPRING_PROFILES_ACTIVE: prod
+  TEMPORAL_TASK_QUEUE: APP_PROVISION_TASK_QUEUE
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build project
+        run: mvn clean package -pl cyrev-workers -am -DskipTests
+
+      - name: Login to ACR
+        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login ${{ secrets.ACR_LOGIN_SERVER }} \
+          -u ${{ secrets.ACR_USERNAME }} --password-stdin
+
+      - name: Build & push image
+        run: |
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/cyrev-workers:latest cyrev-workers
+          docker push ${{ secrets.ACR_LOGIN_SERVER }}/cyrev-workers:latest
+
+      - name: Deploy to Azure Container App
+        run: |
+          az containerapp create \
+            --name cyrev-workers \
+            --resource-group cyrev-rg \
+            --environment cyrev-env \
+            --image <acr>/cyrev-workers:latest \
+            --ingress internal

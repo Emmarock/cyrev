@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="DiffGenerationConfig">
-    <option name="snapshotDb" value="false" />
-    <option name="snapshotModelValue" value="cyrev-iam-provisioning:cyrev-iam-provisioning" />
-    <option name="sourceModelValue" value="cyrev-iam-provisioning:cyrev-iam-provisioning" />
-    <option name="targetDbValue" value="f6ba9b09-2eaa-425b-94e4-9e900c72ba8e" />
-  </component>
-</project>

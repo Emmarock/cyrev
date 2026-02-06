@@ -7,13 +7,21 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="cyrev-iam-provisioning" />
+        <module name="cyrev-workers" />
+        <module name="common" />
+        <module name="cyrev-apis" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="cyrev-workflows" target="21" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="cyrev-iam-provisioning" options="-parameters" />
+      <module name="cyrev-apis" options="" />
+      <module name="cyrev-iam-provisioning" options="" />
+      <module name="cyrev-workers" options="" />
+      <module name="cyrev-workflows" options="" />
     </option>
   </component>
 </project>
