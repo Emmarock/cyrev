@@ -18,23 +18,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repo
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # Step 2: Azure Login
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # Step 3: Install Container Apps extension
       - name: Install Container Apps extension
         run: |
           az extension add --name containerapp --upgrade
 
       ###########################
-      # Step 4: Deploy PostgreSQL
+      # Deploy PostgreSQL
       ###########################
       - name: Deploy PostgreSQL Container App
         run: |
@@ -51,48 +48,111 @@ jobs:
                        POSTGRES_PASSWORD=secretRef:postgres-pwd \
                        POSTGRES_DB=temporal
 
-      ########################################
-      # Step 5: Wait until Postgres is ready
-      ########################################
-      - name: Wait for Postgres to be ready
-        run: |
-          POSTGRES_HOST=temporal-db.cyrev-env.ukwest.internal.azurecontainerapps.io
-          POSTGRES_PORT=5432
-          echo "Waiting for PostgreSQL at $POSTGRES_HOST:$POSTGRES_PORT..."
-          for i in {1..30}; do
-            nc -zv $POSTGRES_HOST $POSTGRES_PORT && echo "Postgres is ready!" && exit 0
-            echo "Postgres not ready yet. Waiting 5s..."
-            sleep 5
-          done
-          echo "Postgres did not become ready in time."
-          exit 1
-
-      ################################
-      # Step 6: Deploy Temporal App
-      ################################
-      - name: Deploy Temporal App
+      ###########################
+      # Deploy Elasticsearch
+      ###########################
+      - name: Deploy Elasticsearch Container App
         run: |
           az containerapp create \
-            --name temporal \
+            --name temporal-es \
             --resource-group CyRev \
             --environment cyrev-env \
-            --image temporalio/auto-setup:1.29.1 \
+            --image docker.elastic.co/elasticsearch/elasticsearch:8.11.1 \
             --cpu 1 \
             --memory 2Gi \
             --ingress internal \
-            --target-port 7233 \
-            --secrets postgres-user=temporal postgres-pwd=temporal \
-            --env-vars POSTGRES_SEEDS=temporal-db.cyrev-env.ukwest.internal.azurecontainerapps.io \
-                       DB_PORT=5432 \
-                       DB=postgres12 \
-                       POSTGRES_USER=secretRef:postgres-user \
-                       POSTGRES_PWD=secretRef:postgres-pwd \
-                       ENABLE_ES=true \
-                       ES_SEEDS=mysearch.search.windows.net \
-                       ES_VERSION=v8
+            --env-vars discovery.type=single-node \
+                       xpack.security.enabled=false
+
+      ######################################################
+      # Wait for Postgres + Elasticsearch to be Ready
+      ######################################################
+      - name: Wait for dependencies
+        run: |
+          echo "Waiting for Postgres and Elasticsearch to be ready..."
+          for i in {1..30}; do
+            POSTGRES_READY=$(az containerapp show \
+              --name temporal-db \
+              --resource-group CyRev \
+              --query "latestRevision.status.conditions[?type=='Ready'].status" -o tsv)
+            ES_READY=$(az containerapp show \
+              --name temporal-es \
+              --resource-group CyRev \
+              --query "latestRevision.status.conditions[?type=='Ready'].status" -o tsv)
+
+            echo "Postgres Ready: $POSTGRES_READY, Elasticsearch Ready: $ES_READY"
+
+            if [[ "$POSTGRES_READY" == "True" ]] && [[ "$ES_READY" == "True" ]]; then
+              echo "Dependencies are ready!"
+              break
+            fi
+            echo "Dependencies not ready yet. Waiting 10s..."
+            sleep 10
+          done
+
+          if [[ "$POSTGRES_READY" != "True" ]] || [[ "$ES_READY" != "True" ]]; then
+            echo "ERROR: Dependencies did not become ready in time."
+            exit 1
+          fi
+
+      ################################
+      # Deploy Temporal App
+      ################################
+      - name: Deploy Temporal App
+        run: |
+          for attempt in {1..3}; do
+            echo "Deploying Temporal (attempt $attempt)..."
+            az containerapp create \
+              --name temporal \
+              --resource-group CyRev \
+              --environment cyrev-env \
+              --image temporalio/auto-setup:1.29.1 \
+              --cpu 1 \
+              --memory 2Gi \
+              --ingress internal \
+              --target-port 7233 \
+              --secrets postgres-user=temporal postgres-pwd=temporal \
+              --env-vars POSTGRES_SEEDS=temporal-db \
+                         DB_PORT=5432 \
+                         DB=postgres12 \
+                         POSTGRES_USER=secretRef:postgres-user \
+                         POSTGRES_PWD=secretRef:postgres-pwd \
+                         ENABLE_ES=true \
+                         ES_SEEDS=temporal-es \
+                         ES_VERSION=v8 && break
+            echo "Temporal deployment failed, retrying in 10s..."
+            sleep 10
+          done
+
+      ################################
+      # Wait for Temporal to be healthy
+      ################################
+      - name: Wait for Temporal Health
+        run: |
+          echo "Waiting for Temporal to become healthy..."
+          for i in {1..30}; do
+            STATUS=$(az containerapp show \
+              --name temporal \
+              --resource-group CyRev \
+              --query "latestRevision.status.conditions[?type=='Ready'].status" -o tsv)
+
+            echo "Temporal Ready Status: $STATUS"
+            if [[ "$STATUS" == "True" ]]; then
+              echo "Temporal is healthy!"
+              break
+            fi
+
+            echo "Temporal not ready yet. Waiting 10s..."
+            sleep 10
+          done
+
+          if [[ "$STATUS" != "True" ]]; then
+            echo "ERROR: Temporal did not become healthy in time."
+            exit 1
+          fi
 
       ##########################
-      # Step 7: Deploy Temporal UI
+      # Deploy Temporal UI
       ##########################
       - name: Deploy Temporal UI
         run: |
@@ -105,4 +165,4 @@ jobs:
             --memory 1Gi \
             --ingress external \
             --target-port 8080 \
-            --env-vars TEMPORAL_ADDRESS=temporal.cyrev-env.ukwest.internal.azurecontainerapps.io:7233
+            --env-vars TEMPORAL_ADDRESS=temporal:7233
