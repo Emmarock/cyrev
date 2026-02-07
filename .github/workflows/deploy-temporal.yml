@@ -32,10 +32,12 @@ jobs:
 
       - name: Deploy Temporal Stack
         run: |
-          az containerapp compose create \
-            --resource-group CyRev \
-            --environment cyrev-env \
-            --compose-file infra/temporal/docker-compose.yml
+          az containerapp update \
+          --name temporal \
+          --resource-group CyRev \
+          --environment cyrev-env \
+          --compose-file infra/temporal/docker-compose.yml
+          --env-vars DB=postgres12
 
       - name: Expose Temporal UI
         run: |
