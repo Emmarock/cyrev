@@ -45,12 +45,12 @@ jobs:
             --memory 2Gi \
             --ingress internal \
             --target-port 7233 \
-            --secrets POSTGRES_USER=temporal POSTGRES_PWD=temporal \
+            --secrets postgres-user=temporal postgres-pwd=temporal \
             --env-vars POSTGRES_SEEDS=temporaldb.postgres.database.azure.com \
                        DB_PORT=5432 \
                        DB=postgres12 \
-                       POSTGRES_USER=secretRef:POSTGRES_USER \
-                       POSTGRES_PWD=secretRef:POSTGRES_PWD \
+                       POSTGRES_USER=secretRef:postgres-user \
+                       POSTGRES_PWD=secretRef:postgres-pwd \
                        ENABLE_ES=true \
                        ES_SEEDS=mysearch.search.windows.net \
                        ES_VERSION=v8
