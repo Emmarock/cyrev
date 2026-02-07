@@ -69,7 +69,7 @@ jobs:
       - name: Wait for dependencies
         run: |
           echo "Waiting for Postgres and Elasticsearch to be Active..."
-          for i in {1..30}; do
+          for i in {1..60}; do
             POSTGRES_STATE=$(az containerapp show \
               --name temporal-db \
               --resource-group CyRev \
