@@ -18,50 +18,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout repository
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      # Step 2: Azure Login
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      # Step 3: Install Container Apps extension
       - name: Install Container Apps extension
         run: |
           az extension add --name containerapp --upgrade
 
+      # Step 4: Deploy Temporal App
       - name: Deploy Temporal App
         run: |
-          az containerapp up \
-            --name temporal-app \
+          az containerapp create \
+            --name temporal \
             --resource-group CyRev \
             --environment cyrev-env \
             --image temporalio/auto-setup:1.29.1 \
-            --cpu 1 --memory 2Gi \
+            --cpu 1 \
+            --memory 2Gi \
             --ingress internal \
             --target-port 7233 \
-            --secrets POSTGRES_USER=${{ secrets.POSTGRES_USER }} POSTGRES_PWD=${{ secrets.POSTGRES_PWD }} \
-            --env-vars POSTGRES_SEEDS=temporaldb.postgres.database.azure.com DB_PORT=5432 DB=postgres12 POSTGRES_USER=secretRef:POSTGRES_USER POSTGRES_PWD=secretRef:POSTGRES_PWD ENABLE_ES=true ES_SEEDS=mysearch.search.windows.net ES_VERSION=v8
+            --secrets POSTGRES_USER=temporal POSTGRES_PWD=temporal \
+            --env-vars POSTGRES_SEEDS=temporaldb.postgres.database.azure.com \
+                       DB_PORT=5432 \
+                       DB=postgres12 \
+                       POSTGRES_USER=secretRef:POSTGRES_USER \
+                       POSTGRES_PWD=secretRef:POSTGRES_PWD \
+                       ENABLE_ES=true \
+                       ES_SEEDS=mysearch.search.windows.net \
+                       ES_VERSION=v8
 
+      # Step 5: Deploy Temporal UI
       - name: Deploy Temporal UI
         run: |
-          az containerapp up \
+          az containerapp create \
             --name temporal-ui \
             --resource-group CyRev \
             --environment cyrev-env \
             --image temporalio/ui:2.26.2 \
-            --cpu 0.5 --memory 1Gi \
+            --cpu 0.5 \
+            --memory 1Gi \
             --ingress external \
             --target-port 8080 \
-            --env-vars TEMPORAL_ADDRESS=temporal-app.cyrev-env.<region>.internal.azurecontainerapps.io:7233
-
-      - name: Deploy Spring Boot Client
-        run: |
-          az containerapp up \
-            --name spring-temporal-client \
-            --resource-group CyRev \
-            --environment cyrev-env \
-            --image <your-spring-boot-image> \
-            --cpu 0.5 --memory 1Gi \
-            --ingress internal \
-            --env-vars TEMPORAL_HOST=temporal-app.cyrev-env.<region>.internal.azurecontainerapps.io TEMPORAL_PORT=7233
+            --env-vars TEMPORAL_ADDRESS=temporal.cyrev-env.ukwest.internal.azurecontainerapps.io:7233
