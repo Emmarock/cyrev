@@ -16,7 +16,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Azure Login
         uses: azure/login@v2
@@ -24,78 +25,32 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Install Container Apps extension
-        run: az extension add --name containerapp --upgrade
-
-      ##################################
-      # PostgreSQL (create once)
-      ##################################
-      - name: Ensure PostgreSQL exists
         run: |
-          if az containerapp show --name temporal-db --resource-group CyRev &>/dev/null; then
-            echo "Postgres already exists"
-          else
-            echo "Creating Postgres..."
-            az containerapp create \
-              --name temporal-db \
-              --resource-group CyRev \
-              --environment cyrev-env \
-              --image postgres:14 \
-              --cpu 0.5 \
-              --memory 1Gi \
-              --ingress internal \
-              --secrets postgres-user=temporal postgres-pwd=temporal \
-              --env-vars POSTGRES_USER=secretRef:postgres-user \
-                         POSTGRES_PASSWORD=secretRef:postgres-pwd \
-                         POSTGRES_DB=temporal
-          fi
+          az extension add --name containerapp --upgrade
 
-      ##################################
-      # Elasticsearch (create once)
-      ##################################
-      - name: Ensure Elasticsearch exists
+      # ------------------------------------------------------------
+      # Ensure Postgres & Elasticsearch stay alive (NO scale-to-zero)
+      # ------------------------------------------------------------
+      - name: Pin replicas for Postgres and Elasticsearch
         run: |
-          if az containerapp show --name temporal-es --resource-group CyRev &>/dev/null; then
-            echo "Elasticsearch already exists"
-          else
-            echo "Creating Elasticsearch..."
-            az containerapp create \
-              --name temporal-es \
-              --resource-group CyRev \
-              --environment cyrev-env \
-              --image docker.elastic.co/elasticsearch/elasticsearch:8.11.1 \
-              --cpu 1 \
-              --memory 2Gi \
-              --ingress internal \
-              --env-vars discovery.type=single-node \
-                         xpack.security.enabled=false
-          fi
+          echo "Pinning Postgres and Elasticsearch replicas..."
 
-      ##################################
-      # Wait for dependencies
-      ##################################
-      - name: Wait for dependencies
-        run: |
-          echo "Waiting for Postgres & Elasticsearch..."
-          for i in {1..30}; do
-            DB_STATE=$(az containerapp show --name temporal-db --resource-group CyRev --query latestRevisionState -o tsv)
-            ES_STATE=$(az containerapp show --name temporal-es --resource-group CyRev --query latestRevisionState -o tsv)
+          az containerapp update \
+            --name temporal-db \
+            --resource-group CyRev \
+            --min-replicas 1 \
+            --max-replicas 1
 
-            echo "Postgres=$DB_STATE, ES=$ES_STATE"
+          az containerapp update \
+            --name temporal-es \
+            --resource-group CyRev \
+            --min-replicas 1 \
+            --max-replicas 1
 
-            if [[ "$DB_STATE" == "Active" && "$ES_STATE" == "Active" ]]; then
-              echo "Dependencies ready"
-              exit 0
-            fi
-            sleep 10
-          done
-
-          echo "Dependencies did not become ready in time"
-          exit 1
-
-      ##################################
-      # Temporal (always deploy/update)
-      ##################################
-      - name: Deploy Temporal
+      # ------------------------------------------------------------
+      # Deploy / Update Temporal Server
+      # ------------------------------------------------------------
+      - name: Deploy Temporal Server
         run: |
           az containerapp create \
             --name temporal \
@@ -106,19 +61,24 @@ jobs:
             --memory 2Gi \
             --ingress internal \
             --target-port 7233 \
-            --secrets postgres-user=temporal postgres-pwd=temporal \
-            --env-vars POSTGRES_SEEDS=temporal-db \
-                       DB_PORT=5432 \
-                       DB=postgres12 \
-                       POSTGRES_USER=secretRef:postgres-user \
-                       POSTGRES_PWD=secretRef:postgres-pwd \
-                       ENABLE_ES=true \
-                       ES_SEEDS=temporal-es \
-                       ES_VERSION=v8
+            --min-replicas 1 \
+            --max-replicas 1 \
+            --secrets \
+              postgres-user=temporal \
+              postgres-pwd=temporal \
+            --env-vars \
+              POSTGRES_SEEDS=temporal-db \
+              DB_PORT=5432 \
+              DB=postgres12 \
+              POSTGRES_USER=secretRef:postgres-user \
+              POSTGRES_PWD=secretRef:postgres-pwd \
+              ENABLE_ES=true \
+              ES_SEEDS=temporal-es \
+              ES_VERSION=v8
 
-      ##################################
-      # Temporal UI (always deploy/update)
-      ##################################
+      # ------------------------------------------------------------
+      # Deploy / Update Temporal UI
+      # ------------------------------------------------------------
       - name: Deploy Temporal UI
         run: |
           az containerapp create \
@@ -130,4 +90,7 @@ jobs:
             --memory 1Gi \
             --ingress external \
             --target-port 8080 \
-            --env-vars TEMPORAL_ADDRESS=temporal:7233
+            --min-replicas 1 \
+            --max-replicas 1 \
+            --env-vars \
+              TEMPORAL_ADDRESS=temporal:7233
