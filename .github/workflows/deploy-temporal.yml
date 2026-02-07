@@ -2,8 +2,7 @@ name: Deploy Temporal Stack
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
     paths:
       - infra/temporal/**
   workflow_dispatch:
@@ -13,12 +12,11 @@ permissions:
   contents: read
 
 jobs:
-  deploy-temporal-stack:
+  deploy-temporal:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Azure Login
         uses: azure/login@v2
@@ -26,80 +24,78 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Install Container Apps extension
-        run: |
-          az extension add --name containerapp --upgrade
+        run: az extension add --name containerapp --upgrade
 
-      ###########################
-      # Deploy PostgreSQL
-      ###########################
-      - name: Deploy PostgreSQL Container App
+      ##################################
+      # PostgreSQL (create once)
+      ##################################
+      - name: Ensure PostgreSQL exists
         run: |
-          az containerapp create \
-            --name temporal-db \
-            --resource-group CyRev \
-            --environment cyrev-env \
-            --image postgres:14 \
-            --cpu 0.5 \
-            --memory 1Gi \
-            --ingress internal \
-            --secrets postgres-user=temporal postgres-pwd=temporal \
-            --env-vars POSTGRES_USER=secretRef:postgres-user \
-                       POSTGRES_PASSWORD=secretRef:postgres-pwd \
-                       POSTGRES_DB=temporal
-
-      ###########################
-      # Deploy Elasticsearch
-      ###########################
-      - name: Deploy Elasticsearch Container App
-        run: |
-          az containerapp create \
-            --name temporal-es \
-            --resource-group CyRev \
-            --environment cyrev-env \
-            --image docker.elastic.co/elasticsearch/elasticsearch:8.11.1 \
-            --cpu 1 \
-            --memory 2Gi \
-            --ingress internal \
-            --env-vars discovery.type=single-node \
-                       xpack.security.enabled=false
-
-      ######################################################
-      # Wait for Postgres + Elasticsearch to be Ready
-      ######################################################
-      - name: Wait for dependencies
-        run: |
-          echo "Waiting for Postgres and Elasticsearch to be Active..."
-          for i in {1..60}; do
-            POSTGRES_STATE=$(az containerapp show \
+          if az containerapp show --name temporal-db --resource-group CyRev &>/dev/null; then
+            echo "Postgres already exists"
+          else
+            echo "Creating Postgres..."
+            az containerapp create \
               --name temporal-db \
               --resource-group CyRev \
-              --query "latestRevisionState" -o tsv)
+              --environment cyrev-env \
+              --image postgres:14 \
+              --cpu 0.5 \
+              --memory 1Gi \
+              --ingress internal \
+              --secrets postgres-user=temporal postgres-pwd=temporal \
+              --env-vars POSTGRES_USER=secretRef:postgres-user \
+                         POSTGRES_PASSWORD=secretRef:postgres-pwd \
+                         POSTGRES_DB=temporal
+          fi
 
-            ES_STATE=$(az containerapp show \
+      ##################################
+      # Elasticsearch (create once)
+      ##################################
+      - name: Ensure Elasticsearch exists
+        run: |
+          if az containerapp show --name temporal-es --resource-group CyRev &>/dev/null; then
+            echo "Elasticsearch already exists"
+          else
+            echo "Creating Elasticsearch..."
+            az containerapp create \
               --name temporal-es \
               --resource-group CyRev \
-              --query "latestRevisionState" -o tsv)
+              --environment cyrev-env \
+              --image docker.elastic.co/elasticsearch/elasticsearch:8.11.1 \
+              --cpu 1 \
+              --memory 2Gi \
+              --ingress internal \
+              --env-vars discovery.type=single-node \
+                         xpack.security.enabled=false
+          fi
 
-            echo "Postgres State: $POSTGRES_STATE, Elasticsearch State: $ES_STATE"
+      ##################################
+      # Wait for dependencies
+      ##################################
+      - name: Wait for dependencies
+        run: |
+          echo "Waiting for Postgres & Elasticsearch..."
+          for i in {1..30}; do
+            DB_STATE=$(az containerapp show --name temporal-db --resource-group CyRev --query latestRevisionState -o tsv)
+            ES_STATE=$(az containerapp show --name temporal-es --resource-group CyRev --query latestRevisionState -o tsv)
 
-            if [[ "$POSTGRES_STATE" == "Active" ]] && [[ "$ES_STATE" == "Active" ]]; then
-              echo "Dependencies are ready!"
-              break
+            echo "Postgres=$DB_STATE, ES=$ES_STATE"
+
+            if [[ "$DB_STATE" == "Active" && "$ES_STATE" == "Active" ]]; then
+              echo "Dependencies ready"
+              exit 0
             fi
-
-            echo "Dependencies not ready yet. Waiting 10s..."
             sleep 10
           done
 
-          if [[ "$POSTGRES_STATE" != "Active" ]] || [[ "$ES_STATE" != "Active" ]]; then
-            echo "ERROR: Dependencies did not become ready in time."
-            exit 1
-          fi
+          echo "Dependencies did not become ready in time"
+          exit 1
 
-      ################################
-      # Deploy Temporal App
-      ################################
-      - name: Deploy Temporal App
+      ##################################
+      # Temporal (always deploy/update)
+      ##################################
+      - name: Deploy Temporal
         run: |
           az containerapp create \
             --name temporal \
@@ -120,36 +116,9 @@ jobs:
                        ES_SEEDS=temporal-es \
                        ES_VERSION=v8
 
-      ################################
-      # Wait for Temporal to be Active
-      ################################
-      - name: Wait for Temporal Health
-        run: |
-          echo "Waiting for Temporal container to be Active..."
-          for i in {1..30}; do
-            STATUS=$(az containerapp show \
-              --name temporal \
-              --resource-group CyRev \
-              --query "latestRevisionState" -o tsv)
-            echo "Temporal State: $STATUS"
-
-            if [[ "$STATUS" == "Active" ]]; then
-              echo "Temporal is Active!"
-              break
-            fi
-
-            echo "Temporal not ready yet. Waiting 10s..."
-            sleep 10
-          done
-
-          if [[ "$STATUS" != "Active" ]]; then
-            echo "ERROR: Temporal did not become Active in time."
-            exit 1
-          fi
-
-      ##########################
-      # Deploy Temporal UI
-      ##########################
+      ##################################
+      # Temporal UI (always deploy/update)
+      ##################################
       - name: Deploy Temporal UI
         run: |
           az containerapp create \
