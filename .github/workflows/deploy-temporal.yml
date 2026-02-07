@@ -14,11 +14,11 @@ permissions:
   contents: read
 
 jobs:
-  deploy-temporal:
+  deploy-temporal-stack:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
+      # Step 1: Checkout repo
       - name: Checkout repo
         uses: actions/checkout@v4
 
@@ -33,7 +33,43 @@ jobs:
         run: |
           az extension add --name containerapp --upgrade
 
-      # Step 4: Deploy Temporal App
+      ###########################
+      # Step 4: Deploy PostgreSQL
+      ###########################
+      - name: Deploy PostgreSQL Container App
+        run: |
+          az containerapp create \
+            --name temporal-db \
+            --resource-group CyRev \
+            --environment cyrev-env \
+            --image postgres:14 \
+            --cpu 0.5 \
+            --memory 1Gi \
+            --ingress internal \
+            --secrets postgres-user=temporal postgres-pwd=temporal \
+            --env-vars POSTGRES_USER=secretRef:postgres-user \
+                       POSTGRES_PASSWORD=secretRef:postgres-pwd \
+                       POSTGRES_DB=temporal
+
+      ########################################
+      # Step 5: Wait until Postgres is ready
+      ########################################
+      - name: Wait for Postgres to be ready
+        run: |
+          POSTGRES_HOST=temporal-db.cyrev-env.ukwest.internal.azurecontainerapps.io
+          POSTGRES_PORT=5432
+          echo "Waiting for PostgreSQL at $POSTGRES_HOST:$POSTGRES_PORT..."
+          for i in {1..30}; do
+            nc -zv $POSTGRES_HOST $POSTGRES_PORT && echo "Postgres is ready!" && exit 0
+            echo "Postgres not ready yet. Waiting 5s..."
+            sleep 5
+          done
+          echo "Postgres did not become ready in time."
+          exit 1
+
+      ################################
+      # Step 6: Deploy Temporal App
+      ################################
       - name: Deploy Temporal App
         run: |
           az containerapp create \
@@ -46,7 +82,7 @@ jobs:
             --ingress internal \
             --target-port 7233 \
             --secrets postgres-user=temporal postgres-pwd=temporal \
-            --env-vars POSTGRES_SEEDS=temporaldb.postgres.database.azure.com \
+            --env-vars POSTGRES_SEEDS=temporal-db.cyrev-env.ukwest.internal.azurecontainerapps.io \
                        DB_PORT=5432 \
                        DB=postgres12 \
                        POSTGRES_USER=secretRef:postgres-user \
@@ -55,7 +91,9 @@ jobs:
                        ES_SEEDS=mysearch.search.windows.net \
                        ES_VERSION=v8
 
-      # Step 5: Deploy Temporal UI
+      ##########################
+      # Step 7: Deploy Temporal UI
+      ##########################
       - name: Deploy Temporal UI
         run: |
           az containerapp create \
