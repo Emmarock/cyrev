@@ -2,13 +2,13 @@ package com.cyrev.iam.config;
 
 import com.cyrev.iam.domain.AuthenticatedUser;
 import com.cyrev.iam.service.JwtTokenProvider;
-import com.google.common.net.HttpHeaders;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -32,6 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
+        // Skip if no Bearer token
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -49,14 +50,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
                 .collect(Collectors.toList());
 
-        AuthenticatedUser principal =
-                new AuthenticatedUser(userId, username, orgCode, authorities);
+        AuthenticatedUser principal = new AuthenticatedUser(userId, username, orgCode, authorities);
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(principal, null, authorities);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        // Skip JWT if Basic Auth header is present
+        return authHeader != null && authHeader.startsWith("Basic");
     }
 }

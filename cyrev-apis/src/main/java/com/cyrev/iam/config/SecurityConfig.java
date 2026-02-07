@@ -22,6 +22,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtFilter;
+    private final PasswordEncoder passwordEncoder;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -38,7 +39,12 @@ public class SecurityConfig {
                         .permitAll()
                         .anyRequest().authenticated()
                 )
+                // Enable HTTP Basic for testing / fallback
+                .httpBasic()
+                .and()
+                // JWT filter runs before UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
@@ -46,14 +52,11 @@ public class SecurityConfig {
     public AuthenticationManager authManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
                 .userDetailsService(userDetailsService)
-                .passwordEncoder(passwordEncoder())
+                .passwordEncoder(passwordEncoder)
                 .and()
                 .build();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+
 
 }

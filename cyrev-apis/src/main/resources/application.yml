@@ -26,19 +26,18 @@ spring:
           auth: true
           starttls:
             enable: true
-  security:
-    user:
-      name: admin
-      password: "{noop}secret123"
-      roles: USER,ADMIN
 logging:
   level:
     root: INFO
     com.company.iam: DEBUG
 
+cyrev:
+  admin: ${CYREV_ADMIN:cyrev_administrator}
+  secret: ${CYREV_SECRET:edd23256-44b4-4f56-baa1-9380092f3f27}
+
 temporal:
-  host: ${TEMPORAL_HOST}
-  port: 7233
+  host: ${TEMPORAL_HOST:temporal}
+  port: ${TEMPORAL_PORT:7233}
   enabled: true
   task-queue: USER_PROVISIONING
   namespace: temporal-system
@@ -84,7 +83,7 @@ security:
     expiry: 3600000 # 1 hour
 
 server:
-  port: 8080
+  port: 8090
 
 management:
   endpoints:
