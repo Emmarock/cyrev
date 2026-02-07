@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - infra/temporal/**
-
   workflow_dispatch:
 
 permissions:
@@ -69,28 +68,30 @@ jobs:
       ######################################################
       - name: Wait for dependencies
         run: |
-          echo "Waiting for Postgres and Elasticsearch to be ready..."
+          echo "Waiting for Postgres and Elasticsearch to be Active..."
           for i in {1..30}; do
-            POSTGRES_READY=$(az containerapp show \
+            POSTGRES_STATE=$(az containerapp show \
               --name temporal-db \
               --resource-group CyRev \
-              --query "latestRevision.status.conditions[?type=='Ready'].status" -o tsv)
-            ES_READY=$(az containerapp show \
+              --query "latestRevisionState" -o tsv)
+
+            ES_STATE=$(az containerapp show \
               --name temporal-es \
               --resource-group CyRev \
-              --query "latestRevision.status.conditions[?type=='Ready'].status" -o tsv)
+              --query "latestRevisionState" -o tsv)
 
-            echo "Postgres Ready: $POSTGRES_READY, Elasticsearch Ready: $ES_READY"
+            echo "Postgres State: $POSTGRES_STATE, Elasticsearch State: $ES_STATE"
 
-            if [[ "$POSTGRES_READY" == "True" ]] && [[ "$ES_READY" == "True" ]]; then
+            if [[ "$POSTGRES_STATE" == "Active" ]] && [[ "$ES_STATE" == "Active" ]]; then
               echo "Dependencies are ready!"
               break
             fi
+
             echo "Dependencies not ready yet. Waiting 10s..."
             sleep 10
           done
 
-          if [[ "$POSTGRES_READY" != "True" ]] || [[ "$ES_READY" != "True" ]]; then
+          if [[ "$POSTGRES_STATE" != "Active" ]] || [[ "$ES_STATE" != "Active" ]]; then
             echo "ERROR: Dependencies did not become ready in time."
             exit 1
           fi
@@ -100,45 +101,40 @@ jobs:
       ################################
       - name: Deploy Temporal App
         run: |
-          for attempt in {1..3}; do
-            echo "Deploying Temporal (attempt $attempt)..."
-            az containerapp create \
-              --name temporal \
-              --resource-group CyRev \
-              --environment cyrev-env \
-              --image temporalio/auto-setup:1.29.1 \
-              --cpu 1 \
-              --memory 2Gi \
-              --ingress internal \
-              --target-port 7233 \
-              --secrets postgres-user=temporal postgres-pwd=temporal \
-              --env-vars POSTGRES_SEEDS=temporal-db \
-                         DB_PORT=5432 \
-                         DB=postgres12 \
-                         POSTGRES_USER=secretRef:postgres-user \
-                         POSTGRES_PWD=secretRef:postgres-pwd \
-                         ENABLE_ES=true \
-                         ES_SEEDS=temporal-es \
-                         ES_VERSION=v8 && break
-            echo "Temporal deployment failed, retrying in 10s..."
-            sleep 10
-          done
+          az containerapp create \
+            --name temporal \
+            --resource-group CyRev \
+            --environment cyrev-env \
+            --image temporalio/auto-setup:1.29.1 \
+            --cpu 1 \
+            --memory 2Gi \
+            --ingress internal \
+            --target-port 7233 \
+            --secrets postgres-user=temporal postgres-pwd=temporal \
+            --env-vars POSTGRES_SEEDS=temporal-db \
+                       DB_PORT=5432 \
+                       DB=postgres12 \
+                       POSTGRES_USER=secretRef:postgres-user \
+                       POSTGRES_PWD=secretRef:postgres-pwd \
+                       ENABLE_ES=true \
+                       ES_SEEDS=temporal-es \
+                       ES_VERSION=v8
 
       ################################
-      # Wait for Temporal to be healthy
+      # Wait for Temporal to be Active
       ################################
       - name: Wait for Temporal Health
         run: |
-          echo "Waiting for Temporal to become healthy..."
+          echo "Waiting for Temporal container to be Active..."
           for i in {1..30}; do
             STATUS=$(az containerapp show \
               --name temporal \
               --resource-group CyRev \
-              --query "latestRevision.status.conditions[?type=='Ready'].status" -o tsv)
+              --query "latestRevisionState" -o tsv)
+            echo "Temporal State: $STATUS"
 
-            echo "Temporal Ready Status: $STATUS"
-            if [[ "$STATUS" == "True" ]]; then
-              echo "Temporal is healthy!"
+            if [[ "$STATUS" == "Active" ]]; then
+              echo "Temporal is Active!"
               break
             fi
 
@@ -146,8 +142,8 @@ jobs:
             sleep 10
           done
 
-          if [[ "$STATUS" != "True" ]]; then
-            echo "ERROR: Temporal did not become healthy in time."
+          if [[ "$STATUS" != "Active" ]]; then
+            echo "ERROR: Temporal did not become Active in time."
             exit 1
           fi
 
