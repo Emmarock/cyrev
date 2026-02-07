@@ -69,7 +69,5 @@ jobs:
             --image $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }} \
             --set-env-vars \
               SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
-              CYREV_ADMIN=${{ secrets.CYREV_ADMINISTRATOR}} \
-              CYREV_SECRET=${{ secrets.CYREV_ADMIN_PASSWORD}} \
               TEMPORAL_HOST=$TEMPORAL_HOST \
               TEMPORAL_PORT=TEMPORAL_PORT \

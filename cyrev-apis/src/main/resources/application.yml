@@ -31,10 +31,6 @@ logging:
     root: INFO
     com.company.iam: DEBUG
 
-cyrev:
-  admin: ${CYREV_ADMIN:cyrev_administrator}
-  secret: ${CYREV_SECRET:edd23256-44b4-4f56-baa1-9380092f3f27}
-
 temporal:
   host: ${TEMPORAL_HOST:temporal}
   port: ${TEMPORAL_PORT:7233}
