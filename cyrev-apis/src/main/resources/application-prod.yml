@@ -15,5 +15,5 @@ spring:
       ddl-auto: validate
 
 temporal:
-  host: ${TEMPORAL_HOST}
+  host: temporal
   port: 7233
