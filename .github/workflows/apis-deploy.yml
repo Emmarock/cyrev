@@ -70,4 +70,4 @@ jobs:
             --set-env-vars \
               SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
               TEMPORAL_HOST=$TEMPORAL_HOST \
-              TEMPORAL_PORT=TEMPORAL_PORT \
+              TEMPORAL_PORT=$TEMPORAL_PORT \
