@@ -20,7 +20,7 @@ services:
       - esdata:/usr/share/elasticsearch/data
 
   temporal:
-    image: temporalio/auto-setup:1.29.1
+    image: temporalio/auto-setup:1.29.3
     depends_on:
       - postgresql
       - elasticsearch

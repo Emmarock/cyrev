@@ -1,15 +1,15 @@
-name: Deploy Temporal Stack
+name: Deploy Temporal to Azure
 
 on:
   push:
-    branches: [ main ]
-    paths:
-      - infra/temporal/**
-  workflow_dispatch:
+    branches:
+      - main
 
-permissions:
-  id-token: write
-  contents: read
+env:
+  RESOURCE_GROUP: CyRev
+  LOCATION: ukwest
+  ENVIRONMENT_NAME: cyrev-env
+  COMPOSE_FILE: infra/temporal/docker-compose.yml
 
 jobs:
   deploy-temporal:
@@ -24,73 +24,13 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Install Container Apps extension
+      - name: Install Azure Container Apps extension
         run: |
           az extension add --name containerapp --upgrade
 
-      # ------------------------------------------------------------
-      # Ensure Postgres & Elasticsearch stay alive (NO scale-to-zero)
-      # ------------------------------------------------------------
-      - name: Pin replicas for Postgres and Elasticsearch
+      - name: Deploy Docker Compose to Azure Container Apps
         run: |
-          echo "Pinning Postgres and Elasticsearch replicas..."
-
-          az containerapp update \
-            --name temporal-db \
-            --resource-group CyRev \
-            --min-replicas 1 \
-            --max-replicas 1
-
-          az containerapp update \
-            --name temporal-es \
-            --resource-group CyRev \
-            --min-replicas 1 \
-            --max-replicas 1
-
-      # ------------------------------------------------------------
-      # Deploy / Update Temporal Server
-      # ------------------------------------------------------------
-      - name: Deploy Temporal Server
-        run: |
-          az containerapp create \
-            --name temporal \
-            --resource-group CyRev \
-            --environment cyrev-env \
-            --image temporalio/auto-setup:1.29.3 \
-            --cpu 1 \
-            --memory 2Gi \
-            --ingress internal \
-            --target-port 7233 \
-            --min-replicas 1 \
-            --max-replicas 1 \
-            --secrets \
-              postgres-user=temporal \
-              postgres-pwd=temporal \
-            --env-vars \
-              POSTGRES_SEEDS=temporal-db \
-              DB_PORT=5432 \
-              DB=postgres12 \
-              POSTGRES_USER=secretRef:postgres-user \
-              POSTGRES_PWD=secretRef:postgres-pwd \
-              ENABLE_ES=true \
-              ES_SEEDS=temporal-es \
-              ES_VERSION=v8
-
-      # ------------------------------------------------------------
-      # Deploy / Update Temporal UI
-      # ------------------------------------------------------------
-      - name: Deploy Temporal UI
-        run: |
-          az containerapp create \
-            --name temporal-ui \
-            --resource-group CyRev \
-            --environment cyrev-env \
-            --image temporalio/ui:2.26.2 \
-            --cpu 0.5 \
-            --memory 1Gi \
-            --ingress external \
-            --target-port 8080 \
-            --min-replicas 1 \
-            --max-replicas 1 \
-            --env-vars \
-              TEMPORAL_ADDRESS=temporal:7233
+          az containerapp compose create \
+            --resource-group $RESOURCE_GROUP \
+            --environment $ENVIRONMENT_NAME \
+            --file $COMPOSE_FILE
