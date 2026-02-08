@@ -23,7 +23,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<CyrevApiResponse<AuthResponse>> login(@RequestBody @Valid LoginRequest request) {
         var response = authService.login(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
+        return ResponseEntity.status(HttpStatus.OK)
                 .body(new CyrevApiResponse<>(
                         true,
                         "Login Successful",

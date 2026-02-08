@@ -6,6 +6,7 @@ import com.cyrev.common.entities.Organization;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.OrganizationRepository;
 import com.cyrev.common.repository.UserRepository;
+import com.cyrev.common.services.NotificationPublisherService;
 import com.cyrev.common.services.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,7 @@ public class UserProvisioningActivitiesImpl implements UserProvisioningActivitie
 
     private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
-    private final NotificationService notificationService;
+    private final NotificationPublisherService notificationPublisherService;
     private final PasswordEncoder passwordEncoder;
     @Override
     @Transactional
@@ -89,7 +90,7 @@ public class UserProvisioningActivitiesImpl implements UserProvisioningActivitie
 
     @Override
     public void notifyUserCreation(UUID userId) {
-        notificationService.sendWelcomeNotification(userId);
+        notificationPublisherService.sendWelcomeNotification(userId);
         log.info("Sent welcome notification to user {}", userId);
     }
 
@@ -102,6 +103,6 @@ public class UserProvisioningActivitiesImpl implements UserProvisioningActivitie
         user.setPassword(passwordEncoder.encode(password));
 
         userRepository.save(user);
-        notificationService.sendUserActivated(user.getEmail(), user.getFirstName(), password);
+        notificationPublisherService.sendUserActivated(user.getEmail(), user.getFirstName(), password);
     }
 }

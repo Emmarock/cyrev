@@ -8,16 +8,8 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface NotificationService {
-    void sendApprovalRequest(UUID userId, Set<App> apps);
 
-    void sendApprovalDecision(Notification notification);
+    void sendHtmlEmail(String to, String subject, String body);
 
-    void sendProvisioningComplete(
-            UUID userId,
-            ProvisioningState state
-    );
-
-    void sendUserActivated(String email, String firstName, String password);
-
-    void sendWelcomeNotification(UUID userId);
+    void sendTextEmail(String to, String subject, String body);
 }

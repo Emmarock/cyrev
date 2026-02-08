@@ -7,6 +7,7 @@ import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.AppProvisioningAdapter;
 import com.cyrev.common.entities.AppAssignment;
 import com.cyrev.common.entities.User;
+import com.cyrev.common.services.NotificationPublisherService;
 import com.cyrev.common.services.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,13 +26,13 @@ public class AppProvisioningActivitiesImpl implements AppProvisioningActivities 
 
     private final UserRepository userRepository;
     private final AppAssignmentRepository assignmentRepository;
-    private final NotificationService notificationService;
+    private final NotificationPublisherService notificationPublisherService;
     private final Map<App, AppProvisioningAdapter> adapters;
 
-    public AppProvisioningActivitiesImpl(UserRepository userRepository, AppAssignmentRepository assignmentRepository, NotificationService notificationService, List<AppProvisioningAdapter> adapters, PasswordEncoder passwordEncoder) {
+    public AppProvisioningActivitiesImpl(UserRepository userRepository, AppAssignmentRepository assignmentRepository, NotificationPublisherService notificationPublisherService, List<AppProvisioningAdapter> adapters, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.assignmentRepository = assignmentRepository;
-        this.notificationService = notificationService;
+        this.notificationPublisherService = notificationPublisherService;
         this.adapters = adapters.stream()
                 .collect(Collectors.toMap(AppProvisioningAdapter::app, a -> a));
     }
@@ -113,7 +114,7 @@ public class AppProvisioningActivitiesImpl implements AppProvisioningActivities 
      */
     @Override
     public void notifyRejected(UUID userId, String approverId, String reason) {
-        notificationService.sendApprovalDecision(
+        notificationPublisherService.sendApprovalDecision(
                 Notification.builder()
                         .type(NotificationType.PROVISIONING_REJECTED)
                         .userId(userId)
@@ -130,7 +131,7 @@ public class AppProvisioningActivitiesImpl implements AppProvisioningActivities 
      */
     @Override
     public void notifyProvisioningComplete(UUID userId, ProvisioningState status) {
-        notificationService.sendProvisioningComplete(userId, status);
+        notificationPublisherService.sendProvisioningComplete(userId, status);
 
         log.info("Provisioning completed user={} status={}", userId, status);
     }
