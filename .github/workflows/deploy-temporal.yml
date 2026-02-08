@@ -56,7 +56,7 @@ jobs:
             --name temporal \
             --resource-group CyRev \
             --environment cyrev-env \
-            --image temporalio/auto-setup:1.29.1 \
+            --image temporalio/auto-setup:1.29.3 \
             --cpu 1 \
             --memory 2Gi \
             --ingress internal \

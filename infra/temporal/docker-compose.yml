@@ -36,7 +36,6 @@ services:
     ports:
       - "7233:7233"
 
-
   temporal-ui:
     image: temporalio/ui:2.26.2
     depends_on:
