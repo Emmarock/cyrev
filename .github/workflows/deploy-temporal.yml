@@ -9,10 +9,9 @@ env:
   RESOURCE_GROUP: CyRev
   LOCATION: ukwest
   ENVIRONMENT_NAME: cyrev-env
-  COMPOSE_FILE: infra/temporal/docker-compose.yml
 
 jobs:
-  deploy-temporal:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,11 +25,74 @@ jobs:
 
       - name: Install Azure Container Apps extension
         run: |
-          az extension add --name containerapp --upgrade
+          az extension add --name containerapp --upgrade || true
 
-      - name: Deploy Docker Compose to Azure Container Apps
+      - name: Create Resource Group (idempotent)
         run: |
-          az containerapp compose create \
-            $COMPOSE_FILE \
+          az group create \
+            --name $RESOURCE_GROUP \
+            --location $LOCATION
+
+      - name: Create Container Apps Environment (idempotent)
+        run: |
+          az containerapp env create \
+            --name $ENVIRONMENT_NAME \
             --resource-group $RESOURCE_GROUP \
-            --environment $ENVIRONMENT_NAME
+            --location $LOCATION \
+            || echo "Environment already exists"
+
+      - name: Deploy PostgreSQL
+        run: |
+          az containerapp create \
+            --name postgresql \
+            --resource-group $RESOURCE_GROUP \
+            --environment $ENVIRONMENT_NAME \
+            --image postgres:14 \
+            --cpu 1 --memory 1Gi \
+            --env-vars POSTGRES_USER=temporal POSTGRES_PASSWORD=temporal POSTGRES_DB=temporal \
+            --ingress internal \
+            || echo "Postgres container app already exists"
+
+      - name: Deploy Elasticsearch
+        run: |
+          az containerapp create \
+            --name elasticsearch \
+            --resource-group $RESOURCE_GROUP \
+            --environment $ENVIRONMENT_NAME \
+            --image docker.elastic.co/elasticsearch/elasticsearch:8.11.1 \
+            --cpu 2 --memory 4Gi \
+            --env-vars discovery.type=single-node xpack.security.enabled=false \
+            --ingress internal \
+            || echo "Elasticsearch container app already exists"
+
+      - name: Deploy Temporal server
+        run: |
+          az containerapp create \
+            --name temporal \
+            --resource-group $RESOURCE_GROUP \
+            --environment $ENVIRONMENT_NAME \
+            --image temporalio/auto-setup:1.29.3 \
+            --cpu 2 --memory 2Gi \
+            --env-vars DB=postgres12 DB_PORT=5432 POSTGRES_USER=temporal POSTGRES_PWD=temporal POSTGRES_SEEDS=postgresql ENABLE_ES=true ES_SEEDS=elasticsearch ES_VERSION=v8 \
+            --ingress internal \
+            || echo "Temporal container app already exists"
+
+      - name: Deploy Temporal UI
+        run: |
+          az containerapp create \
+            --name temporal-ui \
+            --resource-group $RESOURCE_GROUP \
+            --environment $ENVIRONMENT_NAME \
+            --image temporalio/ui:2.26.2 \
+            --cpu 1 --memory 1Gi \
+            --env-vars TEMPORAL_ADDRESS=temporal:7233 \
+            --ingress external --target-port 8080 \
+            || echo "Temporal UI container app already exists"
+
+      - name: Show Temporal UI URL
+        run: |
+          az containerapp show \
+            --name temporal-ui \
+            --resource-group $RESOURCE_GROUP \
+            --query properties.configuration.ingress.fqdn \
+            --output tsv
