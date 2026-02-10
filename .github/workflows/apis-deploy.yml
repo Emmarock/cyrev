@@ -31,6 +31,15 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+      - name: Check Temporal secret length
+        env:
+          TEMPORAL_ADDRESS: ${{ secrets.TEMPORAL_ADDRESS }}
+          TEMPORAL_NAMESPACE: ${{ secrets.TEMPORAL_NAMESPACE }}
+          TEMPORAL_CERT: ${{ secrets.TEMPORAL_API_KEY }}
+        run: |
+          echo "TEMPORAL_ADDRESS length: ${#TEMPORAL_ADDRESS}"
+          echo "TEMPORAL_NAMESPACE length: ${#TEMPORAL_NAMESPACE}"
+          echo "TEMPORAL_API_KEY length: ${#TEMPORAL_API_KEY}"
 
       - name: Build Spring Boot app
         run: mvn clean package -pl cyrev-apis -am -DskipTests
