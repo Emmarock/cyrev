@@ -49,9 +49,9 @@ public class UserProvisioningController {
                 ));
     }
 
-    @PostMapping("/{workflowId}/approve")
+    @PostMapping("/approve")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CyrevApiResponse<ProvisioningResponse>> approveUser(@PathVariable String workflowId, @CurrentUserId UUID approverId) {
+    public ResponseEntity<CyrevApiResponse<ProvisioningResponse>> approveUser(@RequestParam(name="workflowId") String workflowId, @CurrentUserId UUID approverId) {
         userProvisioningWorkflowStarter.approveProvisioningRequest(approverId, workflowId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new CyrevApiResponse<>(
@@ -61,9 +61,9 @@ public class UserProvisioningController {
                 ));
     }
 
-    @PostMapping("/{workflowId}/reject")
+    @PostMapping("/reject")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CyrevApiResponse<ProvisioningResponse>> rejectUser(@PathVariable String workflowId,
+    public ResponseEntity<CyrevApiResponse<ProvisioningResponse>> rejectUser(@RequestParam(name="workflowId") String workflowId,
                                                                              @RequestParam String reason,
                                                                              @CurrentUserId UUID approverId) {
         userProvisioningWorkflowStarter.rejectProvisioningRequest(approverId, workflowId, reason);
@@ -79,8 +79,8 @@ public class UserProvisioningController {
     /**
      * Query workflow state
      */
-    @GetMapping("/{workflowId}/state")
-    public ResponseEntity<CyrevApiResponse<ProvisioningResponse>> getState(@PathVariable String workflowId) {
+    @GetMapping("/state")
+    public ResponseEntity<CyrevApiResponse<ProvisioningResponse>> getState(@RequestParam(name="workflowId") String workflowId) {
         ProvisioningState state = userProvisioningWorkflowStarter.getState(workflowId);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new CyrevApiResponse<>(
