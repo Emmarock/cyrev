@@ -1,9 +1,8 @@
-package com.cyrev.iam.service;
+package com.cyrev.common.services;
 
 import com.cyrev.common.dtos.*;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.UserRepository;
-import com.cyrev.common.services.NotificationPublisherService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;

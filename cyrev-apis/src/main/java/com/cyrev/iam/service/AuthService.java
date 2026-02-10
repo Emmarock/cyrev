@@ -5,7 +5,6 @@ import com.cyrev.common.dtos.LoginRequest;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
-import com.cyrev.common.services.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

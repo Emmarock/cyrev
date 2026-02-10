@@ -36,13 +36,15 @@ logging:
     com.company.iam: DEBUG
 
 temporal:
-  enabled: true
-  task-queue: USER_PROVISIONING
-  namespace: temporal-system
-  workflow:
-    timeout: PT5M # default workflow timeout
+  api-key: ${TEMPORAL_API_KEY:}
+  namespace: ${TEMPORAL_NAMESPACE:temporal-system}
+  address: ${TEMPORAL_ADDRESS:localhost:7233}
   host: ${TEMPORAL_HOST:temporal}
   port: ${TEMPORAL_PORT:7233}
+  enabled: true
+  task-queue: USER_PROVISIONING
+  workflow:
+    timeout: PT5M # default workflow timeout
 
 security:
   jwt:

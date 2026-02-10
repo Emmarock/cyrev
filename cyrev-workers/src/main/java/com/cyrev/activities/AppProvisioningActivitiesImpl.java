@@ -29,7 +29,7 @@ public class AppProvisioningActivitiesImpl implements AppProvisioningActivities 
     private final NotificationPublisherService notificationPublisherService;
     private final Map<App, AppProvisioningAdapter> adapters;
 
-    public AppProvisioningActivitiesImpl(UserRepository userRepository, AppAssignmentRepository assignmentRepository, NotificationPublisherService notificationPublisherService, List<AppProvisioningAdapter> adapters, PasswordEncoder passwordEncoder) {
+    public AppProvisioningActivitiesImpl(UserRepository userRepository, AppAssignmentRepository assignmentRepository, NotificationPublisherService notificationPublisherService, List<AppProvisioningAdapter> adapters) {
         this.userRepository = userRepository;
         this.assignmentRepository = assignmentRepository;
         this.notificationPublisherService = notificationPublisherService;

@@ -7,7 +7,6 @@ import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.OrganizationRepository;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
-import com.cyrev.common.services.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -15,5 +15,10 @@ spring:
       ddl-auto: validate
 
 temporal:
-  host: temporal
-  port: 7233
+  api-key: ${TEMPORAL_API_KEY:}
+  namespace: ${TEMPORAL_NAMESPACE:temporal-system}
+  address: ${TEMPORAL_ADDRESS:}
+  host: ${TEMPORAL_HOST:temporal}
+  port: ${TEMPORAL_PORT:7233}
+  enabled: true
+  task-queue: USER_PROVISIONING
