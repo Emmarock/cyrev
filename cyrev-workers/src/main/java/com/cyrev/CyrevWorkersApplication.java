@@ -21,4 +21,5 @@ public class CyrevWorkersApplication {
     public static void main(String[] args) {
         SpringApplication.run(CyrevWorkersApplication.class, args);
     }
+
 }
