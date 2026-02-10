@@ -64,5 +64,8 @@ jobs:
             --image $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }} \
             --set-env-vars \
               SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
+              TEMPORAL_API_KEY=${{ secrets.TEMPORAL_API_KEY }} \
+              TEMPORAL_NAMESPACE=${{ secrets.TEMPORAL_NAMESPACE }} \
+              TEMPORAL_ADDRESS=${{ secrets.TEMPORAL_ADDRESS }} \
               TEMPORAL_HOST=temporal \
               TEMPORAL_PORT=7233 \

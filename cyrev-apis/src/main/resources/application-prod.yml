@@ -13,7 +13,6 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: validate
-
 temporal:
   api-key: ${TEMPORAL_API_KEY:}
   namespace: ${TEMPORAL_NAMESPACE:temporal-system}
