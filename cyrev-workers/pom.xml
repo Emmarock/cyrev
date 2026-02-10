@@ -20,7 +20,6 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- Shared contracts, workflows, DTOs -->
         <dependency>
             <groupId>com.cyrev</groupId>
             <artifactId>common</artifactId>
