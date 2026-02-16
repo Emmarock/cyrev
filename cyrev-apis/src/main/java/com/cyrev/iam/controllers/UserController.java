@@ -8,6 +8,7 @@ import com.cyrev.common.entities.User;
 import com.cyrev.iam.service.MFAService;
 import com.cyrev.iam.service.UserService;
 import jakarta.validation.Valid;
+import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -50,7 +51,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<CyrevApiResponse<User>> createUser(@Valid @RequestBody UserCreationDTO user) {
+    public ResponseEntity<CyrevApiResponse<User>> createUser(@Valid @RequestBody UserCreationDTO user) throws BadRequestException {
         var created = userService.createUser(user);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new CyrevApiResponse<>(
