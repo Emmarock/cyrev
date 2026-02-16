@@ -42,7 +42,7 @@ public class EmailVerificationService {
 
         tokenRepository.save(verificationToken);
 
-        return baseUrl + "/api/auth/verify-email?token=" + rawToken;
+        return baseUrl + "/set-password?token=" + rawToken;
     }
 
     public void verifyToken(UserUpdateRequestDTO request) {
