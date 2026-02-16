@@ -32,9 +32,9 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers(
                                 "/actuator/health",
-                                "/auth/login",
-                                "/auth/**",
-                                "/auth/verify-email",
+                                "/api/auth/login",
+                                "/api/auth/**",
+                                "/api/auth/verify-email",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/api/users/provisioning",
