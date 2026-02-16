@@ -11,6 +11,7 @@ import com.cyrev.common.repository.OrganizationRepository;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.BadRequestException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +39,19 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(()->new RuntimeException("Invalid user"));
     }
 
-    public User createUser(UserCreationDTO userCreationDTO) {
-
+    public User createUser(UserCreationDTO userCreationDTO) throws BadRequestException {
+        if(userRepository.findByEmail(userCreationDTO.getUsername()).isPresent()) {
+            throw new BadRequestException("Email already exists");
+        }
+        if(userRepository.findByUsername(userCreationDTO.getUsername()).isPresent()) {
+            throw new BadRequestException("Username already exists");
+        }
+        if(organizationRepository.existsByCode(userCreationDTO.getOrganization().getCode())) {
+            throw new BadRequestException("Organization already exists");
+        }
+        if(organizationRepository.findByName(userCreationDTO.getOrganization().getName()).isPresent()) {
+            throw new BadRequestException("Organization already exists");
+        }
         User entity = userMapper.toEntity(userCreationDTO);
         User user = userRepository.save(entity);
         // create organization

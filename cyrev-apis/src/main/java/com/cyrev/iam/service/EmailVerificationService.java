@@ -1,5 +1,6 @@
 package com.cyrev.iam.service;
 
+import com.cyrev.common.dtos.UserStatus;
 import com.cyrev.common.dtos.UserUpdateRequestDTO;
 import com.cyrev.common.entities.EmailVerificationToken;
 import com.cyrev.common.entities.User;
@@ -67,6 +68,7 @@ public class EmailVerificationService {
     private void verifyUser(User user, UserUpdateRequestDTO updated) {
         user.setPassword(passwordEncoder.encode(updated.getPassword()));
         user.setEmailVerified(true);
+        user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
     }
 }
