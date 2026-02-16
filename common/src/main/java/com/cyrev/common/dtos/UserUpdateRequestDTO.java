@@ -16,17 +16,8 @@ import java.util.UUID;
 @Builder
 public class UserUpdateRequestDTO {
 
-    private UUID managerId;
-
-    @NotNull(message = "End date is required")
-    private LocalDate endDate;
-
-    @NotBlank(message = "Department is required")
-    private String department;
-
-    @NotBlank(message = "Unit is required")
-    private String unit;
-
-    @NotBlank(message = "Division is required")
-    private String division;
+    @NotBlank(message = "password is required")
+    private String password;
+    @NotBlank(message = "secret is required")
+    private String secret;
 }

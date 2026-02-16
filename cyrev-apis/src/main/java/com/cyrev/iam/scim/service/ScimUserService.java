@@ -25,7 +25,7 @@ public class ScimUserService {
         // 1️⃣ Try externalId first (authoritative)
         Optional<User> existingByExternalId =
                 Optional.ofNullable(request.getExternalId())
-                        .flatMap(userRepository::findByExternalId);
+                        .flatMap(userRepository::findByUsername);
 
         if (existingByExternalId.isPresent()) {
             return toScim(existingByExternalId.get());
@@ -39,20 +39,13 @@ public class ScimUserService {
 
         if (existingByEmail.isPresent()) {
             User user = existingByEmail.get();
-
-            // 🔁 Backfill externalId if missing
-            if (user.getExternalId() == null) {
-                user.setExternalId(request.getExternalId());
-                userRepository.save(user);
-            }
-
+            userRepository.save(user);
             return toScim(user);
         }
 
         // 3️⃣ Create new user
         User user = new User();
         user.setEmail(email);
-        user.setExternalId(request.getExternalId());
         user.setStatus(Boolean.TRUE.equals(request.getActive())?UserStatus.ACTIVE:UserStatus.INACTIVE);
         user.setUsername(request.getUserName());
         user = userRepository.save(user);
@@ -65,7 +58,7 @@ public class ScimUserService {
         List<User> users = parser.parse(filter)
                 .flatMap(f -> switch (f.getAttribute()) {
                     case "userName" -> userRepository.findByEmail(f.getValue()).map(List::of);
-                    case "externalId" -> userRepository.findByExternalId(f.getValue()).map(List::of);
+                    //case "externalId" -> userRepository.findByExternalId(f.getValue()).map(List::of);
                     case "id" -> userRepository.findById(UUID.fromString(f.getValue())).map(List::of);
                     default -> Optional.empty();
                 })
@@ -97,7 +90,7 @@ public class ScimUserService {
     @Transactional
     public ScimUserResponse patchUser(String scimId, ScimPatchRequest request) throws ScimNotFoundException {
 
-        User user = userRepository.findByExternalId(scimId)
+        User user = userRepository.findByUsername(scimId) // update later
                 .orElseThrow(() -> new ScimNotFoundException("User not found"));
 
         for (ScimPatchRequest.PatchOperation op : request.getOperations()) {

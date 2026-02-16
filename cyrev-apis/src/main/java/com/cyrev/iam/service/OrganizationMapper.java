@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Component
 public class OrganizationMapper {
@@ -26,15 +27,16 @@ public class OrganizationMapper {
         Organization org = new Organization();
         org.setCode(dto.getCode());
         org.setName(dto.getName());
-        org.setContractStartDate(dto.getContractStartDate());
-        org.setContractEndDate(dto.getContractEndDate());
+        return org;
+    }
+
+    public Organization toEntity(OrganizationCreationDTO dto, User user) {
+        Organization org = new Organization();
+        org.setCode(dto.getCode());
+        org.setName(dto.getName());
 
         Set<User> owners = new HashSet<>();
-        if (dto.getOwnerIds() != null) {
-            dto.getOwnerIds().forEach(id -> 
-                userRepository.findById(id).ifPresent(owners::add)
-            );
-        }
+        owners.add(user);
         org.setOwners(owners);
 
         return org;
@@ -47,15 +49,6 @@ public class OrganizationMapper {
         OrganizationCreationDTO dto = new OrganizationCreationDTO();
         dto.setCode(org.getCode());
         dto.setName(org.getName());
-        dto.setContractStartDate(org.getContractStartDate());
-        dto.setContractEndDate(org.getContractEndDate());
-
-        Set<java.util.UUID> ownerIds = new HashSet<>();
-        if (org.getOwners() != null) {
-            org.getOwners().forEach(user -> ownerIds.add(user.getId()));
-        }
-        dto.setOwnerIds(ownerIds);
-
         return dto;
     }
 }

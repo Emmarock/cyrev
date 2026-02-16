@@ -1,58 +1,49 @@
 package com.cyrev.iam.service;
 
-import com.cyrev.common.dtos.App;
-import com.cyrev.common.dtos.Role;
-import com.cyrev.common.dtos.UserCreationDTO;
+import com.cyrev.common.dtos.*;
+import com.cyrev.common.entities.Address;
+import com.cyrev.common.entities.Organization;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.OrganizationRepository;
-import com.cyrev.common.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
 public class UserMapper {
 
     private final OrganizationRepository organizationRepository;
-    private final UserRepository userRepository;
 
 
     public User toEntity(UserCreationDTO dto) {
         User user = new User();
-
-        user.setEmail(dto.getEmail());
+        user.setEmail(dto.getBusinessEmail());
         user.setUsername(dto.getUsername());
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
-        user.setStartDate(dto.getStartDate());
-        user.setEndDate(dto.getEndDate());
-        user.setDepartment(dto.getDepartment());
-        user.setUnit(dto.getUnit());
-        user.setDivision(dto.getDivision());
-        user.setIdentityStatus(dto.getIdentityStatus());
-        user.setRole(Role.valueOf(dto.getRole()));
-
-        // Assigned Apps
-        if (dto.getAssignedApps() != null) {
-            Set<App> apps = dto.getAssignedApps().stream()
-                    .map(App::valueOf)
-                    .collect(Collectors.toSet());
-            user.setAssignedApps(apps);
-        }
-
-        // Manager
-        if (dto.getManagerId() != null) {
-            userRepository.findById(dto.getManagerId()).ifPresent(user::setManager);
-        }
-
+        user.setRole(Role.SUPER_ADMIN);
         // Company
-        if (dto.getOrganizationCode() != null) {
-            organizationRepository.findByCode(dto.getOrganizationCode()).ifPresent(user::setOrganization);
+        if (dto.getOrganization() != null) {
+            organizationRepository.findByCode(dto.getOrganization().getCode()).ifPresent(user::setOrganization);
         }
-
         return user;
+    }
+
+    public Address toAddress(@NotNull AddressDto dto, Organization organization) {
+        return Address.builder()
+                .city(dto.getCity())
+                .state(dto.getState())
+                .postalCode(dto.getPostalCode())
+                .countryName(dto.getCountryName())
+                .countryCode(dto.getCountryCode())
+                .buildingNumber(dto.getBuildingNumber())
+                .street(dto.getStreet())
+                .organization(organization)
+                .build();
     }
 }

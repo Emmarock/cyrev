@@ -5,6 +5,7 @@ import com.cyrev.common.dtos.CyrevApiResponse;
 import com.cyrev.common.dtos.UserCreationDTO;
 import com.cyrev.common.dtos.UserUpdateRequestDTO;
 import com.cyrev.common.entities.User;
+import com.cyrev.iam.service.MFAService;
 import com.cyrev.iam.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -54,7 +55,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new CyrevApiResponse<>(
                         true,
-                        "User retrieved Successful",
+                        "User created Successful",
                         created
                 ));
     }

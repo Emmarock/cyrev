@@ -22,4 +22,6 @@ public interface NotificationPublisherService {
     void sendWelcomeNotification(UUID userId);
 
     void sendWelcomeEmail( String firstname, String email);
+
+    void sendVerificationLink(String firstname, String email, String url);
 }

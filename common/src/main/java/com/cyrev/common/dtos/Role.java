@@ -1,5 +1,5 @@
 package com.cyrev.common.dtos;
 
 public enum Role {
-    ADMIN,WRITE,READ
+    SUPER_ADMIN,ADMIN, USER_WRITE, USER_READ
 }

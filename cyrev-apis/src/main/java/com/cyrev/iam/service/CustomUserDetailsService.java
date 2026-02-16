@@ -1,6 +1,7 @@
 package com.cyrev.iam.service;
 
 import com.cyrev.common.dtos.IdentityStatus;
+import com.cyrev.common.dtos.UserStatus;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .withUsername(user.getEmail())
                 .password(user.getPassword())
                 .authorities("ROLE_" + user.getRole().name())
-                .disabled(user.getIdentityStatus() != IdentityStatus.ACTIVE)
                 .build();
     }
 }

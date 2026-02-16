@@ -8,16 +8,16 @@ import org.springframework.stereotype.Component;
 public class ApprovalPolicy {
 
     public boolean requiresApproval(App app, Role role) {
-        if(role==Role.READ){
+        if(role==Role.USER_READ){
             return false;
         }
-        if (app == App.JIRA && (role == Role.WRITE || role == Role.ADMIN)) {
+        if (app == App.JIRA && (role == Role.USER_WRITE || role == Role.ADMIN)) {
             return true;
         }
-        if (app == App.BITBUCKET && (role == Role.WRITE || role == Role.ADMIN)) {
+        if (app == App.BITBUCKET && (role == Role.USER_WRITE || role == Role.ADMIN)) {
             return true;
         }
-        if (app == App.SLACK && (role == Role.WRITE||role==Role.ADMIN)){
+        if (app == App.SLACK && (role == Role.USER_WRITE ||role==Role.ADMIN)){
             return true;
         }
         return false;

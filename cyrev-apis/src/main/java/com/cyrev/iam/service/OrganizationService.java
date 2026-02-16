@@ -41,11 +41,6 @@ public class OrganizationService {
         // Update fields
         org.setCode(dto.getCode());
         org.setName(dto.getName());
-        org.setContractStartDate(dto.getContractStartDate());
-        org.setContractEndDate(dto.getContractEndDate());
-
-        // Update owners
-        org.setOwners(organizationMapper.toEntity(dto).getOwners());
 
         return organizationRepository.save(org);
     }

@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -21,7 +23,6 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
     @Override
     public void sendApprovalRequest(UUID userId, Set<App> apps) {
         User user = userRepository.findById(userId).orElseThrow();
-        User manager = user.getManager();
 
         String subject = "Approval Required: App Access Request";
         String body = """
@@ -36,9 +37,11 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
                         user.getEmail(),
                         apps.stream().map(Enum::name).collect(Collectors.joining(", "))
                 );
+        Map<String, Object> message = new HashMap<>();
+        message.put("body", body);
+        message.put("subject", subject);
 
-
-        EmailEvent event = new EmailEvent(manager.getEmail(),subject,body,false);
+        EmailEvent event = new EmailEvent(user.getEmail(),message,false);
         eventPublisher.publishEvent(event);
     }
 
@@ -54,8 +57,10 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
                 ? "Your app access request has been approved."
                 : "Your app access request was rejected.\nReason: " + notification.getMessage();
 
-
-        EmailEvent event = new EmailEvent(user.getEmail(),subject,body,false);
+        Map<String, Object> message = new HashMap<>();
+        message.put("body", body);
+        message.put("subject", subject);
+        EmailEvent event = new EmailEvent(user.getEmail(),message,false);
         eventPublisher.publishEvent(event);
     }
 
@@ -79,8 +84,10 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
                 """
                 .formatted(user.getFirstName(), state.name());
 
-
-        EmailEvent event = new EmailEvent(user.getEmail(),subject,body,false);
+        Map<String, Object> message = new HashMap<>();
+        message.put("body", body);
+        message.put("subject", subject);
+        EmailEvent event = new EmailEvent(user.getEmail(),message,false);
         eventPublisher.publishEvent(event);
     }
 
@@ -100,8 +107,10 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
                 If you experience any issues, contact support.
                 """
                 .formatted(firstName, password);
-
-        EmailEvent event = new EmailEvent(email,subject,body,false);
+        Map<String, Object> message = new HashMap<>();
+        message.put("body", body);
+        message.put("subject", subject);
+        EmailEvent event = new EmailEvent(email,message,false);
         eventPublisher.publishEvent(event);
     }
 
@@ -119,24 +128,45 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
                 If you experience any issues, contact support.
                 """
                 .formatted(user.getFirstName());
-        EmailEvent event = new EmailEvent(user.getEmail(),subject,body,false);
+        Map<String, Object> message = new HashMap<>();
+        message.put("body", body);
+        message.put("subject", subject);
+        EmailEvent event = new EmailEvent(user.getEmail(), message,false);
         eventPublisher.publishEvent(event);
     }
 
     @Override
     public void sendWelcomeEmail(String firstname, String email) {
-        EmailEvent event = new EmailEvent(
-            email, "Login Notification",
-            """
+        String body = """
             Welcome  %s 🎉,
             
             Your have successfully login on CYREV.
             
             If you did not initiate this action, please contact support immediately
-            """.formatted(firstname),
-            false
-        );
+            """.formatted(firstname);
+        Map<String, Object> message = new HashMap<>();
+        message.put("body", body);
+        message.put("subject", "Login Notification");
+        EmailEvent event = new EmailEvent(email, message, false);
 
+        eventPublisher.publishEvent(event);
+    }
+
+    @Override
+    public void sendVerificationLink(String firstname, String email, String url) {
+        String body = """
+            Welcome  %s 🎉, \n
+            
+            We are happy to have you onboard CYREV. \n
+            
+            please click on this <a href="%s">link</a> to complete your email verification. \n
+            
+            If you did not initiate this action, please contact support immediately.
+            """.formatted(firstname, url);
+        Map<String, Object> message = new HashMap<>();
+        message.put("body", body);
+        message.put("subject", "CyRev Verification Link");
+        EmailEvent event = new EmailEvent(email, message, false);
         eventPublisher.publishEvent(event);
     }
 }

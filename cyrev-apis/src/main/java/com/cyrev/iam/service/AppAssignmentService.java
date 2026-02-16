@@ -78,16 +78,6 @@ public class AppAssignmentService {
         if (assignment.getApprovalId() == null) {
             throw new BadRequestException("Invalid approval request");
         }
-
-        User user = userService.getUser(assignment.getUserId());
-        User manager = user.getManager();
-        if(manager == null) {
-            throw new BadRequestException("Invalid user, ensure this user has an assigned manager");
-        }
-        UUID managerId = manager.getId();
-        if (assignment.getApprovalId() == null || managerId == null || !managerId.equals(assignment.getApprovalId())) {
-            throw new BadRequestException(message);
-        }
     }
 
     public ProvisioningState getState(UUID userId){

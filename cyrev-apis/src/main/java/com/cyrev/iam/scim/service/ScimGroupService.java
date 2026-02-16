@@ -38,7 +38,7 @@ public class ScimGroupService {
         if (request.getMembers() != null && !request.getMembers().isEmpty()) {
             Set<User> membersToAdd = request.getMembers().stream()
                     .map(ScimGroupRequest.Member::getValue)
-                    .map(userRepository::findByExternalId) // or findByUsername
+                    .map(userRepository::findByUsername) // or findByUsername
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .collect(Collectors.toSet());
@@ -141,7 +141,7 @@ public class ScimGroupService {
 
         if (filter.startsWith("externalId")) {
             return ScimFilter.extractEquals(filter)
-                    .flatMap(userRepository::findByExternalId)
+                    .flatMap(userRepository::findByUsername)
                     .map(List::of)
                     .orElse(List.of());
         }

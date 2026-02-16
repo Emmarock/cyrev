@@ -2,9 +2,15 @@ package com.cyrev.iam.service;
 
 import com.cyrev.common.dtos.UserCreationDTO;
 import com.cyrev.common.dtos.UserUpdateRequestDTO;
+import com.cyrev.common.entities.Address;
+import com.cyrev.common.entities.Organization;
 import com.cyrev.common.entities.User;
+import com.cyrev.common.repository.AddressRepository;
+import com.cyrev.common.repository.OrganizationRepository;
 import com.cyrev.common.repository.UserRepository;
+import com.cyrev.common.services.NotificationPublisherService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,7 +21,13 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final OrganizationRepository organizationRepository;
+    private final AddressRepository addressRepository;
+    private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final OrganizationMapper organizationMapper;
+    private final NotificationPublisherService notificationPublisherService;
+    private final EmailVerificationService emailVerificationService;
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -28,30 +40,26 @@ public class UserService {
     public User createUser(UserCreationDTO userCreationDTO) {
 
         User entity = userMapper.toEntity(userCreationDTO);
-
-        return userRepository.save(entity);
+        User user = userRepository.save(entity);
+        // create organization
+        Organization org = organizationMapper.toEntity(userCreationDTO.getOrganization(), user);
+        Organization organization = organizationRepository.save(org);
+        Address address = userMapper.toAddress(userCreationDTO.getCompanyAddress(), organization);
+        addressRepository.save(address);
+        user.setOrganization(organization);
+        userRepository.save(user);
+        // create email event here
+        String verificationLink = emailVerificationService.createAndSendVerification(user);
+        notificationPublisherService.sendVerificationLink(user.getFirstName(), user.getEmail(), verificationLink);
+        return user;
     }
 
     public User updateUser(UUID id, UserUpdateRequestDTO updated) {
-
         return userRepository.findById(id).map(user -> {
-            if (updated.getManagerId() != null) {
-                userRepository.findById(updated.getManagerId()).ifPresent(user::setManager);
+            if (updated.getPassword() != null) {
+                user.setPassword(passwordEncoder.encode(updated.getPassword()));
+                user.setEmailVerified(true);
             }
-
-            if (updated.getEndDate() != null) {
-                user.setEndDate(updated.getEndDate());
-            }
-            if (updated.getDepartment() != null) {
-                user.setDepartment(updated.getDepartment());
-            }
-            if (updated.getDivision() != null) {
-                user.setDivision(updated.getDivision());
-            }
-            if (updated.getUnit() != null) {
-                user.setUnit(updated.getUnit());
-            }
-
             return userRepository.save(user);
         }).orElseThrow(() -> new RuntimeException("Invalid user ID: " + id));
     }

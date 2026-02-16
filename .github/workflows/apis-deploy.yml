@@ -76,5 +76,6 @@ jobs:
               TEMPORAL_API_KEY=${{ secrets.TEMPORAL_API_KEY }} \
               TEMPORAL_NAMESPACE=${{ secrets.TEMPORAL_NAMESPACE }} \
               TEMPORAL_ADDRESS=${{ secrets.TEMPORAL_ADDRESS }} \
+              SEND_GRID_API_KEY=${{ secrets.SEND_GRID_API_KEY }} \
               TEMPORAL_HOST=temporal \
               TEMPORAL_PORT=7233 \

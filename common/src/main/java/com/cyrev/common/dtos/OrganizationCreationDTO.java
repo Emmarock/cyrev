@@ -15,13 +15,6 @@ public class OrganizationCreationDTO {
     private String code;
 
     @NotBlank(message = "Company name is required")
-    @Size(max = 100, message = "Company name must be at most 100 characters")
+    @Size(max = 200, message = "Company name must be at most 100 characters")
     private String name;
-
-    @NotNull(message = "Contract start date is required")
-    private LocalDate contractStartDate;
-
-    @NotNull(message = "Contract end date is required")
-    private LocalDate contractEndDate;
-    private Set<UUID> ownerIds; // list of User ID
 }

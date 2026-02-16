@@ -54,7 +54,7 @@ public class UserProvisioningActivitiesImpl implements UserProvisioningActivitie
         // Example: employeeId = orgCode + incremental number
         long count = userRepository.countByOrganization_Code(user.getOrganization().getCode());
         String employeeId =  String.format("%s-%05d",organizationCode, count + 1);
-        user.setEmployeeId(employeeId);
+        // user.setEmployeeId(employeeId);
 
         userRepository.save(user);
 
@@ -69,7 +69,7 @@ public class UserProvisioningActivitiesImpl implements UserProvisioningActivitie
         User manager = userRepository.findById(managerId)
                 .orElseThrow(() -> new IllegalArgumentException("Manager not found: " + managerId));
 
-        user.setManager(manager);
+        // user.setManager(manager);
         userRepository.save(user);
 
         log.info("Assigned manager {} to user {}", managerId, userId);
@@ -81,7 +81,7 @@ public class UserProvisioningActivitiesImpl implements UserProvisioningActivitie
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
 
-        user.setIdentityStatus(status);
+        // user.setIdentityStatus(status);
         userRepository.save(user);
 
         log.info("Set identity status {} for user {}", status, userId);

@@ -1,32 +1,20 @@
 package com.cyrev.common.dtos;
 
+import lombok.Data;
+
+import java.util.Map;
+
+@Data
 public class EmailEvent {
 
     private final String to;
-    private final String subject;
-    private final String body;
+    private final Map<String,Object> body;
     private final boolean html;
 
-    public EmailEvent(String to, String subject, String body, boolean html) {
+    public EmailEvent(String to, Map<String,Object> body, boolean html) {
         this.to = to;
-        this.subject = subject;
         this.body = body;
         this.html = html;
     }
 
-    public String getTo() {
-        return to;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public boolean isHtml() {
-        return html;
-    }
 }

@@ -68,6 +68,45 @@
    <version>${project.version}</version>
   </dependency>
 
+  <!-- Microsoft Graph SDK -->
+  <dependency>
+   <groupId>com.microsoft.graph</groupId>
+   <artifactId>microsoft-graph</artifactId>
+   <version>5.35.0</version>
+  </dependency>
+
+  <!-- Azure Identity for token acquisition -->
+  <dependency>
+   <groupId>com.azure</groupId>
+   <artifactId>azure-identity</artifactId>
+   <version>1.12.0</version>
+  </dependency>
+
+  <!-- Jackson for JSON mapping (if needed) -->
+  <dependency>
+   <groupId>com.fasterxml.jackson.core</groupId>
+   <artifactId>jackson-databind</artifactId>
+  </dependency>
+
+  <!-- Modern TOTP library -->
+  <dependency>
+   <groupId>dev.samstevens.totp</groupId>
+   <artifactId>totp</artifactId>
+   <version>1.7.1</version>
+  </dependency>
+
+  <!-- QR Code generation -->
+  <dependency>
+   <groupId>com.google.zxing</groupId>
+   <artifactId>core</artifactId>
+   <version>3.5.0</version>
+  </dependency>
+  <dependency>
+   <groupId>com.google.zxing</groupId>
+   <artifactId>javase</artifactId>
+   <version>3.5.0</version>
+  </dependency>
+
   <dependency>
    <groupId>org.springframework.boot</groupId>
    <artifactId>spring-boot-starter-test</artifactId>
@@ -83,11 +122,6 @@
    <groupId>org.projectlombok</groupId>
    <artifactId>lombok</artifactId>
    <scope>provided</scope>
-  </dependency>
-
-  <dependency>
-   <groupId>org.springframework.boot</groupId>
-   <artifactId>spring-boot-starter-webflux</artifactId>
   </dependency>
  </dependencies>
 

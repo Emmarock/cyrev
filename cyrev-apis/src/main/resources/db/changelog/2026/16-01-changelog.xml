@@ -5,7 +5,42 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd"
         objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
-    <changeSet id="1769542588580-1" author="apata">
+    <changeSet id="1771200036367-1" author="apata">
+        <createTable tableName="addresses">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_addresses"/>
+            </column>
+            <column name="created_at" type="DATETIME"/>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+            <column name="version" type="BIGINT"/>
+            <column name="deleted" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="organization_id" type="UUID"/>
+            <column name="building_number" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="street" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="city" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="postal_code" type="VARCHAR(255)"/>
+            <column name="country_code" type="VARCHAR(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="country_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1771200036367-2" author="apata">
         <createTable tableName="app_assignments">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_app_assignments"/>
@@ -28,7 +63,24 @@
             <column name="failure_reason" type="oid"/>
         </createTable>
     </changeSet>
-    <changeSet id="1769542588580-2" author="apata">
+    <changeSet id="1771200036367-3" author="apata">
+        <createTable tableName="email_verification_token">
+            <column name="id" type="VARCHAR(255)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_emailverificationtoken"/>
+            </column>
+            <column name="token" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="UUID"/>
+            <column name="expiry_date" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="used" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="1771200036367-4" author="apata">
         <createTable tableName="group_members">
             <column name="group_id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_group_members"/>
@@ -38,7 +90,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1769542588580-3" author="apata">
+    <changeSet id="1771200036367-5" author="apata">
         <createTable tableName="groups">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_groups"/>
@@ -56,7 +108,7 @@
             <column name="provider" type="VARCHAR(255)"/>
         </createTable>
     </changeSet>
-    <changeSet id="1769542588580-4" author="apata">
+    <changeSet id="1771200036367-6" author="apata">
         <createTable tableName="organization_owners">
             <column name="organization_id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_organization_owners"/>
@@ -66,7 +118,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="1769542588580-5" author="apata">
+    <changeSet id="1771200036367-7" author="apata">
         <createTable tableName="organizations">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_organizations"/>
@@ -89,15 +141,7 @@
             <column name="contract_end_date" type="DATE"/>
         </createTable>
     </changeSet>
-    <changeSet id="1769542588580-6" author="apata">
-        <createTable tableName="user_assigned_apps">
-            <column name="user_id" type="UUID">
-                <constraints nullable="false"/>
-            </column>
-            <column name="assigned_apps" type="VARCHAR(255)"/>
-        </createTable>
-    </changeSet>
-    <changeSet id="1769542588580-7" author="apata">
+    <changeSet id="1771200036367-8" author="apata">
         <createTable tableName="users">
             <column name="id" type="UUID">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_users"/>
@@ -116,89 +160,88 @@
             <column name="username" type="VARCHAR(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="password" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
+            <column name="password" type="VARCHAR(255)"/>
+            <column name="secret" type="VARCHAR(255)"/>
             <column name="first_name" type="VARCHAR(255)"/>
             <column name="last_name" type="VARCHAR(255)"/>
-            <column name="employee_id" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
             <column name="organization_id" type="UUID"/>
-            <column name="manager_id" type="UUID"/>
-            <column name="start_date" type="DATE"/>
-            <column name="end_date" type="DATE"/>
-            <column name="department" type="VARCHAR(255)"/>
-            <column name="unit" type="VARCHAR(255)"/>
-            <column name="division" type="VARCHAR(255)"/>
-            <column name="identity_status" type="VARCHAR(255)"/>
             <column name="status" type="VARCHAR(255)"/>
             <column name="role" type="VARCHAR(255)"/>
-            <column name="external_id" type="VARCHAR(255)"/>
-            <column name="provider" type="VARCHAR(255)"/>
+            <column name="email_verified" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mfa_enabled" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
-    <changeSet id="1769542588580-8" author="apata">
+    <changeSet id="1771200036367-9" author="apata">
         <addUniqueConstraint columnNames="user_id, app" constraintName="uc_0ef8636f3e1679df2b2df286b"
                              tableName="app_assignments"/>
     </changeSet>
-    <changeSet id="1769542588580-9" author="apata">
+    <changeSet id="1771200036367-10" author="apata">
+        <addUniqueConstraint columnNames="organization_id" constraintName="uc_addresses_organization"
+                             tableName="addresses"/>
+    </changeSet>
+    <changeSet id="1771200036367-11" author="apata">
+        <addUniqueConstraint columnNames="token" constraintName="uc_emailverificationtoken_token"
+                             tableName="email_verification_token"/>
+    </changeSet>
+    <changeSet id="1771200036367-12" author="apata">
         <addUniqueConstraint columnNames="external_id" constraintName="uc_groups_externalid" tableName="groups"/>
     </changeSet>
-    <changeSet id="1769542588580-10" author="apata">
+    <changeSet id="1771200036367-13" author="apata">
         <addUniqueConstraint columnNames="code" constraintName="uc_organizations_code" tableName="organizations"/>
     </changeSet>
-    <changeSet id="1769542588580-11" author="apata">
+    <changeSet id="1771200036367-14" author="apata">
         <addUniqueConstraint columnNames="email" constraintName="uc_users_email" tableName="users"/>
     </changeSet>
-    <changeSet id="1769542588580-12" author="apata">
-        <addUniqueConstraint columnNames="employee_id" constraintName="uc_users_employeeid" tableName="users"/>
-    </changeSet>
-    <changeSet id="1769542588580-13" author="apata">
+    <changeSet id="1771200036367-15" author="apata">
         <addUniqueConstraint columnNames="username" constraintName="uc_users_username" tableName="users"/>
     </changeSet>
-    <changeSet id="1769542588580-14" author="apata">
+    <changeSet id="1771200036367-16" author="apata">
+        <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="addresses"
+                                 constraintName="FK_ADDRESSES_ON_ORGANIZATION" referencedColumnNames="id"
+                                 referencedTableName="organizations"/>
+    </changeSet>
+    <changeSet id="1771200036367-17" author="apata">
         <addForeignKeyConstraint baseColumnNames="manager_id" baseTableName="app_assignments"
                                  constraintName="FK_APP_ASSIGNMENTS_ON_MANAGER" referencedColumnNames="id"
                                  referencedTableName="users"/>
     </changeSet>
-    <changeSet id="1769542588580-15" author="apata">
+    <changeSet id="1771200036367-18" author="apata">
         <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="app_assignments"
                                  constraintName="FK_APP_ASSIGNMENTS_ON_USER" referencedColumnNames="id"
                                  referencedTableName="users"/>
     </changeSet>
-    <changeSet id="1769542588580-16" author="apata">
-        <addForeignKeyConstraint baseColumnNames="manager_id" baseTableName="users" constraintName="FK_USERS_ON_MANAGER"
-                                 referencedColumnNames="id" referencedTableName="users"/>
+    <changeSet id="1771200036367-19" author="apata">
+        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="email_verification_token"
+                                 constraintName="FK_EMAILVERIFICATIONTOKEN_ON_USER" referencedColumnNames="id"
+                                 referencedTableName="users"/>
     </changeSet>
-    <changeSet id="1769542588580-17" author="apata">
+    <changeSet id="1771200036367-20" author="apata">
         <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="users"
                                  constraintName="FK_USERS_ON_ORGANIZATION" referencedColumnNames="id"
                                  referencedTableName="organizations"/>
     </changeSet>
-    <changeSet id="1769542588580-18" author="apata">
+    <changeSet id="1771200036367-21" author="apata">
         <addForeignKeyConstraint baseColumnNames="group_id" baseTableName="group_members"
                                  constraintName="fk_gromem_on_group" referencedColumnNames="id"
                                  referencedTableName="groups"/>
     </changeSet>
-    <changeSet id="1769542588580-19" author="apata">
+    <changeSet id="1771200036367-22" author="apata">
         <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="group_members"
                                  constraintName="fk_gromem_on_user" referencedColumnNames="id"
                                  referencedTableName="users"/>
     </changeSet>
-    <changeSet id="1769542588580-20" author="apata">
+    <changeSet id="1771200036367-23" author="apata">
         <addForeignKeyConstraint baseColumnNames="organization_id" baseTableName="organization_owners"
                                  constraintName="fk_orgown_on_organization" referencedColumnNames="id"
                                  referencedTableName="organizations"/>
     </changeSet>
-    <changeSet id="1769542588580-21" author="apata">
+    <changeSet id="1771200036367-24" author="apata">
         <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="organization_owners"
                                  constraintName="fk_orgown_on_user" referencedColumnNames="id"
-                                 referencedTableName="users"/>
-    </changeSet>
-    <changeSet id="1769542588580-22" author="apata">
-        <addForeignKeyConstraint baseColumnNames="user_id" baseTableName="user_assigned_apps"
-                                 constraintName="fk_user_assignedapps_on_user" referencedColumnNames="id"
                                  referencedTableName="users"/>
     </changeSet>
 

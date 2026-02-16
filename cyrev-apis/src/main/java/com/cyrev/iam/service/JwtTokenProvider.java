@@ -19,6 +19,9 @@ public class JwtTokenProvider {
     @Value("${security.jwt.expiry}")
     private long expiration;
 
+    @Value("${security.jwt.mfa-expiry}")
+    private long mfaExpiration;
+
     public String generateToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getId().toString())
@@ -27,6 +30,17 @@ public class JwtTokenProvider {
                 .claim("roles", user.getRole()) // ["ADMIN","USER"]
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(Keys.hmacShaKeyFor(secret.getBytes()), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generateMFAToken(User user) {
+        return Jwts.builder()
+                .setSubject(user.getId().toString())
+                .claim("username", user.getUsername())
+                .claim("mfaRequired", true)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + mfaExpiration))
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes()), SignatureAlgorithm.HS256)
                 .compact();
     }

@@ -11,10 +11,8 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findByEmail(String email);
-    Optional<User> findByExternalId(String externalId);
     Optional<User> findByUsername(String username);
     List<User> findAllByIdIn(Set<UUID> userIds);
-    Optional<User> findByManagerId(UUID managerId);
 
     long countByOrganization_Code(String organizationCode);
 

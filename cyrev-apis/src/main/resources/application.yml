@@ -1,3 +1,5 @@
+app:
+  base-url: https://cybrooke.vercel.app
 spring:
   application:
     name: cyrev-iam-provisioning
@@ -79,6 +81,7 @@ security:
   jwt:
     secret: VERY_LONG_RANDOM_SECRET_32_CHARS_MIN
     expiry: 3600000 # 1 hour
+    mfa-expiry: 300000 # 5 mins
 
 server:
   port: 8090
@@ -89,3 +92,10 @@ management:
       exposure:
         include: "*"
 
+entra:
+  client-id: ${ENTRA_YOUR_CLIENT_ID}
+  client-secret: ${ENTRA_YOUR_CLIENT_SECRET}
+  tenant-id: ${ENTRA_YOUR_TENANT_ID}
+sendgrid:
+  api-key: ${SENDGRID_API_KEY}
+  from-email: info@cyrev.com

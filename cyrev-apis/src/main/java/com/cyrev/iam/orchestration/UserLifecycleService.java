@@ -33,10 +33,6 @@ public class UserLifecycleService {
     public User createUser(User user, Role role) {
         User saved = repository.save(user);
 
-        saved.getAssignedApps().forEach(app ->
-            adapters.get(app).assignUser(saved, role)
-        );
-
         return saved;
     }
 
@@ -45,8 +41,5 @@ public class UserLifecycleService {
         User user = repository.findById(userId).orElseThrow();
         user.setStatus(UserStatus.SUSPENDED);
 
-        user.getAssignedApps().forEach(app ->
-            adapters.get(app).revokeUser(user)
-        );
     }
 }

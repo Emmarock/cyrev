@@ -1,5 +1,6 @@
 package com.cyrev.common.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
@@ -21,7 +22,7 @@ public class Organization extends BaseEntity {
     private String name;
 
     @Column(name = "contract_start_date")
-    private LocalDate contractStartDate;
+    private LocalDate contractStartDate = LocalDate.now();
 
     @Column(name = "contract_end_date")
     private LocalDate contractEndDate;
@@ -33,5 +34,6 @@ public class Organization extends BaseEntity {
         joinColumns = @JoinColumn(name = "organization_id"),
         inverseJoinColumns = @JoinColumn(name = "user_id")
     )
+    @JsonIgnore
     private Set<User> owners;
 }
