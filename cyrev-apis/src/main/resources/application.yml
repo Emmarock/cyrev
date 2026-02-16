@@ -98,4 +98,4 @@ entra:
   tenant-id: ${ENTRA_YOUR_TENANT_ID}
 sendgrid:
   api-key: ${SENDGRID_API_KEY}
-  from-email: info@cyrev.com
+  from-email: info@ayokunmidapo.com
