@@ -55,6 +55,7 @@ public class AuthController {
     }
 
     @PostMapping("/mfa/verify")
+    @PreAuthorize("hasRole('MFA_WRITE')")
     public ResponseEntity<CyrevApiResponse<AuthResponse>> verifyMFA(@CurrentUserId UUID userId, @RequestParam String code) {
         AuthResponse authResponse =  authService.verifyMFACode(userId, code);
         return ResponseEntity.status(HttpStatus.OK)
