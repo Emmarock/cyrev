@@ -153,7 +153,7 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
     }
 
     @Override
-    public void sendVerificationLink(String firstname, String email, String url) {
+    public void publishVerificationEvent(String firstname, String email, String url) {
         String body = """
             Welcome  %s 🎉, \n
             

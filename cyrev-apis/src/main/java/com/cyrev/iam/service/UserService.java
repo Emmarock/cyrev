@@ -1,7 +1,6 @@
 package com.cyrev.iam.service;
 
 import com.cyrev.common.dtos.UserCreationDTO;
-import com.cyrev.common.dtos.UserStatus;
 import com.cyrev.common.dtos.UserUpdateRequestDTO;
 import com.cyrev.common.entities.Address;
 import com.cyrev.common.entities.Organization;
@@ -10,10 +9,11 @@ import com.cyrev.common.repository.AddressRepository;
 import com.cyrev.common.repository.OrganizationRepository;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
+import com.cyrev.iam.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +39,7 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(()->new RuntimeException("Invalid user"));
     }
 
+    @Transactional
     public User createUser(UserCreationDTO userCreationDTO) throws BadRequestException {
         if(userRepository.findByEmail(userCreationDTO.getUsername()).isPresent()) {
             throw new BadRequestException("Email already exists");
@@ -62,8 +63,8 @@ public class UserService {
         user.setOrganization(organization);
         userRepository.save(user);
         // create email event here
-        String verificationLink = emailVerificationService.createAndSendVerification(user);
-        notificationPublisherService.sendVerificationLink(user.getFirstName(), user.getEmail(), verificationLink);
+        String verificationLink = emailVerificationService.generateVerificationLink(user);
+        notificationPublisherService.publishVerificationEvent(user.getFirstName(), user.getEmail(), verificationLink);
         return user;
     }
 

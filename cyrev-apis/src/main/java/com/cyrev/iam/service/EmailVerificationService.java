@@ -28,7 +28,7 @@ public class EmailVerificationService {
     @Value("${app.base-url}")
     private String baseUrl;
 
-    public String createAndSendVerification(User user) {
+    public String generateVerificationLink(User user) {
 
         String rawToken = tokenGenerator.generateToken();
 

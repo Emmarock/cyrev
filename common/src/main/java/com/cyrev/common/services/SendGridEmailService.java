@@ -22,11 +22,6 @@ public class SendGridEmailService implements NotificationService{
     @Value("${sendgrid.from-email}")
     private String fromEmail;
 
-    public void sendEmail(String to, String subject, String content) throws IOException {
-
-
-    }
-
     @Override
     public MailProvider getProvider() {
         return MailProvider.SENDGRID;

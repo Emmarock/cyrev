@@ -23,5 +23,5 @@ public interface NotificationPublisherService {
 
     void sendWelcomeEmail( String firstname, String email);
 
-    void sendVerificationLink(String firstname, String email, String url);
+    void publishVerificationEvent(String firstname, String email, String url);
 }
