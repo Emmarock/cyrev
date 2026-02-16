@@ -28,6 +28,7 @@ public class JwtTokenProvider {
                 .claim("username", user.getUsername())
                 .claim("orgCode", user.getOrganization().getCode())
                 .claim("roles", user.getRole()) // ["ADMIN","USER"]
+                .claim("isMfaEnabled", user.isMfaEnabled())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes()), SignatureAlgorithm.HS256)
@@ -39,6 +40,7 @@ public class JwtTokenProvider {
                 .setSubject(user.getId().toString())
                 .claim("username", user.getUsername())
                 .claim("mfaRequired", true)
+                .claim("isMfaEnabled", user.isMfaEnabled())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + mfaExpiration))
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes()), SignatureAlgorithm.HS256)

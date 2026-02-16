@@ -43,17 +43,14 @@ public class AuthService {
         );
 
         User user = getUser(request.getEmail());
-        if(user.isMfaEnabled()){
-            String token = jwtTokenProvider.generateMFAToken(user);
-            return new AuthResponse(
-                    token,
-                    user.getId(),
-                    user.getUsername(),
-                    user.getOrganization().getCode()
-            );
-        }else {
-            return issueFullAccessToken( sendEmail, user);
-        }
+        String token = jwtTokenProvider.generateMFAToken(user);
+        return new AuthResponse(
+                token,
+                user.getId(),
+                user.getUsername(),
+                user.getOrganization().getCode(),
+                user.isMfaEnabled()
+        );
     }
 
     private AuthResponse issueFullAccessToken( boolean sendEmail, User user) {
@@ -65,7 +62,8 @@ public class AuthService {
                 token,
                 user.getId(),
                 user.getUsername(),
-                user.getOrganization().getCode()
+                user.getOrganization().getCode(),
+                user.isMfaEnabled()
         );
     }
 
