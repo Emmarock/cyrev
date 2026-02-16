@@ -1,6 +1,7 @@
 package com.cyrev.iam.service;
 
 import com.cyrev.common.dtos.UserCreationDTO;
+import com.cyrev.common.dtos.UserStatus;
 import com.cyrev.common.dtos.UserUpdateRequestDTO;
 import com.cyrev.common.entities.Address;
 import com.cyrev.common.entities.Organization;
