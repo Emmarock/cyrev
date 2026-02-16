@@ -1,5 +1,6 @@
 package com.cyrev.iam.service;
 
+import com.cyrev.common.dtos.Role;
 import com.cyrev.common.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -39,6 +40,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setSubject(user.getId().toString())
                 .claim("username", user.getUsername())
+                .claim("roles", Role.MFA_WRITE.toString())
                 .claim("mfaRequired", true)
                 .claim("isMfaEnabled", user.isMfaEnabled())
                 .setIssuedAt(new Date())

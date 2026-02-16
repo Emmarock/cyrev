@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -38,6 +39,7 @@ public class AuthController {
     }
 
     @PostMapping("/mfa/register")
+    @PreAuthorize("hasRole('MFA_WRITE')")
     public ResponseEntity<CyrevApiResponse<Map<String,String>>> register(@CurrentUserId UUID userId) throws IOException {
         try {
             Map<String,String> qrFile = authService.registerMfa(userId);
