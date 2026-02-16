@@ -53,9 +53,9 @@ public class AppProvisioningActivitiesImpl implements AppProvisioningActivities 
             appAssignment.setStatus(AssignmentStatus.ACTIVE);
             assignmentRepository.save(appAssignment);
         }
-        Set<App> assignedApps = user.getAssignedApps();
+        /*Set<App> assignedApps = user.getAssignedApps();
         assignedApps.addAll(apps);
-        user.setAssignedApps(assignedApps);
+        user.setAssignedApps(assignedApps);*/
         userRepository.save(user);
         log.info("Recorded provisioning request for user={} apps={}", user.getId(), apps);
     }
