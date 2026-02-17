@@ -81,7 +81,7 @@ security:
   jwt:
     secret: VERY_LONG_RANDOM_SECRET_32_CHARS_MIN
     expiry: 3600000 # 1 hour
-    mfa-expiry: 300000 # 5 mins
+    mfa-expiry: 900000 # 15 mins
 
 server:
   port: 8090
