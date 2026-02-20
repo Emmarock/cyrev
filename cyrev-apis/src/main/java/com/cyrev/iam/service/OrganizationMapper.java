@@ -25,14 +25,12 @@ public class OrganizationMapper {
      */
     public Organization toEntity(OrganizationCreationDTO dto) {
         Organization org = new Organization();
-        org.setCode(dto.getCode());
         org.setName(dto.getName());
         return org;
     }
 
     public Organization toEntity(OrganizationCreationDTO dto, User user) {
         Organization org = new Organization();
-        org.setCode(dto.getCode());
         org.setName(dto.getName());
 
         Set<User> owners = new HashSet<>();
@@ -47,7 +45,6 @@ public class OrganizationMapper {
      */
     public OrganizationCreationDTO toDTO(Organization org) {
         OrganizationCreationDTO dto = new OrganizationCreationDTO();
-        dto.setCode(org.getCode());
         dto.setName(org.getName());
         return dto;
     }

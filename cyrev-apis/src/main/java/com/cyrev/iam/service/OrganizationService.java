@@ -23,8 +23,8 @@ public class OrganizationService {
      */
     @Transactional
     public Organization createOrganization(OrganizationCreationDTO dto) throws BadRequestException {
-        if(organizationRepository.existsByCode(dto.getCode())) {
-            throw new BadRequestException("Organization with code "+dto.getCode()+" already exists ");
+        if(organizationRepository.existsByName(dto.getName())) {
+            throw new BadRequestException("Organization with name "+dto.getName()+" already exists ");
         }
         Organization org = organizationMapper.toEntity(dto);
         return organizationRepository.save(org);
@@ -39,7 +39,6 @@ public class OrganizationService {
                 .orElseThrow(() -> new RuntimeException("Organization not found with id: " + orgId));
 
         // Update fields
-        org.setCode(dto.getCode());
         org.setName(dto.getName());
 
         return organizationRepository.save(org);

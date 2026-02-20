@@ -29,13 +29,14 @@ public class UserProvisioningActivitiesImpl implements UserProvisioningActivitie
     public void createUser(UUID userId) {
         // Check if user already exists (idempotent)
         User user = userRepository.findById(userId).orElse(null);
-        if (userRepository.existsByEmail(user.getEmail())) {
+        if (user!=null && userRepository.existsByEmail(user.getEmail())) {
             log.info("User with email {} already exists, skipping creation", user.getEmail());
             return;
         }
 
-        Organization organization = organizationRepository.findByCode(user.getOrganization().getCode())
-                .orElseThrow(()-> new IllegalStateException("Organization with code " + user.getOrganization().getCode() + " does not exist"));
+        assert user != null;
+        Organization organization = organizationRepository.findByName(user.getOrganization().getName())
+                .orElseThrow(()-> new IllegalStateException("Organization with code " + user.getOrganization().getName() + " does not exist"));
 
         user.setOrganization(organization);
 
@@ -50,9 +51,9 @@ public class UserProvisioningActivitiesImpl implements UserProvisioningActivitie
     public void assignEmployeeId( UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
-        String organizationCode = user.getOrganization().getCode();
+        String organizationCode = user.getOrganization().getName();
         // Example: employeeId = orgCode + incremental number
-        long count = userRepository.countByOrganization_Code(user.getOrganization().getCode());
+        long count = userRepository.countByOrganization_Name(user.getOrganization().getName());
         String employeeId =  String.format("%s-%05d",organizationCode, count + 1);
         // user.setEmployeeId(employeeId);
 

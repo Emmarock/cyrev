@@ -15,17 +15,8 @@ import java.util.Set;
 @Builder
 public class Organization extends BaseEntity {
 
-    @Column(name = "code", nullable = false, unique = true)
-    private String code;
-
     @Column(name = "name", nullable = false)
     private String name;
-
-    @Column(name = "contract_start_date")
-    private LocalDate contractStartDate = LocalDate.now();
-
-    @Column(name = "contract_end_date")
-    private LocalDate contractEndDate;
 
     // Owners relationship: many-to-many (assuming a User entity exists)
     @ManyToMany

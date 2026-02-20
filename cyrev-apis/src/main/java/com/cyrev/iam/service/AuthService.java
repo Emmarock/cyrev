@@ -48,7 +48,7 @@ public class AuthService {
                 token,
                 user.getId(),
                 user.getUsername(),
-                user.getOrganization().getCode(),
+                user.getOrganization().getName(),
                 user.isMfaEnabled()
         );
     }
@@ -62,7 +62,7 @@ public class AuthService {
                 token,
                 user.getId(),
                 user.getUsername(),
-                user.getOrganization().getCode(),
+                user.getOrganization().getName(),
                 user.isMfaEnabled()
         );
     }

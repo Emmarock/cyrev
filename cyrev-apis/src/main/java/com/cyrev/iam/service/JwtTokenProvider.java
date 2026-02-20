@@ -26,8 +26,9 @@ public class JwtTokenProvider {
     public String generateToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getId().toString())
+                .claim("email", user.getEmail())
                 .claim("username", user.getUsername())
-                .claim("orgCode", user.getOrganization().getCode())
+                .claim("orgName", user.getOrganization().getName())
                 .claim("roles", user.getRole()) // ["ADMIN","USER"]
                 .claim("isMfaEnabled", user.isMfaEnabled())
                 .setIssuedAt(new Date())
@@ -40,6 +41,8 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .setSubject(user.getId().toString())
                 .claim("username", user.getUsername())
+                .claim("email", user.getEmail())
+                .claim("orgName", user.getOrganization().getName())
                 .claim("roles", Role.MFA_WRITE.toString())
                 .claim("mfaRequired", true)
                 .claim("isMfaEnabled", user.isMfaEnabled())

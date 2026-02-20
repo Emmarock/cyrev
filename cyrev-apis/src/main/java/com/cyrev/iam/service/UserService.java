@@ -47,9 +47,6 @@ public class UserService {
         if(userRepository.findByUsername(userCreationDTO.getUsername()).isPresent()) {
             throw new BadRequestException("Username already exists");
         }
-        if(organizationRepository.existsByCode(userCreationDTO.getOrganization().getCode())) {
-            throw new BadRequestException("Organization already exists");
-        }
         if(organizationRepository.findByName(userCreationDTO.getOrganization().getName()).isPresent()) {
             throw new BadRequestException("Organization already exists");
         }

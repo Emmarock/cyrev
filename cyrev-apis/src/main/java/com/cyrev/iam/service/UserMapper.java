@@ -9,10 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
 @Component
 @RequiredArgsConstructor
 public class UserMapper {
@@ -29,7 +25,7 @@ public class UserMapper {
         user.setRole(Role.SUPER_ADMIN);
         // Company
         if (dto.getOrganization() != null) {
-            organizationRepository.findByCode(dto.getOrganization().getCode()).ifPresent(user::setOrganization);
+            organizationRepository.findByName(dto.getOrganization().getName()).ifPresent(user::setOrganization);
         }
         return user;
     }
