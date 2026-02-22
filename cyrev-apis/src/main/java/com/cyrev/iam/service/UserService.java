@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -41,6 +42,7 @@ public class UserService {
 
     @Transactional
     public User createUser(UserCreationDTO userCreationDTO) throws BadRequestException {
+        validateCorporateEmail(userCreationDTO.getBusinessEmail());
         if(userRepository.findByEmail(userCreationDTO.getUsername()).isPresent()) {
             throw new BadRequestException("Email already exists");
         }
@@ -83,4 +85,23 @@ public class UserService {
         }).orElse(false);
     }
 
+    public String extractDomain(String email) {
+        return email.substring(email.indexOf("@") + 1).toLowerCase();
+    }
+    private static final Set<String> PUBLIC_EMAIL_DOMAINS = Set.of(
+            "gmail.com",
+            "yahoo.com",
+            "hotmail.com",
+            "outlook.com",
+            "icloud.com",
+            "aol.com",
+            "protonmail.com"
+    );
+    public void validateCorporateEmail(String email) {
+        String domain = extractDomain(email);
+
+        if (PUBLIC_EMAIL_DOMAINS.contains(domain)) {
+            throw new BadRequestException("Public email domains are not allowed. Please use your corporate email.");
+        }
+    }
 }

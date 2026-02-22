@@ -5,9 +5,12 @@ import com.cyrev.common.entities.Address;
 import com.cyrev.common.entities.Organization;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.OrganizationRepository;
+import com.cyrev.iam.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
+
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
