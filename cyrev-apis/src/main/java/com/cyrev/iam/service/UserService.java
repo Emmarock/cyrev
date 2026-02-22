@@ -43,7 +43,7 @@ public class UserService {
     @Transactional
     public User createUser(UserCreationDTO userCreationDTO) throws BadRequestException {
         validateCorporateEmail(userCreationDTO.getBusinessEmail());
-        if(userRepository.findByEmail(userCreationDTO.getUsername()).isPresent()) {
+        if(userRepository.existsByEmail(userCreationDTO.getBusinessEmail())) {
             throw new BadRequestException("Email already exists");
         }
         if(userRepository.findByUsername(userCreationDTO.getUsername()).isPresent()) {
