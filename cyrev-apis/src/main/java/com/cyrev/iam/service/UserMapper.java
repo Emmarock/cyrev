@@ -33,6 +33,7 @@ public class UserMapper {
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setRole(Role.SUPER_ADMIN);
+        user.setStatus(UserStatus.PENDING);
         // Company
         if (dto.getOrganization() != null) {
             organizationRepository.findByName(dto.getOrganization().getName()).ifPresent(user::setOrganization);
