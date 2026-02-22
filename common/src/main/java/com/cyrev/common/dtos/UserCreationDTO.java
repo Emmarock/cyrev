@@ -12,6 +12,7 @@ import lombok.*;
 public class UserCreationDTO {
 
     @NotBlank(message = "Business Email is required")
+    @Email(message = "Invalid email format")
     private String businessEmail;
 
     private String username;

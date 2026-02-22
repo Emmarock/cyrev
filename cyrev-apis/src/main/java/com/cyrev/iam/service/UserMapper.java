@@ -26,7 +26,7 @@ public class UserMapper {
     }
 
     public User toEntity(UserCreationDTO dto) {
-        String username= emailToUsername(dto.getUsername());
+        String username= emailToUsername(dto.getBusinessEmail());
         User user = new User();
         user.setEmail(dto.getBusinessEmail());
         user.setUsername(username);
