@@ -14,12 +14,19 @@ import org.springframework.stereotype.Component;
 public class UserMapper {
 
     private final OrganizationRepository organizationRepository;
-
+    public static String emailToUsername(String email) {
+        if (email == null) {
+            throw new IllegalArgumentException("Email cannot be null");
+        }
+        return email.replace("@", "_")
+                .replace(".", "_");
+    }
 
     public User toEntity(UserCreationDTO dto) {
+        String username= emailToUsername(dto.getUsername());
         User user = new User();
         user.setEmail(dto.getBusinessEmail());
-        user.setUsername(dto.getUsername());
+        user.setUsername(username);
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setRole(Role.SUPER_ADMIN);

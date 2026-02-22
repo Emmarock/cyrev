@@ -15,7 +15,6 @@ public class UserCreationDTO {
     @Email(message = "Invalid email format")
     private String businessEmail;
 
-    @NotBlank(message = "Username is required")
     private String username;
 
     @NotBlank(message = "First name is required")
