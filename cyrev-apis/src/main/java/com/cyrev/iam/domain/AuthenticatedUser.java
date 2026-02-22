@@ -12,6 +12,6 @@ import java.util.UUID;
 public class AuthenticatedUser {
     private UUID userId;
     private String username;
-    private String orgCode;
+    private String orgName;
     private Collection<? extends GrantedAuthority> authorities;
 }
