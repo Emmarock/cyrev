@@ -28,8 +28,8 @@ public class MFAService {
     }
 
     // Generate QR code image file for Google Authenticator
-    public byte [] generateQRCode(String email, String issuer, String secret) throws IOException, QrGenerationException {
-        String qrFile = "QRCode_" + email+"_"+  System.currentTimeMillis()  + ".png";
+    public byte [] generateQRCode(String email, String username, String issuer, String secret) throws IOException, QrGenerationException {
+        String qrFile = "QRCode_" + username+"_"+  System.currentTimeMillis()  + ".png";
         QrData data = new QrData.Builder()
                 .label(email)
                 .secret(secret)

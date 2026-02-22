@@ -85,7 +85,7 @@ public class AuthService {
         String secret = mfaService.generateSecretKey();
         user.setSecret(secret);
         userRepository.save(user);
-        byte [] qrCodeByte = mfaService.generateQRCode(user.getEmail(), appName, secret);
+        byte [] qrCodeByte = mfaService.generateQRCode(user.getEmail(), user.getUsername(), appName, secret);
         return Map.of(
                 "username", user.getUsername(),
                 "secret", secret,
