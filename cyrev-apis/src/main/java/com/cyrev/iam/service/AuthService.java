@@ -5,16 +5,19 @@ import com.cyrev.common.dtos.LoginRequest;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
+import com.cyrev.iam.config.EntraProperties;
+import com.cyrev.iam.entra.service.clients.MicrosoftGraphClient;
 import dev.samstevens.totp.exceptions.QrGenerationException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
@@ -29,6 +32,8 @@ public class AuthService {
     private final NotificationPublisherService notificationPublisherService;
     private final MFAService mfaService;
     static String appName = "CyRevApp";
+    private final EntraProperties props;
+    private final MicrosoftGraphClient microsoftGraphClient;
 
     public AuthResponse login(LoginRequest request) {
        return login(request,true);
@@ -46,9 +51,10 @@ public class AuthService {
         String token = jwtTokenProvider.generateMFAToken(user);
         return new AuthResponse(
                 token,
+                user.getAuthProvider(),
                 user.getId(),
                 user.getUsername(),
-                user.getOrganization().getName(),
+                user.getOrganization().getId().toString(),
                 user.isMfaEnabled()
         );
     }
@@ -60,9 +66,10 @@ public class AuthService {
         }
         return new AuthResponse(
                 token,
+                user.getAuthProvider(),
                 user.getId(),
                 user.getUsername(),
-                user.getOrganization().getName(),
+                user.getOrganization().getId().toString(),
                 user.isMfaEnabled()
         );
     }
@@ -93,8 +100,8 @@ public class AuthService {
         );
     }
 
-    public AuthResponse verifyMFACode(UUID emailAddress, String code) {
-        User user = getUserByUUID(emailAddress);
+    public AuthResponse verifyMFACode(UUID userId, String code) {
+        User user = getUserByUUID(userId);
         boolean mfaVerified = mfaService.verifyCode(user.getSecret(), code);
         if (mfaVerified) {
             user.setMfaEnabled(true);
@@ -102,6 +109,36 @@ public class AuthService {
             return issueFullAccessToken(true, user);
         }
         throw new UsernameNotFoundException("Invalid MFA code");
+    }
+
+    public String buildLoginUrl() {
+        String scope = URLEncoder.encode("openid profile email User.Read", StandardCharsets.UTF_8);
+
+        return "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+                + "?client_id=" + props.getClientId()
+                + "&response_type=code"
+                + "&redirect_uri=" + props.getAuthRedirectUri()
+                + "&scope="+scope
+                + "&response_mode=query"
+                + "&state=" + UUID.randomUUID();
+    }
+
+    public AuthResponse providerAuth(String code) throws ParseException {
+        User user = microsoftGraphClient.getUserProfile(code);
+        String token;
+        if (!user.isMfaEnabled()) {
+            token = jwtTokenProvider.generateMFAToken(user);
+        }else{
+            token = jwtTokenProvider.generateToken(user);
+        }
+        return new AuthResponse(
+                token,
+                user.getAuthProvider(),
+                user.getId(),
+                user.getUsername(),
+                user.getOrganization().getId().toString(),
+                user.isMfaEnabled()
+        );
     }
 }
 

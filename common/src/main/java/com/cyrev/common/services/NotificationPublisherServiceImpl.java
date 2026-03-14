@@ -161,7 +161,7 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
             
             please click on this <a href="%s">link</a> to complete your email verification. \n
             
-            If you did not initiate this action, please contact support immediately.
+            If you or your system admin did not initiate this action, please contact support immediately.
             """.formatted(firstname, url);
         Map<String, Object> message = new HashMap<>();
         message.put("body", body);

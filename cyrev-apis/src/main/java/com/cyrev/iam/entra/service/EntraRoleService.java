@@ -1,24 +1,37 @@
 package com.cyrev.iam.entra.service;
 
-import com.microsoft.graph.models.AppRoleAssignment;
-import com.microsoft.graph.requests.GraphServiceClient;
+import com.cyrev.common.entities.TenantContext;
+import com.cyrev.common.entities.TenantContextHolder;
+import com.cyrev.iam.entra.service.clients.ResilientGraphClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class EntraRoleService {
 
-    private final GraphServiceClient<?> graphClient;
+    private final ResilientGraphClient graphClient;
 
-    public AppRoleAssignment assignRoleToUser(String userId, String principalId, String appRoleId, String resourceId) {
-        AppRoleAssignment assignment = new AppRoleAssignment();
-        assignment.principalId = java.util.UUID.fromString(principalId);
-        assignment.resourceId = java.util.UUID.fromString(resourceId);
-        assignment.appRoleId = java.util.UUID.fromString(appRoleId);
+    public void assignRoleToUser(
+            String userId,
+            String principalId,
+            String appRoleId,
+            String resourceId
+    ) {
+        TenantContext tenant = TenantContextHolder.get();
+        String tenantId = tenant.getEntraTenantId();
+        Map<String, Object> body = new HashMap<>();
+        body.put("principalId", principalId);
+        body.put("resourceId", resourceId);
+        body.put("appRoleId", appRoleId);
 
-        return graphClient.users(userId).appRoleAssignments()
-                .buildRequest()
-                .post(assignment);
+        graphClient.post(
+                tenantId,
+                "/v1.0/users/" + userId + "/appRoleAssignments",
+                body
+        );
     }
 }

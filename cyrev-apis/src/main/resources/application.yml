@@ -1,6 +1,30 @@
 app:
   base-url: https://cybrooke.vercel.app
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          microsoft:
+            client-name: Microsoft
+            client-id: ${entra.client-id}
+            client-secret: ${entra.client-secret}
+            authorization-grant-type: authorization_code
+            redirect-uri: https://1c55-2a02-6b6f-fb20-3300-e160-7d33-8bb9-49.ngrok-free.app/api/auth/callback
+            scope:
+              - openid
+              - profile
+              - email
+              - User.Read
+        provider:
+          microsoft:
+            authorization-uri: https://login.microsoftonline.com/common/oauth2/v2.0/authorize
+            token-uri: https://login.microsoftonline.com/common/oauth2/v2.0/token
+            user-info-uri: https://graph.microsoft.com/oidc/userinfo
+            user-name-attribute: sub
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/common/v2.0
   application:
     name: cyrev-iam-provisioning
   datasource:
@@ -96,6 +120,10 @@ entra:
   client-id: ${ENTRA_YOUR_CLIENT_ID}
   client-secret: ${ENTRA_YOUR_CLIENT_SECRET}
   tenant-id: ${ENTRA_YOUR_TENANT_ID}
+  redirect-uri: https://1c55-2a02-6b6f-fb20-3300-e160-7d33-8bb9-49.ngrok-free.app/api/cyrev/admin-consent-callback
+  auth-redirect-uri: https://1c55-2a02-6b6f-fb20-3300-e160-7d33-8bb9-49.ngrok-free.app/api/auth/callback
+  authority: https://login.microsoftonline.com
+  auth-token-url: https://login.microsoftonline.com/common/oauth2/v2.0/token
 sendgrid:
   api-key: ${SENDGRID_API_KEY}
   from-email: info@ayokunmidapo.com

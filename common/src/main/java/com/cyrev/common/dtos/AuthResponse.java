@@ -11,8 +11,9 @@ import java.util.UUID;
 @Builder
 public class AuthResponse {
     private String accessToken;
+    private AuthProvider authProvider;
     private UUID userId;
     private String username;
-    private String orgCode;
+    private String orgId;
     private boolean isMfaEnabled;
 }

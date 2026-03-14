@@ -1,10 +1,12 @@
 package com.cyrev.iam.controllers;
 
+import com.cyrev.common.dtos.*;
+import com.cyrev.common.entities.UserInvite;
+import com.cyrev.iam.annotations.CurrentUser;
 import com.cyrev.iam.annotations.CurrentUserId;
-import com.cyrev.common.dtos.CyrevApiResponse;
-import com.cyrev.common.dtos.UserCreationDTO;
-import com.cyrev.common.dtos.UserUpdateRequestDTO;
 import com.cyrev.common.entities.User;
+import com.cyrev.iam.annotations.TenantAdmin;
+import com.cyrev.iam.service.InviteService;
 import com.cyrev.iam.service.MFAService;
 import com.cyrev.iam.service.UserService;
 import jakarta.validation.Valid;
@@ -22,11 +24,23 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
-
-    public UserController(UserService userService) {
+    private final InviteService inviteService;
+    public UserController(UserService userService, InviteService inviteService) {
         this.userService = userService;
+        this.inviteService = inviteService;
     }
 
+    @PostMapping("/invites")
+    @TenantAdmin
+    public ResponseEntity<UserInviteDTO> inviteUser(@CurrentUserId UUID inviter, @RequestBody InviteUserRequest request) {
+        return ResponseEntity.ok(inviteService.sendInvite(inviter,request));
+    }
+
+    @PostMapping("/invites/accept")
+    public ResponseEntity<AcceptInviteDTO> acceptInvite(@RequestBody AcceptInviteRequest request) {
+        AcceptInviteDTO acceptInviteDTO = inviteService.acceptInvite(request);
+        return ResponseEntity.ok(acceptInviteDTO);
+    }
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CyrevApiResponse<List<User>>> getAllUsers() {

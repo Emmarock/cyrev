@@ -1,4 +1,5 @@
 package com.cyrev.common.entities;
+import com.cyrev.common.dtos.AuthProvider;
 import com.cyrev.common.dtos.Role;
 import com.cyrev.common.dtos.UserStatus;
 import jakarta.persistence.*;
@@ -30,6 +31,9 @@ public class User extends BaseEntity {
 
     private String firstName;
     private String lastName;
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider;
+    private String providerUserId;
 
     @ManyToOne
     @JoinColumn(name = "organization_id")

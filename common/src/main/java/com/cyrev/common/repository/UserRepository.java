@@ -1,5 +1,6 @@
 package com.cyrev.common.repository;
 
+import com.cyrev.common.dtos.AuthProvider;
 import com.cyrev.common.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -17,4 +18,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     long countByOrganization_Name(String organizationName);
 
     boolean existsByEmail(String email);
+    Optional<User> findByAuthProviderAndProviderUserId(
+            AuthProvider provider,
+            String providerUserId
+    );
 }

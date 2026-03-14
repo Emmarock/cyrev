@@ -1,5 +1,5 @@
 package com.cyrev.common.dtos;
 
 public enum ApprovalStatus {
-    PENDING, APPROVED, REJECTED
+    NOT_REQUIRED, PENDING_APPROVAL, APPROVED, REJECTED
 }

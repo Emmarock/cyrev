@@ -4,6 +4,7 @@ import com.cyrev.common.dtos.CyrevApiResponse;
 import com.cyrev.common.dtos.AuthResponse;
 import com.cyrev.common.dtos.LoginRequest;
 import com.cyrev.common.dtos.UserUpdateRequestDTO;
+import com.cyrev.common.entities.User;
 import com.cyrev.iam.service.EmailVerificationService;
 import com.cyrev.iam.annotations.CurrentUserId;
 import com.cyrev.iam.service.AuthService;
@@ -16,6 +17,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.text.ParseException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -76,6 +80,30 @@ public class AuthController {
                         true,
                         "Email verified",
                         "Email verified successfully"
+                ));
+    }
+
+    @GetMapping("/login")
+    public ResponseEntity<CyrevApiResponse<String>> login() {
+
+        String redirectUrl = authService.buildLoginUrl();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new CyrevApiResponse<>(
+                        true,
+                        "Redirect URL Retrieved",
+                        redirectUrl
+                ));
+    }
+
+    @GetMapping("/callback")
+    public ResponseEntity<CyrevApiResponse<AuthResponse>> callback(@RequestParam String code) throws ParseException {
+
+        AuthResponse authResponse = authService.providerAuth(code);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new CyrevApiResponse<>(
+                        true,
+                        "Login Successful",
+                        authResponse
                 ));
     }
 

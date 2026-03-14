@@ -1,5 +1,6 @@
 package com.cyrev.iam.service;
 
+import com.cyrev.common.dtos.AuthProvider;
 import com.cyrev.common.dtos.UserCreationDTO;
 import com.cyrev.common.dtos.UserUpdateRequestDTO;
 import com.cyrev.common.entities.Address;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 

@@ -1,5 +1,6 @@
 package com.cyrev.iam.config;
 
+import com.cyrev.iam.filters.TenantContextFilter;
 import com.cyrev.iam.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,7 @@ public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtFilter;
+    private final TenantContextFilter tenantContextFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -32,8 +34,10 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers(
                                 "/actuator/health",
+                                "/api/cyrev/admin-consent-callback",
                                 "/api/auth/login",
                                 "/api/auth/**",
+                                "/api/auth/callback",
                                 "/api/auth/verify-email",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
@@ -48,13 +52,14 @@ public class SecurityConfig {
                 .httpBasic()
                 .and()
                 // JWT filter runs before UsernamePasswordAuthenticationFilter
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(tenantContextFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }
 
     @Bean
-    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
                 .userDetailsService(userDetailsService)
                 .passwordEncoder(passwordEncoder())

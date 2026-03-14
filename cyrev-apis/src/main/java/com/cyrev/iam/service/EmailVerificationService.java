@@ -45,6 +45,19 @@ public class EmailVerificationService {
         return baseUrl + "/set-password?token=" + rawToken;
     }
 
+    public String getVerificationLink(String rawToken) {
+        EmailVerificationToken verificationToken =
+                EmailVerificationToken.builder()
+                        .token(rawToken)
+                        .expiryDate(Instant.now().plusSeconds(3600)) // 1 hr
+                        .used(false)
+                        .build();
+
+        tokenRepository.save(verificationToken);
+
+        return baseUrl + "/set-password?token=" + rawToken;
+    }
+
     public void verifyToken(UserUpdateRequestDTO request) {
 
         EmailVerificationToken verificationToken =
