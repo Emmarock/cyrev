@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -25,6 +26,8 @@ import java.util.UUID;
 public class TenantContextFilter extends OncePerRequestFilter {
 
     private final SaasTenantRepository saasTenantRepository;
+    private static final AntPathMatcher matcher = new AntPathMatcher();
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -63,7 +66,11 @@ public class TenantContextFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        List<String> tenantContextExcludedPaths = List.of("/api/auth/");
-        return tenantContextExcludedPaths.contains(path);
+
+        List<String> patterns = List.of(
+                "/api/auth/**"
+        );
+
+        return patterns.stream().anyMatch(p -> matcher.match(p, path));
     }
 }
