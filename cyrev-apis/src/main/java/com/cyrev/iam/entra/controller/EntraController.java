@@ -112,4 +112,5 @@ public class EntraController {
     public Object createApp(@RequestParam String displayName) {
         return appService.createApplication(displayName);
     }
+
 }
