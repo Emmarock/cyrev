@@ -9,8 +9,11 @@ import com.cyrev.iam.config.EntraProperties;
 import com.cyrev.iam.entra.service.clients.MicrosoftGraphClient;
 import dev.samstevens.totp.exceptions.QrGenerationException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +27,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
@@ -123,22 +127,27 @@ public class AuthService {
                 + "&state=" + UUID.randomUUID();
     }
 
-    public AuthResponse providerAuth(String code) throws ParseException {
-        User user = microsoftGraphClient.getUserProfile(code);
-        String token;
-        if (!user.isMfaEnabled()) {
-            token = jwtTokenProvider.generateMFAToken(user);
-        }else{
-            token = jwtTokenProvider.generateToken(user);
+    public AuthResponse providerAuth(String code){
+        try{
+            User user = microsoftGraphClient.getUserProfile(code);
+            String token;
+            if (!user.isMfaEnabled()) {
+                token = jwtTokenProvider.generateMFAToken(user);
+            }else{
+                token = jwtTokenProvider.generateToken(user);
+            }
+            return new AuthResponse(
+                    token,
+                    user.getAuthProvider(),
+                    user.getId(),
+                    user.getUsername(),
+                    user.getOrganization().getId().toString(),
+                    user.isMfaEnabled()
+            );
+        }catch(Exception e){
+            log.error(String.format("Provider authentication failed: %s", e.getMessage()));
+            throw new AccessDeniedException(e.getMessage());
         }
-        return new AuthResponse(
-                token,
-                user.getAuthProvider(),
-                user.getId(),
-                user.getUsername(),
-                user.getOrganization().getId().toString(),
-                user.isMfaEnabled()
-        );
     }
 }
 

@@ -90,13 +90,13 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new CyrevApiResponse<>(
                         true,
-                        "Redirect URL Retrieved",
+                        "Authentication provider URL retrieved",
                         redirectUrl
                 ));
     }
 
     @GetMapping("/callback")
-    public ResponseEntity<CyrevApiResponse<AuthResponse>> callback(@RequestParam String code) throws ParseException {
+    public ResponseEntity<CyrevApiResponse<AuthResponse>> callback(@RequestParam String code) {
 
         AuthResponse authResponse = authService.providerAuth(code);
         return ResponseEntity.status(HttpStatus.OK)

@@ -29,7 +29,7 @@ public class EntraUserService {
     private final UserService userService;
 
     public EntraUser createUser(String displayName, String mailNickname, String userPrincipalName, String tempPassword) {
-
+        // create the user in entra
         TenantContext tenant = TenantContextHolder.get();
         String tenantId = tenant.getEntraTenantId();
         Map<String, Object> passwordProfile = new HashMap<>();

@@ -1,5 +1,6 @@
 package com.cyrev.iam.entra.controller;
 
+import com.cyrev.common.dtos.CyrevApiResponse;
 import com.cyrev.common.dtos.EntraGroup;
 import com.cyrev.common.dtos.EntraUser;
 import com.cyrev.common.entities.SaasTenant;
@@ -38,19 +39,26 @@ public class EntraController {
 
     @GetMapping("/connect-entra")
     @TenantAdmin
-    public ResponseEntity<Void> connect(@CurrentUserId UUID adminId) {
+    public ResponseEntity<CyrevApiResponse<String>> connect(@CurrentUserId UUID adminId) {
         String url = consentService.buildUrl(adminId);
 
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .location(URI.create(url))
-                .build();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new CyrevApiResponse<>(
+                        true,
+                        "Redirect URL Retrieved",
+                        url
+                ));
     }
 
     @GetMapping("/admin-consent-callback")
-    public ResponseEntity<Object> callback(@RequestParam UUID tenant, @RequestParam String state, @RequestParam(required = false) String admin_consent) throws JsonProcessingException {
+    public ResponseEntity<CyrevApiResponse<SaasTenant>> callback(@RequestParam UUID tenant, @RequestParam String state, @RequestParam(required = false) String admin_consent) throws JsonProcessingException {
         if (!"True".equalsIgnoreCase(admin_consent)) {
-            return ResponseEntity.badRequest().body("Consent denied");
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new CyrevApiResponse<>(
+                            true,
+                            "Entra Tenant Denied",
+                            null
+                    ));
         }
         String decoded = new String(
                 Base64.getUrlDecoder().decode(state),
@@ -62,19 +70,36 @@ public class EntraController {
         UUID orgId = UUID.fromString(node.get("orgId").asText());
         String originalState = node.get("state").asText();
         SaasTenant saasTenant = onboardingService.registerTenant(orgId, originalState, tenant);
-        return ResponseEntity.ok(saasTenant);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new CyrevApiResponse<>(
+                        true,
+                        "Entra Tenant Consent Accepted",
+                        saasTenant
+                ));
     }
 
     @PostMapping("/users")
     @TenantAdmin
-    public EntraUser createUser(@RequestBody EntraUser entraUser) {
-        return entraUserService.createUser(entraUser.getDisplayName(), entraUser.getMail(), entraUser.getUserPrincipalName(), entraUser.getPassword());
+    public ResponseEntity<CyrevApiResponse<EntraUser>> createUser(@RequestBody EntraUser entraUser) {
+        var response = entraUserService.createUser(entraUser.getDisplayName(), entraUser.getMail(), entraUser.getUserPrincipalName(), entraUser.getPassword());
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new CyrevApiResponse<>(
+                        true,
+                        "Entra User List Retrieved",
+                        response
+                ));
     }
 
     @GetMapping("/users")
     @TenantAdmin
-    public List<EntraUser> listUsers() {
-        return entraUserService.listUsers();
+    public ResponseEntity<CyrevApiResponse<List<EntraUser>>> listUsers() {
+        var response =  entraUserService.listUsers();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new CyrevApiResponse<>(
+                        true,
+                        "Entra User List Retrieved",
+                        response
+                ));
     }
 
     @PostMapping("/groups")
