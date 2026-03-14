@@ -8,7 +8,6 @@ import com.cyrev.iam.domain.AuthenticatedUser;
 import com.cyrev.iam.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;

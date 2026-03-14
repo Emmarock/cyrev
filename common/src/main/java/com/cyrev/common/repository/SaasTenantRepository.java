@@ -15,5 +15,4 @@ public interface SaasTenantRepository extends JpaRepository<SaasTenant, UUID> {
 
     Optional<SaasTenant> findSaasTenantByOrganization_Id(UUID organizationId);
     boolean existsByEntraTenantIdAndOrganization_Id(String entraTenantId, UUID organizationId);
-    Optional<SaasTenant> findByTenantId(UUID tenantId);
 }
