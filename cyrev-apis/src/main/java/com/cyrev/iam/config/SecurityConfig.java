@@ -49,8 +49,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 // Enable HTTP Basic for testing / fallback
-                .httpBasic()
-                .and()
+                .httpBasic(AbstractHttpConfigurer::disable)
                 // JWT filter runs before UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(tenantContextFilter, JwtAuthenticationFilter.class);
