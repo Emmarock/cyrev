@@ -10,7 +10,7 @@ spring:
             client-id: ${entra.client-id}
             client-secret: ${entra.client-secret}
             authorization-grant-type: authorization_code
-            redirect-uri: https://1c55-2a02-6b6f-fb20-3300-e160-7d33-8bb9-49.ngrok-free.app/api/auth/callback
+            redirect-uri: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io/api/auth/callback
             scope:
               - openid
               - profile
@@ -120,8 +120,8 @@ entra:
   client-id: ${ENTRA_YOUR_CLIENT_ID}
   client-secret: ${ENTRA_YOUR_CLIENT_SECRET}
   tenant-id: ${ENTRA_YOUR_TENANT_ID}
-  redirect-uri: https://1c55-2a02-6b6f-fb20-3300-e160-7d33-8bb9-49.ngrok-free.app/api/cyrev/admin-consent-callback
-  auth-redirect-uri: https://1c55-2a02-6b6f-fb20-3300-e160-7d33-8bb9-49.ngrok-free.app/api/auth/callback
+  redirect-uri: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io/api/cyrev/admin-consent-callback
+  auth-redirect-uri: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io/api/auth/callback
   authority: https://login.microsoftonline.com
   auth-token-url: https://login.microsoftonline.com/common/oauth2/v2.0/token
 sendgrid:
