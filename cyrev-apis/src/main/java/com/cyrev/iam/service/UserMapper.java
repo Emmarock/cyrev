@@ -34,6 +34,7 @@ public class UserMapper {
         user.setLastName(dto.getLastName());
         user.setRole(Role.SUPER_ADMIN);
         user.setStatus(UserStatus.PENDING);
+        user.setAuthProvider(dto.getAuthProvider()==null?AuthProvider.CYREV:dto.getAuthProvider());
         // Company
         if (dto.getOrganization() != null) {
             organizationRepository.findByName(dto.getOrganization().getName()).ifPresent(user::setOrganization);

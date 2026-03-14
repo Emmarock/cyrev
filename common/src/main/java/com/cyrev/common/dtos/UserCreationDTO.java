@@ -28,4 +28,6 @@ public class UserCreationDTO {
 
     @NotNull(message = "company address is required")
     private AddressDto companyAddress;
+
+    private AuthProvider authProvider;
 }
