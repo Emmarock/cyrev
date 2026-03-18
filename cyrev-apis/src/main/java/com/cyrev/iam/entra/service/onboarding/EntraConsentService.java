@@ -26,7 +26,6 @@ public class EntraConsentService {
     private final ConsentStateService consentStateService;
     private final UserService userService;
     private final SaasTenantRepository saasTenantRepository;
-    private final OrganizationRepository organizationRepository;
     public String buildUrl(UUID adminId) {
         User admin = userService.getUser(adminId);
 
