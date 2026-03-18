@@ -59,8 +59,7 @@ public class MicrosoftGraphClient {
                 .block();
         SignedJWT jwt = (SignedJWT) JWTParser.parse(tokenResponse.getIdToken());  // using Nimbus JWT library
         String tenantId = jwt.getJWTClaimsSet().getStringClaim("tid"); // "tid" claim has the tenant id
-        SaasTenant saasTenant = saasTenantRepository.findByEntraTenantId(tenantId)
-                .orElse(null);
+        Optional<SaasTenant> optionalSaasTenant = saasTenantRepository.findByEntraTenantId(tenantId);
         String microsoftId = response.get("id").toString();
         String email = response.get("mail") != null ? response.get("mail").toString() : response.get("userPrincipalName").toString();
         String surname = response.get("surname").toString();
@@ -82,7 +81,7 @@ public class MicrosoftGraphClient {
         user.setLastName(surname);
         user.setUsername(UserMapper.emailToUsername(email));
         user.setAuthProvider(AuthProvider.MICROSOFT);
-        user.setOrganization(saasTenant.getOrganization());
+        user.setOrganization(optionalSaasTenant.map(SaasTenant::getOrganization).orElse(null));
         user.setEmailVerified(true);
         user.setRole(Role.MFA_WRITE);
         user.setProviderUserId(microsoftId);
