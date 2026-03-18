@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.Map;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
@@ -110,5 +111,9 @@ public class ResilientGraphClient {
         log.error("Graph DELETE failed after retries. tenantId={}, uri={}, error={}",
                 tenantId, uri, e.getMessage());
         throw e;
+    }
+    public <T> T get(String tenantId, String uri, Function<Map<String, Object>, T> mapper) {
+        Map<String, Object> response = get(tenantId, uri);
+        return mapper.apply(response);
     }
 }

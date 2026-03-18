@@ -2,25 +2,22 @@ package com.cyrev.iam.entra.controller;
 
 import com.cyrev.common.dtos.CyrevApiResponse;
 import com.cyrev.common.dtos.EntraGroup;
+import com.cyrev.common.dtos.EntraOrganization;
 import com.cyrev.common.dtos.EntraUser;
 import com.cyrev.common.entities.SaasTenant;
 import com.cyrev.iam.annotations.CurrentUserId;
 import com.cyrev.iam.annotations.TenantAdmin;
 import com.cyrev.iam.entra.service.*;
-import com.cyrev.iam.entra.service.onboarding.ConsentStateService;
 import com.cyrev.iam.entra.service.onboarding.EntraConsentService;
 import com.cyrev.iam.entra.service.onboarding.TenantOnboardingService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.microsoft.graph.requests.UserCollectionPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
@@ -36,6 +33,7 @@ public class EntraController {
     private final ApplicationService appService;
     private final EntraConsentService consentService;
     private final TenantOnboardingService onboardingService;
+    private final EntraOrganizationService organizationService;
 
     @GetMapping("/connect-entra")
     @TenantAdmin
@@ -99,6 +97,17 @@ public class EntraController {
                         true,
                         "Entra User List Retrieved",
                         response
+                ));
+    }
+
+    @GetMapping("/organization")
+    @TenantAdmin
+    public ResponseEntity<CyrevApiResponse<EntraOrganization>> getOrganization() {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new CyrevApiResponse<>(
+                        true,
+                        "Entra Organization details retrieved",
+                        organizationService.getOrganization()
                 ));
     }
 

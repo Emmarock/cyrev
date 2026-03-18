@@ -16,19 +16,6 @@ import java.util.UUID;
 public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
-    private final OrganizationMapper organizationMapper;
-
-    /**
-     * Create a new Organization
-     */
-    @Transactional
-    public Organization createOrganization(OrganizationCreationDTO dto) throws BadRequestException {
-        if(organizationRepository.existsByName(dto.getName())) {
-            throw new BadRequestException("Organization with name "+dto.getName()+" already exists ");
-        }
-        Organization org = organizationMapper.toEntity(dto);
-        return organizationRepository.save(org);
-    }
 
     /**
      * Update an existing Organization

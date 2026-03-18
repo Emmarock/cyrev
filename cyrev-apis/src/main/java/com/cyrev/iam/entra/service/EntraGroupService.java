@@ -40,11 +40,11 @@ public class EntraGroupService {
 
 
     public void deleteGroup(String tenantId, String groupId) {
-        graphClient.delete(tenantId, "/v1.0/groups/" + groupId);
+        graphClient.delete(tenantId, "/groups/" + groupId);
     }
 
     public Map<String, Object> listGroups(String tenantId) {
-        return graphClient.get(tenantId, "/v1.0/groups");
+        return graphClient.get(tenantId, "/groups");
     }
     private String getTenantId(UUID adminId) {
         User admin = userService.getUser(adminId);

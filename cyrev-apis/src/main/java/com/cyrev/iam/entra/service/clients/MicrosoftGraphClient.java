@@ -60,7 +60,7 @@ public class MicrosoftGraphClient {
         SignedJWT jwt = (SignedJWT) JWTParser.parse(tokenResponse.getIdToken());  // using Nimbus JWT library
         String tenantId = jwt.getJWTClaimsSet().getStringClaim("tid"); // "tid" claim has the tenant id
         SaasTenant saasTenant = saasTenantRepository.findByEntraTenantId(tenantId)
-                .orElseThrow(()-> new AuthorizationDeniedException("SaasTenant not found"));
+                .orElse(null);
         String microsoftId = response.get("id").toString();
         String email = response.get("mail") != null ? response.get("mail").toString() : response.get("userPrincipalName").toString();
         String surname = response.get("surname").toString();

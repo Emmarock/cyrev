@@ -141,11 +141,11 @@ public class AuthService {
                     user.getAuthProvider(),
                     user.getId(),
                     user.getUsername(),
-                    user.getOrganization().getId().toString(),
+                    user.getOrganization()!=null? user.getOrganization().getId().toString(): null,
                     user.isMfaEnabled()
             );
         }catch(Exception e){
-            log.error(String.format("Provider authentication failed: %s", e.getMessage()));
+            log.error("Provider authentication failed: {}", e.getMessage());
             throw new AccessDeniedException(e.getMessage());
         }
     }

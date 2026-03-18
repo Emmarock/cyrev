@@ -5,7 +5,6 @@ import com.cyrev.common.entities.SaasTenant;
 import com.cyrev.common.repository.SaasTenantRepository;
 import com.cyrev.iam.entra.service.clients.MicrosoftGraphClient;
 import com.cyrev.iam.exceptions.BadRequestException;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,13 +16,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TenantOnboardingService {
 
-    private final SaasTenantRepository repo;
+    private final SaasTenantRepository saasTenantRepository;
     private final MicrosoftGraphClient graph;
     private final ConsentStateService consentStateService;
     @Transactional
     public SaasTenant registerTenant(UUID orgId, String state, UUID tenantId) {
 
-        SaasTenant tenant = repo
+        SaasTenant tenant = saasTenantRepository
                 .findSaasTenantByOrganization_Id(orgId)
                 .orElseThrow(()-> new BadRequestException("SaasTenant not found"));
         consentStateService.validate(state);
@@ -35,6 +34,6 @@ public class TenantOnboardingService {
         tenant.setConsentedAt(Instant.now());
         tenant.setStatus(TenantStatus.ACTIVE);
 
-        return repo.save(tenant);
+        return saasTenantRepository.save(tenant);
     }
 }

@@ -19,16 +19,6 @@ public class OrganizationMapper {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Maps OrganizationCreationDTO to Organization entity.
-     * Resolves ownerIds to User entities.
-     */
-    public Organization toEntity(OrganizationCreationDTO dto) {
-        Organization org = new Organization();
-        org.setName(dto.getName());
-        return org;
-    }
-
     public Organization toEntity(OrganizationCreationDTO dto, User user) {
         Organization org = new Organization();
         org.setName(dto.getName());

@@ -6,7 +6,6 @@ import com.cyrev.common.entities.Organization;
 import com.cyrev.iam.service.OrganizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,22 +20,6 @@ import java.util.UUID;
 public class OrganizationController {
 
     private final OrganizationService organizationService;
-
-    /**
-     * Create a new organization
-     */
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CyrevApiResponse<Organization>> createOrganization(
-            @Valid @RequestBody OrganizationCreationDTO dto) throws BadRequestException {
-        Organization organization = organizationService.createOrganization(dto);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new CyrevApiResponse<>(
-                        true,
-                        "Organization created successfully",
-                        organization
-                ));
-    }
 
     /**
      * Update an existing organization
