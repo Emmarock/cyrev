@@ -10,6 +10,7 @@ import com.cyrev.iam.service.OrganizationService;
 import com.cyrev.iam.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,13 +22,13 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SaasTenantService {
 
     private final SaasTenantRepository saasTenantRepository;
     private final ConsentStateService consentStateService;
     private final EntraOrganizationService entraOrganizationService;
     private final ObjectMapper objectMapper;
-    private final OrganizationService organizationService;
     @Transactional
     public void registerTenant(String state, UUID tenantId) {
         try{
@@ -55,6 +56,7 @@ public class SaasTenantService {
             tenant.setStatus(TenantStatus.PENDING);
             saasTenantRepository.save(tenant);
         }catch(Exception e){
+            log.error("Unable to register tenant: {}", e.getMessage());
             throw new BadRequestException("Unable to register tenant");
         }
     }
