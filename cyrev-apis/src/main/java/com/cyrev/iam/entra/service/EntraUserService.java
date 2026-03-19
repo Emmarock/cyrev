@@ -48,12 +48,6 @@ public class EntraUserService {
         return EntraUserMapper.fromGraph(body);
     }
 
-    private String getTenantId(UUID adminId) {
-        User admin = userService.getUser(adminId);
-        SaasTenant tenant= saasTenantRepository.findSaasTenantByOrganization(admin.getOrganization())
-                .orElseThrow(()-> new BadRequestException("SaasTenant not found"));
-        return tenant.getEntraTenantId();
-    }
 
     public void updateUser(String userId, Map<String, Object> body) {
         TenantContext tenant = TenantContextHolder.get();

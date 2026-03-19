@@ -1,13 +1,11 @@
 package com.cyrev.iam.service;
 
-import com.cyrev.common.dtos.AuthProvider;
+import com.cyrev.common.dtos.Role;
 import com.cyrev.common.dtos.UserCreationDTO;
 import com.cyrev.common.dtos.UserUpdateRequestDTO;
 import com.cyrev.common.entities.Address;
-import com.cyrev.common.entities.Organization;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.AddressRepository;
-import com.cyrev.common.repository.OrganizationRepository;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
 import com.cyrev.iam.exceptions.BadRequestException;
@@ -17,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,11 +23,9 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final OrganizationRepository organizationRepository;
     private final AddressRepository addressRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
-    private final OrganizationMapper organizationMapper;
     private final NotificationPublisherService notificationPublisherService;
     private final EmailVerificationService emailVerificationService;
 
@@ -42,6 +37,16 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(()->new RuntimeException("Invalid user"));
     }
 
+    public User findTenantUser(UUID id, UUID tenantId) {
+        return userRepository.findUserByIdAndTenant_Id(id,tenantId).orElseThrow(()-> new BadRequestException("User not found in this tenant"));
+    }
+
+    public void markUserAsAdmin(UUID id){
+        User user = getUser(id);
+        user.setRole(Role.SUPER_ADMIN);
+        userRepository.save(user);
+    }
+
     @Transactional
     public User createUser(UserCreationDTO userCreationDTO) throws BadRequestException {
         validateCorporateEmail(userCreationDTO.getBusinessEmail());
@@ -51,17 +56,11 @@ public class UserService {
         if(userRepository.findByUsername(userCreationDTO.getUsername()).isPresent()) {
             throw new BadRequestException("Username already exists");
         }
-        if(organizationRepository.findByName(userCreationDTO.getOrganization().getName()).isPresent()) {
-            throw new BadRequestException("Organization already exists");
-        }
         User entity = userMapper.toEntity(userCreationDTO);
         User user = userRepository.save(entity);
-        // create organization
-        Organization org = organizationMapper.toEntity(userCreationDTO.getOrganization(), user);
-        Organization organization = organizationRepository.save(org);
-        Address address = userMapper.toAddress(userCreationDTO.getCompanyAddress(), organization);
+        Address address = userMapper.toAddress(userCreationDTO.getCompanyAddress());
         addressRepository.save(address);
-        user.setOrganization(organization);
+
         userRepository.save(user);
         // create email event here
         String verificationLink = emailVerificationService.generateVerificationLink(user);

@@ -27,6 +27,13 @@ public class EntraOrganizationService {
                 this::mapToOrganization
         );
     }
+    public EntraOrganization verifyTenant(String tenantId) {
+        return graphClient.get(
+                tenantId,
+                "/organization",
+                this::mapToOrganization
+        );
+    }
     @SuppressWarnings("unchecked")
     private EntraOrganization mapToOrganization(Map<String, Object> response) {
 

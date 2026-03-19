@@ -18,7 +18,6 @@ import java.util.UUID;
 public class TenantSecurityService {
 
     private final UserService userService;
-    private final SaasTenantRepository saasTenantRepository;
     public void validateTenantAdmin(AuthenticatedUser user, TenantContext tenantContext) {
 
         String tenantId = tenantContext.getEntraTenantId();
@@ -31,10 +30,7 @@ public class TenantSecurityService {
     }
 
     private boolean checkIfUserIsTenantAdmin(UUID userId, String tenantId) {
-        User user = userService.getUser(userId);
-        if(Role.ADMIN.equals(user.getRole()) || Role.SUPER_ADMIN.equals(user.getRole())) {
-            return saasTenantRepository.existsByEntraTenantIdAndOrganization_Id(tenantId,user.getOrganization().getId());
-        }
-        return false;
+        User user = userService.findTenantUser(userId, UUID.fromString(tenantId));
+        return Role.ADMIN.equals(user.getRole()) || Role.SUPER_ADMIN.equals(user.getRole());
     }
 }

@@ -12,9 +12,4 @@ import java.util.UUID;
 @Repository
 public interface OrganizationRepository extends JpaRepository<Organization, UUID> {
 
-    boolean existsByName(String name);
-
-    Optional<Organization> findByName( String name);
-
-    Optional<Organization> findByOwners(Set<User> owners);
 }

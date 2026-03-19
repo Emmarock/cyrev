@@ -116,4 +116,13 @@ public class ResilientGraphClient {
         Map<String, Object> response = get(tenantId, uri);
         return mapper.apply(response);
     }
+
+    public Map<String, Object> getUserProfile(String accessToken, String code, String uri) {
+        return graphBaseClient.authClient(accessToken,code)
+                .get()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+    }
 }

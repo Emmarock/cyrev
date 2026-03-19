@@ -26,4 +26,11 @@ public class GraphBaseClient {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
+    public WebClient authClient(String accessToken, String code) {
+        return webClientBuilder
+                .baseUrl(GRAPH_BASE_URL)
+                .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
+    }
 }

@@ -58,7 +58,7 @@ public class AuthService {
                 user.getAuthProvider(),
                 user.getId(),
                 user.getUsername(),
-                user.getOrganization().getId().toString(),
+                user.getTenant().getId().toString(),
                 user.isMfaEnabled()
         );
     }
@@ -73,7 +73,7 @@ public class AuthService {
                 user.getAuthProvider(),
                 user.getId(),
                 user.getUsername(),
-                user.getOrganization().getId().toString(),
+                user.getTenant().getId().toString(),
                 user.isMfaEnabled()
         );
     }
@@ -84,11 +84,10 @@ public class AuthService {
     }
 
     private User getUser(String email) {
-        User user = userRepository.findByEmail(email)
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException(
                         "User not found with email: " + email
                 ));
-        return user;
     }
 
     public Map<String,String> registerMfa(UUID userId) throws QrGenerationException, IOException {
@@ -129,7 +128,7 @@ public class AuthService {
 
     public AuthResponse providerAuth(String code){
         try{
-            User user = microsoftGraphClient.getUserProfile(code);
+            User user = microsoftGraphClient.handleLoginCallback(code);
             String token;
             if (!user.isMfaEnabled()) {
                 token = jwtTokenProvider.generateMFAToken(user);
@@ -141,7 +140,7 @@ public class AuthService {
                     user.getAuthProvider(),
                     user.getId(),
                     user.getUsername(),
-                    user.getOrganization()!=null? user.getOrganization().getId().toString(): null,
+                    user.getTenant()!=null? user.getTenant().getId().toString(): null,
                     user.isMfaEnabled()
             );
         }catch(Exception e){

@@ -10,7 +10,8 @@ public class EntraUser {
     private String id;
 
     private String displayName;
-
+    private String givenName;
+    private String familyName;
     private String userPrincipalName;
     private String password;
 

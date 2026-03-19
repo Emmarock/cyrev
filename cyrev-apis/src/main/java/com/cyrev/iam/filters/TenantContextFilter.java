@@ -39,9 +39,9 @@ public class TenantContextFilter extends OncePerRequestFilter {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
             if (auth != null && auth.getPrincipal() instanceof AuthenticatedUser user) {
-                String orgId = user.getOrgId();
+                String tenantId = user.getTenantId();
                 SaasTenant tenant = saasTenantRepository
-                        .findSaasTenantByOrganization_Id(UUID.fromString(orgId))
+                        .findByEntraTenantId(tenantId)
                         .orElse(null);
                 if (tenant == null || !tenant.isConsentGranted() || tenant.getStatus()!= TenantStatus.ACTIVE) {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Tenant not registered");

@@ -4,7 +4,6 @@ import com.cyrev.common.dtos.OrganizationCreationDTO;
 import com.cyrev.common.entities.Organization;
 import com.cyrev.common.repository.OrganizationRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

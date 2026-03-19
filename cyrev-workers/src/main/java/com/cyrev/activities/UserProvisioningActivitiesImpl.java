@@ -2,9 +2,7 @@ package com.cyrev.activities;
 
 import com.cyrev.common.activities.UserProvisioningActivities;
 import com.cyrev.common.dtos.IdentityStatus;
-import com.cyrev.common.entities.Organization;
 import com.cyrev.common.entities.User;
-import com.cyrev.common.repository.OrganizationRepository;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +19,6 @@ import java.util.UUID;
 public class UserProvisioningActivitiesImpl implements UserProvisioningActivities {
 
     private final UserRepository userRepository;
-    private final OrganizationRepository organizationRepository;
     private final NotificationPublisherService notificationPublisherService;
     private final PasswordEncoder passwordEncoder;
     @Override
@@ -35,11 +32,6 @@ public class UserProvisioningActivitiesImpl implements UserProvisioningActivitie
         }
 
         assert user != null;
-        Organization organization = organizationRepository.findByName(user.getOrganization().getName())
-                .orElseThrow(()-> new IllegalStateException("Organization with code " + user.getOrganization().getName() + " does not exist"));
-
-        user.setOrganization(organization);
-
         userRepository.save(user);
 
         log.info("Created user {} {}", user.getFirstName(), user.getLastName());
@@ -51,15 +43,8 @@ public class UserProvisioningActivitiesImpl implements UserProvisioningActivitie
     public void assignEmployeeId( UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
-        String organizationCode = user.getOrganization().getName();
-        // Example: employeeId = orgCode + incremental number
-        long count = userRepository.countByOrganization_Name(user.getOrganization().getName());
-        String employeeId =  String.format("%s-%05d",organizationCode, count + 1);
-        // user.setEmployeeId(employeeId);
 
         userRepository.save(user);
-
-        log.info("Assigned employeeId {} to user {}", employeeId, userId);
     }
 
     @Override

@@ -14,6 +14,6 @@ public class AuthResponse {
     private AuthProvider authProvider;
     private UUID userId;
     private String username;
-    private String orgId;
+    private String tenantId;
     private boolean isMfaEnabled;
 }

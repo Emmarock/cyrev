@@ -5,21 +5,17 @@ import com.cyrev.common.dtos.EntraGroup;
 import com.cyrev.common.dtos.EntraOrganization;
 import com.cyrev.common.dtos.EntraUser;
 import com.cyrev.common.entities.SaasTenant;
-import com.cyrev.iam.annotations.CurrentUserId;
 import com.cyrev.iam.annotations.TenantAdmin;
 import com.cyrev.iam.entra.service.*;
 import com.cyrev.iam.entra.service.onboarding.EntraConsentService;
-import com.cyrev.iam.entra.service.onboarding.TenantOnboardingService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.cyrev.iam.entra.service.onboarding.SaasTenantService;
+import com.cyrev.iam.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,14 +28,13 @@ public class EntraController {
     private final EntraGroupService entraGroupService;
     private final ApplicationService appService;
     private final EntraConsentService consentService;
-    private final TenantOnboardingService onboardingService;
+    private final SaasTenantService saasTenantService;
     private final EntraOrganizationService organizationService;
+    private final AuthService authService;
 
     @GetMapping("/connect-entra")
-    @TenantAdmin
-    public ResponseEntity<CyrevApiResponse<String>> connect(@CurrentUserId UUID adminId) {
-        String url = consentService.buildUrl(adminId);
-
+    public ResponseEntity<CyrevApiResponse<String>> connect() {
+        String url = consentService.buildUrl();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new CyrevApiResponse<>(
                         true,
@@ -49,31 +44,18 @@ public class EntraController {
     }
 
     @GetMapping("/admin-consent-callback")
-    public ResponseEntity<CyrevApiResponse<SaasTenant>> callback(@RequestParam UUID tenant, @RequestParam String state, @RequestParam(required = false) String admin_consent) throws JsonProcessingException {
+    public ResponseEntity<Void> callback(@RequestParam UUID tenant, @RequestParam String state, @RequestParam(required = false) String admin_consent) {
         if (!"True".equalsIgnoreCase(admin_consent)) {
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new CyrevApiResponse<>(
-                            true,
-                            "Entra Tenant Denied",
-                            null
-                    ));
+            URI deniedRedirect = URI.create("/error?reason=consent_denied");
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(deniedRedirect)
+                    .build();
         }
-        String decoded = new String(
-                Base64.getUrlDecoder().decode(state),
-                StandardCharsets.UTF_8
-        );
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode node = mapper.readTree(decoded);
-
-        UUID orgId = UUID.fromString(node.get("orgId").asText());
-        String originalState = node.get("state").asText();
-        SaasTenant saasTenant = onboardingService.registerTenant(orgId, originalState, tenant);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new CyrevApiResponse<>(
-                        true,
-                        "Entra Tenant Consent Accepted",
-                        saasTenant
-                ));
+        saasTenantService.registerTenant(state, tenant);
+        String redirectUrl = authService.buildLoginUrl();
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(redirectUrl))
+                .build();
     }
 
     @PostMapping("/users")

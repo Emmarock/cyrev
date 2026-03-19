@@ -12,8 +12,8 @@ import lombok.*;
 @Builder
 public class Address extends BaseEntity {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id")
-    private Organization organization;
+    @JoinColumn(name = "tenant_id")
+    private SaasTenant tenant;
     @Column(name="building_number", nullable = false)
     private String buildingNumber;
     @Column(name="street", nullable = false)

@@ -36,8 +36,8 @@ public class User extends BaseEntity {
     private String providerUserId;
 
     @ManyToOne
-    @JoinColumn(name = "organization_id")
-    private Organization organization;
+    @JoinColumn(name = "tenant_id")
+    private SaasTenant tenant;
 
     @Enumerated(EnumType.STRING)
     private UserStatus status;

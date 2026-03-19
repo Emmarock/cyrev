@@ -28,10 +28,6 @@ public class SaasTenant extends TenantAwareEntity {
     @Enumerated(EnumType.STRING)
     private TenantStatus status;
 
-    @OneToOne
-    @JoinColumn(name = "organization_id")
-    private Organization organization;
-
     private Instant createdAt;
     private Instant updatedAt;
 

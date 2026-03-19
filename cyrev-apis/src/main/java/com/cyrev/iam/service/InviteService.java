@@ -1,12 +1,15 @@
 package com.cyrev.iam.service;
 
 import com.cyrev.common.dtos.*;
+import com.cyrev.common.entities.TenantContext;
+import com.cyrev.common.entities.TenantContextHolder;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.entities.UserInvite;
 import com.cyrev.common.repository.UserInviteRepository;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
 import com.cyrev.common.services.VerificationTokenGenerator;
+import com.cyrev.iam.filters.TenantContextFilter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,9 +31,14 @@ public class InviteService {
     private final VerificationTokenGenerator verificationTokenGenerator;
 
     public UserInviteDTO sendInvite(UUID inviter, InviteUserRequest request) {
+        TenantContext tenantContext = TenantContextHolder.get();
+        String entraTenantId = tenantContext.getEntraTenantId();
         User user = userRepository.findById(inviter).orElseThrow(()-> new EntityNotFoundException("User not found"));
         if (inviteRepository.existsByEmailAndStatus(request.getBusinessEmail(), InviteStatus.PENDING)) {
             throw new RuntimeException("User already invited");
+        }
+        if(user.getTenant()==null || entraTenantId==null){
+            throw new RuntimeException("User tenant can not be null");
         }
         String verificationToken = verificationTokenGenerator.generateToken();
         UserInvite invite = UserInvite.builder()
@@ -70,14 +78,16 @@ public class InviteService {
             inviteRepository.save(invite);
             throw new RuntimeException("Invite expired");
         }
+        User inviter = invite.getInviter();
         User user = new User();
         user.setFirstName(invite.getFirstName());
         user.setLastName(invite.getLastName());
         user.setUsername(UserMapper.emailToUsername(invite.getEmail()));
         user.setEmail(invite.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setOrganization(invite.getInviter().getOrganization());
+        user.setAuthProvider(AuthProvider.CYREV);
         user.setRole(invite.getRole());
+        user.setTenant(inviter.getTenant());
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
         invite.setStatus(InviteStatus.ACCEPTED);

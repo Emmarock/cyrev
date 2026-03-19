@@ -28,7 +28,7 @@ public class JwtTokenProvider {
                 .setSubject(user.getId().toString())
                 .claim("email", user.getEmail())
                 .claim("username", user.getUsername())
-                .claim("orgId", user.getOrganization().getId())
+                .claim("tenantId", user.getTenant().getId())
                 .claim("authProvider", user.getAuthProvider())
                 .claim("roles", user.getRole()) // ["ADMIN","USER"]
                 .claim("isMfaEnabled", user.isMfaEnabled())
@@ -43,7 +43,7 @@ public class JwtTokenProvider {
                 .setSubject(user.getId().toString())
                 .claim("username", user.getUsername())
                 .claim("email", user.getEmail())
-                .claim("orgId", user.getOrganization().getId())
+                .claim("tenantId", user.getTenant().getId())
                 .claim("authProvider", user.getAuthProvider())
                 .claim("roles", Role.MFA_WRITE.toString())
                 .claim("isMfaEnabled", user.isMfaEnabled())

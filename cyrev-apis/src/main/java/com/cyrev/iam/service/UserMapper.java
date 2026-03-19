@@ -2,21 +2,16 @@ package com.cyrev.iam.service;
 
 import com.cyrev.common.dtos.*;
 import com.cyrev.common.entities.Address;
-import com.cyrev.common.entities.Organization;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.OrganizationRepository;
-import com.cyrev.iam.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
-
-import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
 public class UserMapper {
 
-    private final OrganizationRepository organizationRepository;
     public static String emailToUsername(String email) {
         if (email == null) {
             throw new IllegalArgumentException("Email cannot be null");
@@ -35,14 +30,10 @@ public class UserMapper {
         user.setRole(Role.SUPER_ADMIN);
         user.setStatus(UserStatus.PENDING);
         user.setAuthProvider(dto.getAuthProvider()==null?AuthProvider.CYREV:dto.getAuthProvider());
-        // Company
-        if (dto.getOrganization() != null) {
-            organizationRepository.findByName(dto.getOrganization().getName()).ifPresent(user::setOrganization);
-        }
         return user;
     }
 
-    public Address toAddress(@NotNull AddressDto dto, Organization organization) {
+    public Address toAddress(@NotNull AddressDto dto) {
         return Address.builder()
                 .city(dto.getCity())
                 .state(dto.getState())
@@ -51,7 +42,6 @@ public class UserMapper {
                 .countryCode(dto.getCountryCode())
                 .buildingNumber(dto.getBuildingNumber())
                 .street(dto.getStreet())
-                .organization(organization)
                 .build();
     }
 }
