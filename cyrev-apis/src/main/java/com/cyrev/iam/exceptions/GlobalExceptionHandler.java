@@ -1,6 +1,7 @@
 package com.cyrev.iam.exceptions;
 
 import com.cyrev.common.dtos.ApiErrorResponse;
+import com.cyrev.common.dtos.ErrorMessageParser;
 import io.temporal.client.WorkflowExecutionAlreadyStarted;
 import io.temporal.client.WorkflowServiceException;
 import io.temporal.failure.ActivityFailure;
@@ -137,7 +138,7 @@ public class GlobalExceptionHandler {
 
         return buildError(
                 HttpStatus.FORBIDDEN,
-                ex.getMessage(),
+                ex, // 👈 include structured JSON
                 request
         );
     }
@@ -154,7 +155,7 @@ public class GlobalExceptionHandler {
 
         return buildError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "An unexpected error occurred",
+                ex,
                 request
         );
     }
@@ -173,6 +174,23 @@ public class GlobalExceptionHandler {
                 status.value(),
                 status.getReasonPhrase(),
                 message,
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(status).body(response);
+    }
+    private ResponseEntity<ApiErrorResponse> buildError(
+            HttpStatus status,
+            Exception ex,
+            HttpServletRequest request
+    ) {
+        ErrorMessageParser.ParsedError parsedError =
+                ErrorMessageParser.parse(ex.getMessage());
+
+        ApiErrorResponse response = new ApiErrorResponse(
+                Instant.now(),
+                status.value(),
+                parsedError.getMessage(),
+                parsedError.getDetails(),
                 request.getRequestURI()
         );
         return ResponseEntity.status(status).body(response);
