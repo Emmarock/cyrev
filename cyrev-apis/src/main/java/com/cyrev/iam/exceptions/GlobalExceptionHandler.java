@@ -133,11 +133,11 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
-        log.error("Unhandled exception", ex);
+        log.error("Access Denied ", ex);
 
         return buildError(
                 HttpStatus.FORBIDDEN,
-                "Access denied",
+                ex.getMessage(),
                 request
         );
     }
