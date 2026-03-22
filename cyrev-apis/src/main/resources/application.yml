@@ -120,7 +120,7 @@ entra:
   client-id: ${ENTRA_YOUR_CLIENT_ID}
   client-secret: ${ENTRA_YOUR_CLIENT_SECRET}
   tenant-id: ${ENTRA_YOUR_TENANT_ID}
-  redirect-uri: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io/api/cyrev/admin-consent-callback
+  redirect-uri: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io/api/entra/admin-consent-callback
   auth-redirect-uri: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io/api/auth/callback
   authority: https://login.microsoftonline.com
   auth-token-url: https://login.microsoftonline.com/common/oauth2/v2.0/token
