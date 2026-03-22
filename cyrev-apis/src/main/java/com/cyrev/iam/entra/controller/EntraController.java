@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/cyrev")
+@RequestMapping("/api/entra")
 @RequiredArgsConstructor
 @Tag(name = "Entra Connection", description = "API for establishing connection to Entra")
 public class EntraController {

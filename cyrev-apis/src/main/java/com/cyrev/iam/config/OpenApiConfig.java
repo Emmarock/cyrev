@@ -44,8 +44,8 @@ public class OpenApiConfig {
         @Bean
         public GroupedOpenApi entraApi() {
                 return GroupedOpenApi.builder()
-                        .group("auth")
-                        .pathsToMatch("/api/cyrev/**")
+                        .group("entra")
+                        .pathsToMatch("/api/entra/**")
                         .build();
         }
 
