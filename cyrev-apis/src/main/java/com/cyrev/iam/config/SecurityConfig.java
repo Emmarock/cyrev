@@ -34,8 +34,8 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers(
                                 "/actuator/health",
-                                "/api/cyrev/connect-entra",
-                                "/api/cyrev/admin-consent-callback",
+                                "/api/entra/connect-entra",
+                                "/api/entra/admin-consent-callback",
                                 "/api/auth/login",
                                 "/api/auth/**",
                                 "/api/auth/callback",
