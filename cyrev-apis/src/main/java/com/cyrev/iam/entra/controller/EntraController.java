@@ -23,7 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/entra")
 @RequiredArgsConstructor
-@Tag(name = "Entra Connection", description = "API for establishing connection to Entra")
+@Tag(name = "Entra Connection", description = "API for establishing connection to entra")
 public class EntraController {
 
     private final EntraUserService entraUserService;
