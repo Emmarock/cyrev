@@ -10,6 +10,7 @@ import com.cyrev.iam.entra.service.*;
 import com.cyrev.iam.entra.service.onboarding.EntraConsentService;
 import com.cyrev.iam.entra.service.onboarding.SaasTenantService;
 import com.cyrev.iam.service.AuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/cyrev")
 @RequiredArgsConstructor
+@Tag(name = "Entra Connection", description = "API for establishing connection to Entra")
 public class EntraController {
 
     private final EntraUserService entraUserService;

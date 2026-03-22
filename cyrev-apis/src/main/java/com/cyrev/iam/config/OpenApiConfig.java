@@ -41,4 +41,12 @@ public class OpenApiConfig {
                         .build();
         }
 
+        @Bean
+        public GroupedOpenApi entraApi() {
+                return GroupedOpenApi.builder()
+                        .group("auth")
+                        .pathsToMatch("/api/cyrev/**")
+                        .build();
+        }
+
 }

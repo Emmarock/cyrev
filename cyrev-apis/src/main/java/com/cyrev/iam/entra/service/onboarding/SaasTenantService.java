@@ -6,8 +6,6 @@ import com.cyrev.common.repository.SaasTenantRepository;
 import com.cyrev.iam.entra.service.EntraOrganizationService;
 import com.cyrev.iam.entra.service.utils.StatePayload;
 import com.cyrev.iam.exceptions.BadRequestException;
-import com.cyrev.iam.service.OrganizationService;
-import com.cyrev.iam.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
