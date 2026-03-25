@@ -14,14 +14,12 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.util.Base64;
 import java.util.Map;
 import java.util.UUID;
@@ -54,7 +52,11 @@ public class AuthService {
 
         User user = getUser(request.getEmail());
         String token = jwtTokenProvider.generateMFAToken(user);
-        return getAuthResponse(token, user);
+        AuthResponse authResponse = getAuthResponse(token, user);
+        if (sendEmail) {
+            notificationPublisherService.publishLoginEvent(user.getFirstName(), user.getEmail());
+        }
+        return authResponse;
     }
 
     @NotNull
@@ -72,7 +74,7 @@ public class AuthService {
     private AuthResponse issueFullAccessToken( boolean sendEmail, User user) {
         String token = jwtTokenProvider.generateToken(user);
         if (sendEmail) {
-            notificationPublisherService.sendWelcomeEmail(user.getFirstName(), user.getEmail());
+            notificationPublisherService.publishSignupEvent(user.getFirstName(), user.getEmail());
         }
         return getAuthResponse(token, user);
     }

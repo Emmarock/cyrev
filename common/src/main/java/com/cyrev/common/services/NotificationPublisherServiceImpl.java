@@ -136,7 +136,24 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
     }
 
     @Override
-    public void sendWelcomeEmail(String firstname, String email) {
+    public void publishSignupEvent(String firstname, String email) {
+        String body = """
+            Welcome  %s 🎉,
+            
+            Your have successfully signup on CYREV.
+            
+            If you did not initiate this action, please contact support immediately
+            """.formatted(firstname);
+        Map<String, Object> message = new HashMap<>();
+        message.put("body", body);
+        message.put("subject", "Signup Notification");
+        EmailEvent event = new EmailEvent(email, message, false);
+
+        eventPublisher.publishEvent(event);
+    }
+
+    @Override
+    public void sendLoginEmail(String firstname, String email) {
         String body = """
             Welcome  %s 🎉,
             
