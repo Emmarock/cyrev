@@ -10,6 +10,7 @@ import com.cyrev.iam.entra.service.clients.MicrosoftGraphClient;
 import dev.samstevens.totp.exceptions.QrGenerationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -53,12 +54,17 @@ public class AuthService {
 
         User user = getUser(request.getEmail());
         String token = jwtTokenProvider.generateMFAToken(user);
+        return getAuthResponse(token, user);
+    }
+
+    @NotNull
+    private static AuthResponse getAuthResponse(String token, User user) {
         return new AuthResponse(
                 token,
                 user.getAuthProvider(),
                 user.getId(),
                 user.getUsername(),
-                user.getTenant()!=null? user.getTenant().getId().toString(): null,
+                user.getTenant() != null ? user.getTenant().getId().toString() : null,
                 user.isMfaEnabled()
         );
     }
@@ -68,14 +74,7 @@ public class AuthService {
         if (sendEmail) {
             notificationPublisherService.sendWelcomeEmail(user.getFirstName(), user.getEmail());
         }
-        return new AuthResponse(
-                token,
-                user.getAuthProvider(),
-                user.getId(),
-                user.getUsername(),
-                user.getTenant()!=null? user.getTenant().getId().toString(): null,
-                user.isMfaEnabled()
-        );
+        return getAuthResponse(token, user);
     }
 
     private User getUserByUUID(UUID id) {
@@ -135,14 +134,7 @@ public class AuthService {
             }else{
                 token = jwtTokenProvider.generateToken(user);
             }
-            return new AuthResponse(
-                    token,
-                    user.getAuthProvider(),
-                    user.getId(),
-                    user.getUsername(),
-                    user.getTenant()!=null? user.getTenant().getId().toString(): null,
-                    user.isMfaEnabled()
-            );
+            return getAuthResponse(token, user);
         }catch(Exception e){
             log.error("Provider authentication failed: {}", e.getMessage());
             throw new AccessDeniedException(e.getMessage());
