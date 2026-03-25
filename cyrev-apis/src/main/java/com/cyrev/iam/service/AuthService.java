@@ -73,7 +73,7 @@ public class AuthService {
                 user.getAuthProvider(),
                 user.getId(),
                 user.getUsername(),
-                user.getTenant().getId().toString(),
+                user.getTenant()!=null? user.getTenant().getId().toString(): null,
                 user.isMfaEnabled()
         );
     }
