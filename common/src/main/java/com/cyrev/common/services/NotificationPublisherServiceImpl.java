@@ -153,7 +153,7 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
     }
 
     @Override
-    public void sendLoginEmail(String firstname, String email) {
+    public void publishLoginEvent(String firstname, String email) {
         String body = """
             Welcome  %s 🎉,
             
