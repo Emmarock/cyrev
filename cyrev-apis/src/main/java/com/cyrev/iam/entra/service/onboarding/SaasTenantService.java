@@ -30,11 +30,14 @@ public class SaasTenantService {
     @Transactional
     public void registerTenant(String state, UUID tenantId) {
         try{
+            SaasTenant saasTenant = findTenant(tenantId);
+            if(saasTenant != null){
+                return;
+            }
             String decoded = new String(
                     Base64.getUrlDecoder().decode(state),
                     StandardCharsets.UTF_8
             );
-
             StatePayload  statePayload = objectMapper.readValue(decoded, StatePayload.class);
             LocalDateTime expiryTime = statePayload.getExpiryTime();
             String originalState = statePayload.getState();
