@@ -12,6 +12,7 @@ import com.cyrev.iam.service.UserMapper;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MicrosoftGraphClient {
 
     private final UserRepository userRepository;
@@ -49,12 +51,14 @@ public class MicrosoftGraphClient {
         if(tenant.getStatus()!= TenantStatus.ACTIVE){
             saasTenantService.activateTenant(UUID.fromString(tenantId));
         }
-        Optional<User> existing = userRepository.findByAuthProviderAndProviderUserId(AuthProvider.MICROSOFT, entraUser.getId());
+        Optional<User> existing = userRepository.findByAuthProviderAndProviderUserIdAndEmail(AuthProvider.MICROSOFT, entraUser.getId(),entraUser.getMail());
+        log.info("Existing user found: {}", existing.isPresent());
         return existing.orElseGet(() -> createUser(entraUser, tenant));
     }
 
     @NotNull
     private User createUser(EntraUser entraUser, SaasTenant tenant) {
+
         User user = new User();
         user.setEmail(entraUser.getMail());
         user.setFirstName(entraUser.getGivenName());
