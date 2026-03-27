@@ -51,23 +51,23 @@ public class MicrosoftGraphClient {
         if(tenant.getStatus()!= TenantStatus.ACTIVE){
             saasTenantService.activateTenant(UUID.fromString(tenantId));
         }
-        Optional<User> existing = userRepository.findByAuthProviderAndProviderUserIdAndEmail(AuthProvider.MICROSOFT, entraUser.getId(),entraUser.getMail());
+        Optional<User> existing = userRepository.findUserByEmailAndTenant_Id(entraUser.getMail(), tenant.getId());
         log.info("Existing user found: {}", existing.isPresent());
         return existing.orElseGet(() -> createUser(entraUser, tenant));
     }
 
     @NotNull
     private User createUser(EntraUser entraUser, SaasTenant tenant) {
-
-        User user = new User();
+        Optional<User> existing = userRepository.findByEmail(entraUser.getMail());
+        User user = existing.orElseThrow(() -> new BadRequestException("User not found"));
         user.setEmail(entraUser.getMail());
         user.setFirstName(entraUser.getGivenName());
         user.setLastName(entraUser.getFamilyName());
         user.setUsername(UserMapper.emailToUsername(entraUser.getMail()));
-        user.setAuthProvider(AuthProvider.MICROSOFT);
+        user.setAuthProvider(user.getAuthProvider());
         user.setTenant(tenant);
         user.setEmailVerified(true);
-        user.setRole(Role.MFA_WRITE);
+        user.setRole(user.isMfaEnabled()?user.getRole():Role.MFA_WRITE);
         user.setProviderUserId(entraUser.getId());
         return userRepository.save(user);
     }
