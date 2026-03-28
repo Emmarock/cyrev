@@ -9,8 +9,11 @@ import com.cyrev.iam.service.EmailVerificationService;
 import com.cyrev.iam.annotations.CurrentUserId;
 import com.cyrev.iam.service.AuthService;
 import dev.samstevens.totp.exceptions.QrGenerationException;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,6 +26,8 @@ import java.text.ParseException;
 import java.util.Map;
 import java.util.UUID;
 
+import static reactor.netty.http.HttpConnectionLiveness.log;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -30,6 +35,8 @@ public class AuthController {
 
     private final AuthService authService;
     private final EmailVerificationService emailVerificationService;
+    @Value("${app.base-url}")
+    private String baseUrl;
 
     @PostMapping("/login")
     public ResponseEntity<CyrevApiResponse<AuthResponse>> login(@RequestBody @Valid LoginRequest request) {
@@ -95,16 +102,18 @@ public class AuthController {
                 ));
     }
 
+    @SneakyThrows
     @GetMapping("/callback")
-    public ResponseEntity<CyrevApiResponse<AuthResponse>> callback(@RequestParam String code) {
-
-        AuthResponse authResponse = authService.providerAuth(code);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new CyrevApiResponse<>(
-                        true,
-                        "Login Successful",
-                        authResponse
-                ));
+    public void callback(@RequestParam String code, HttpServletResponse response) {
+        try{
+            AuthResponse authResponse = authService.providerAuth(code);
+            // Example: redirect to frontend with token
+            String redirectUrl = baseUrl+"?accessToken=" + authResponse.getAccessToken();
+            response.sendRedirect(redirectUrl);
+        }
+        catch (Exception ex) {
+            log.error("OAuth callback failed", ex);
+            response.sendRedirect(baseUrl+"?error=auth_failed");
+        }
     }
-
 }
