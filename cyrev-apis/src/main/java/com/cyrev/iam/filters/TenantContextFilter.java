@@ -11,6 +11,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -23,6 +24,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class TenantContextFilter extends OncePerRequestFilter {
 
     private final SaasTenantRepository saasTenantRepository;
@@ -41,9 +43,10 @@ public class TenantContextFilter extends OncePerRequestFilter {
             if (auth != null && auth.getPrincipal() instanceof AuthenticatedUser user) {
                 String tenantId = user.getTenantId();
                 SaasTenant tenant = saasTenantRepository
-                        .findByEntraTenantId(tenantId)
+                        .findById(UUID.fromString(tenantId))
                         .orElse(null);
                 if (tenant == null || !tenant.isConsentGranted() || tenant.getStatus()!= TenantStatus.ACTIVE) {
+                    log.error("Tenant with id {} was not found", tenantId);
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Tenant not registered");
                     return;
                 }

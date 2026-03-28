@@ -1,6 +1,8 @@
 package com.cyrev.iam.controllers;
 
 import com.cyrev.common.dtos.*;
+import com.cyrev.common.entities.TenantContext;
+import com.cyrev.common.entities.TenantContextHolder;
 import com.cyrev.common.entities.UserInvite;
 import com.cyrev.iam.annotations.CurrentUser;
 import com.cyrev.iam.annotations.CurrentUserId;
@@ -55,7 +57,8 @@ public class UserController {
 
     @GetMapping()
     public ResponseEntity<CyrevApiResponse<User>> getUser(@CurrentUserId UUID id) {
-        var user = userService.getUser(id);
+        TenantContext tenant = TenantContextHolder.get();
+        var user = userService.findTenantUser(id,tenant.getInternalTenantId());
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new CyrevApiResponse<>(
                         true,
