@@ -41,7 +41,9 @@ public class TenantContextFilter extends OncePerRequestFilter {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
             if (auth != null && auth.getPrincipal() instanceof AuthenticatedUser user) {
+                log.info(user.toString());
                 String tenantId = user.getTenantId();
+                log.info("User {} has been authenticated and the tenant id is {}", user.getUsername(), tenantId);
                 SaasTenant tenant = saasTenantRepository
                         .findById(UUID.fromString(tenantId))
                         .orElse(null);
