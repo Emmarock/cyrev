@@ -14,4 +14,14 @@ public class AuthenticatedUser {
     private String username;
     private String tenantId;
     private Collection<? extends GrantedAuthority> authorities;
+
+    @Override
+    public String toString() {
+        return "AuthenticatedUser{" +
+                "userId=" + userId +
+                ", username='" + username + '\'' +
+                ", tenantId='" + tenantId + '\'' +
+                ", authorities=" + authorities +
+                '}';
+    }
 }
