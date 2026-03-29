@@ -1,13 +1,10 @@
 package com.cyrev.iam.entra.service;
 
 import com.cyrev.common.dtos.EntraUser;
-import com.cyrev.common.entities.SaasTenant;
 import com.cyrev.common.entities.TenantContext;
 import com.cyrev.common.entities.TenantContextHolder;
-import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.SaasTenantRepository;
 import com.cyrev.iam.entra.mapper.EntraUserMapper;
-import com.cyrev.iam.exceptions.BadRequestException;
 import com.cyrev.iam.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +29,7 @@ public class EntraUserService {
 
     public EntraUser createUser(String displayName, String mailNickname, String userPrincipalName, String tempPassword) {
         // create the user in entra
-        TenantContext tenant = TenantContextHolder.get();
-        String tenantId = tenant.getEntraTenantId();
+        String tenantId = getEntraTenantId();
         Map<String, Object> passwordProfile = new HashMap<>();
         passwordProfile.put("password", passwordEncoder.encode(tempPassword));
         passwordProfile.put("forceChangePasswordNextSignIn", true);
@@ -52,20 +48,22 @@ public class EntraUserService {
 
 
     public void updateUser(String userId, Map<String, Object> body) {
-        TenantContext tenant = TenantContextHolder.get();
-        String tenantId = tenant.getEntraTenantId();
+        String tenantId = getEntraTenantId();
         resilientGraphClient.patch(tenantId, "/users/" + userId, body);
     }
 
-    public void deleteUser(String userId) {
+    private static String getEntraTenantId() {
         TenantContext tenant = TenantContextHolder.get();
-        String tenantId = tenant.getEntraTenantId();
+        return tenant.getEntraTenantId();
+    }
+
+    public void deleteUser(String userId) {
+        String tenantId = getEntraTenantId();
         resilientGraphClient.delete(tenantId, "/users/" + userId);
     }
 
     public EntraUser getUser(String userId) {
-        TenantContext tenant = TenantContextHolder.get();
-        String tenantId = tenant.getEntraTenantId();
+        String tenantId = getEntraTenantId();
         Map<String, Object> response =
                 resilientGraphClient.get(tenantId, "/users/" + userId);
 
@@ -73,8 +71,7 @@ public class EntraUserService {
     }
 
     public List<EntraUser> listUsers() {
-        TenantContext tenant = TenantContextHolder.get();
-        String tenantId = tenant.getEntraTenantId();
+        String tenantId = getEntraTenantId();
         Map<String, Object> response =
                 resilientGraphClient.get(tenantId, URI);
 
