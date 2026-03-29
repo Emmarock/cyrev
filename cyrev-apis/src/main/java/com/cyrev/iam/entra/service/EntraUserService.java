@@ -10,6 +10,7 @@ import com.cyrev.iam.entra.mapper.EntraUserMapper;
 import com.cyrev.iam.exceptions.BadRequestException;
 import com.cyrev.iam.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EntraUserService {
 
     public static final String URI = "/users";
@@ -42,7 +44,7 @@ public class EntraUserService {
         body.put("mailNickname", mailNickname);
         body.put("userPrincipalName", userPrincipalName);
         body.put("passwordProfile", passwordProfile);
-
+        log.info("Creating EntraUser: {} in tenant {} using graph url {}", body, tenantId, URI);
         resilientGraphClient.post(tenantId, URI, body);
 
         return EntraUserMapper.fromGraph(body);
