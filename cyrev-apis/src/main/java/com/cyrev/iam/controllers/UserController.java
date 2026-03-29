@@ -3,19 +3,15 @@ package com.cyrev.iam.controllers;
 import com.cyrev.common.dtos.*;
 import com.cyrev.common.entities.TenantContext;
 import com.cyrev.common.entities.TenantContextHolder;
-import com.cyrev.common.entities.UserInvite;
-import com.cyrev.iam.annotations.CurrentUser;
 import com.cyrev.iam.annotations.CurrentUserId;
 import com.cyrev.common.entities.User;
 import com.cyrev.iam.annotations.TenantAdmin;
 import com.cyrev.iam.service.InviteService;
-import com.cyrev.iam.service.MFAService;
 import com.cyrev.iam.service.UserService;
 import jakarta.validation.Valid;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -44,9 +40,10 @@ public class UserController {
         return ResponseEntity.ok(acceptInviteDTO);
     }
     @GetMapping("/all")
-    @PreAuthorize("hasRole('ADMIN')")
+    @TenantAdmin
     public ResponseEntity<CyrevApiResponse<List<User>>> getAllUsers() {
-        var users = userService.getAllUsers();
+        TenantContext tenant = TenantContextHolder.get();
+        var users = userService.getTenantAllUsers(tenant.getInternalTenantId());
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new CyrevApiResponse<>(
                         true,

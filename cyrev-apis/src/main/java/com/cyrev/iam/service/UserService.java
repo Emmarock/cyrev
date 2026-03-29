@@ -29,8 +29,8 @@ public class UserService {
     private final NotificationPublisherService notificationPublisherService;
     private final EmailVerificationService emailVerificationService;
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<User> getTenantAllUsers(UUID tenantId) {
+        return userRepository.findAllByTenantId(tenantId);
     }
 
     public User getUser(UUID id) {
