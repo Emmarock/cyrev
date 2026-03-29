@@ -2,6 +2,7 @@ package com.cyrev.iam.entra.service.clients;
 
 import com.cyrev.iam.entra.service.onboarding.TenantAccessTokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GraphBaseClient {
 
     private final TenantAccessTokenService tokenService;
@@ -19,7 +21,7 @@ public class GraphBaseClient {
     public WebClient tenantClient(String tenantId) {
 
         String accessToken = tokenService.getTenantUserAccessToken(tenantId);
-
+        log.info("Creating EntraUser: {} in tenant {}", accessToken, tenantId);
         return webClientBuilder
                 .baseUrl(GRAPH_BASE_URL)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
