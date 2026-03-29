@@ -1,6 +1,5 @@
 package com.cyrev.iam.service;
 
-import com.cyrev.common.dtos.Role;
 import com.cyrev.common.dtos.UserCreationDTO;
 import com.cyrev.common.dtos.UserUpdateRequestDTO;
 import com.cyrev.common.entities.Address;
@@ -41,11 +40,6 @@ public class UserService {
         return userRepository.findUserByIdAndTenant_Id(id,tenantId).orElseThrow(()-> new BadRequestException("User not found in this tenant"));
     }
 
-    public void markUserAsAdmin(UUID id){
-        User user = getUser(id);
-        user.setRole(Role.SUPER_ADMIN);
-        userRepository.save(user);
-    }
 
     @Transactional
     public User createUser(UserCreationDTO userCreationDTO) throws BadRequestException {
