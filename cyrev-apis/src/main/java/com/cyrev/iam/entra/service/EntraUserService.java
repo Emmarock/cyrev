@@ -27,6 +27,9 @@ public class EntraUserService {
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
 
+    public String extractMailNickname(String upn) {
+        return upn.split("@")[0];
+    }
     public EntraUser createUser(String displayName, String mailNickname, String userPrincipalName, String tempPassword) {
         // create the user in entra
         String tenantId = getEntraTenantId();
@@ -37,7 +40,7 @@ public class EntraUserService {
         Map<String, Object> body = new HashMap<>();
         body.put("accountEnabled", true);
         body.put("displayName", displayName);
-        body.put("mailNickname", mailNickname);
+        body.put("mailNickname", extractMailNickname(mailNickname));
         body.put("userPrincipalName", userPrincipalName);
         body.put("passwordProfile", passwordProfile);
         log.info("Creating EntraUser: {} in tenant {} using graph url {}", body, tenantId, URI);
