@@ -27,8 +27,8 @@ public class EntraUserService {
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
 
-    public String extractMailNickname(String upn) {
-        return upn.split("@")[0];
+    public String extractMailNickname(String email) {
+        return email.split("@")[0];
     }
     public EntraUser createUser(String displayName, String mailNickname, String userPrincipalName, String tempPassword) {
         // create the user in entra
