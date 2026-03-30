@@ -3,8 +3,10 @@ package com.cyrev.iam.service;
 import com.cyrev.common.dtos.UserCreationDTO;
 import com.cyrev.common.dtos.UserUpdateRequestDTO;
 import com.cyrev.common.entities.Address;
+import com.cyrev.common.entities.SaasTenant;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.AddressRepository;
+import com.cyrev.common.repository.SaasTenantRepository;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
 import com.cyrev.iam.exceptions.BadRequestException;
@@ -27,7 +29,7 @@ public class UserService {
     private final UserMapper userMapper;
     private final NotificationPublisherService notificationPublisherService;
     private final EmailVerificationService emailVerificationService;
-
+    private final SaasTenantRepository saasTenantRepository;
     public List<User> getTenantAllUsers(UUID tenantId) {
         return userRepository.findAllByTenantId(tenantId);
     }
@@ -42,7 +44,7 @@ public class UserService {
 
 
     @Transactional
-    public User createUser(UserCreationDTO userCreationDTO) throws BadRequestException {
+    public User createUser(String tenantId, UserCreationDTO userCreationDTO) throws BadRequestException {
         validateCorporateEmail(userCreationDTO.getBusinessEmail());
         if(userRepository.existsByEmail(userCreationDTO.getBusinessEmail())) {
             throw new BadRequestException("Email already exists");
@@ -50,7 +52,9 @@ public class UserService {
         if(userRepository.findByUsername(userCreationDTO.getUsername()).isPresent()) {
             throw new BadRequestException("Username already exists");
         }
+        SaasTenant saasTenant = saasTenantRepository.findByEntraTenantId(tenantId).orElseThrow();
         User entity = userMapper.toEntity(userCreationDTO);
+        entity.setTenant(saasTenant);
         User user = userRepository.save(entity);
         Address address = userMapper.toAddress(userCreationDTO.getCompanyAddress());
         addressRepository.save(address);

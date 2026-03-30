@@ -4,6 +4,7 @@ import com.cyrev.common.dtos.*;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationPublisherServiceImpl implements NotificationPublisherService {
 
     private final ApplicationEventPublisher eventPublisher;
@@ -185,5 +187,6 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
         message.put("subject", "CyRev Verification Link");
         EmailEvent event = new EmailEvent(email, message, false);
         eventPublisher.publishEvent(event);
+        log.info("publish email verification link to user");
     }
 }
