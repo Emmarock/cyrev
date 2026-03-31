@@ -45,7 +45,7 @@ public class EmailVerificationService {
         return baseUrl + "/set-password?token=" + rawToken;
     }
 
-    public String getVerificationLink(String rawToken) {
+    public String getInvitationLink(String rawToken) {
         EmailVerificationToken verificationToken =
                 EmailVerificationToken.builder()
                         .token(rawToken)
@@ -55,7 +55,7 @@ public class EmailVerificationService {
 
         tokenRepository.save(verificationToken);
 
-        return baseUrl + "/set-password?token=" + rawToken;
+        return baseUrl + "/accept-invite?token=" + rawToken;
     }
 
     public void verifyToken(UserUpdateRequestDTO request) {

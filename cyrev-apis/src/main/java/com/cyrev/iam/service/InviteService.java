@@ -9,7 +9,6 @@ import com.cyrev.common.repository.UserInviteRepository;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
 import com.cyrev.common.services.VerificationTokenGenerator;
-import com.cyrev.iam.filters.TenantContextFilter;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -55,8 +54,8 @@ public class InviteService {
                 .deleted(false)
                 .build();
         inviteRepository.save(invite);
-        String verificationLink = emailVerificationService.getVerificationLink(verificationToken);
-        notificationPublisherService.publishVerificationEvent(request.getFirstName(), request.getBusinessEmail(), verificationLink);
+        String invitationLink = emailVerificationService.getInvitationLink(verificationToken);
+        notificationPublisherService.publishVerificationEvent(request.getFirstName(), request.getBusinessEmail(), invitationLink);
         return UserInviteDTO.builder()
                 .firstName(invite.getFirstName())
                 .lastName(invite.getLastName())
