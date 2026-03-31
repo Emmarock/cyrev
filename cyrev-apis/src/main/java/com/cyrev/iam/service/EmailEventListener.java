@@ -5,6 +5,7 @@ import com.cyrev.common.dtos.MailProvider;
 import com.cyrev.common.services.NotificationService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,7 @@ import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMI
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class EmailEventListener {
 
     private final List<NotificationService> emailNotificationServices;
@@ -37,6 +39,7 @@ public class EmailEventListener {
     @TransactionalEventListener(phase = AFTER_COMMIT)
     public void handleEmailEvent(EmailEvent event) throws IOException {
         Map<String,Object> content= event.getBody();
+        log.info("Received email event for user {}",event.getTo());
         if (event.isHtml()) {
             getEmailNotificationService().sendHtmlEmail(
                     event.getTo(),
@@ -50,5 +53,6 @@ public class EmailEventListener {
                     content.get("body").toString()
             );
         }
+        log.info("Email has been sent to user {}",event.getTo());
     }
 }

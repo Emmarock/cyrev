@@ -30,6 +30,7 @@ public class TenantSecurityService {
             log.error("User {} is not an admin of this tenant", user.getUserId());
             throw new AccessDeniedException("User is not an admin of this tenant");
         }
+        log.info("User {} is an admin of this tenant", user.getUserId());
     }
 
     private boolean checkIfUserIsTenantAdmin(UUID userId, UUID tenantId) {
