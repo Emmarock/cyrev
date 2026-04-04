@@ -127,7 +127,6 @@ public class AuthController {
     public void callback(@RequestParam String code, HttpServletResponse response) {
         try{
             AuthResponse authResponse = authService.providerAuth(code);
-            // Example: redirect to frontend with token
             String redirectUrl = baseUrl+"?accessToken=" + authResponse.getAccessToken();
             response.sendRedirect(redirectUrl);
         }
