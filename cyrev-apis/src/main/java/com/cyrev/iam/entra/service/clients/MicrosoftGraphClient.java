@@ -30,13 +30,9 @@ public class MicrosoftGraphClient {
     private final SaasTenantService saasTenantService;
     private final ResilientGraphClient resilientGraphClient;
     private final TenantAccessTokenService tokenService;
-    private final EntraOrganizationService entraOrganizationService;
-
-    public String verifyTenant(String tenantId) {
-        return entraOrganizationService.verifyTenant(tenantId).getDisplayName();
-    }
 
     public User handleLoginCallback(String code) throws ParseException {
+
         EntraTokenResponse tokenResponse = tokenService.getTenantUserAccessTokenFromCode(code);
 
         SignedJWT jwt = (SignedJWT) JWTParser.parse(tokenResponse.getIdToken());  // using Nimbus JWT library

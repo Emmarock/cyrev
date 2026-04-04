@@ -2,25 +2,33 @@ package com.cyrev.iam.service;
 
 import com.cyrev.common.dtos.AuthResponse;
 import com.cyrev.common.dtos.LoginRequest;
+import com.cyrev.common.entities.TenantContextHolder;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
 import com.cyrev.iam.config.EntraProperties;
 import com.cyrev.iam.entra.service.clients.MicrosoftGraphClient;
+import com.nimbusds.jwt.JWTParser;
 import dev.samstevens.totp.exceptions.QrGenerationException;
+import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 
@@ -37,7 +45,7 @@ public class AuthService {
     static String appName = "CyRevApp";
     private final EntraProperties props;
     private final MicrosoftGraphClient microsoftGraphClient;
-
+    private final TokenBlacklistService tokenBlacklistService;
     public AuthResponse login(LoginRequest request) {
        return login(request,true);
     }
@@ -57,6 +65,34 @@ public class AuthService {
             notificationPublisherService.publishLoginEvent(user.getFirstName(), user.getEmail());
         }
         return authResponse;
+    }
+
+    public void logout(HttpServletRequest request) throws ParseException {
+        // 1. Extract access token
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            Claims claims = jwtTokenProvider.parseClaims(token);
+            String jti = claims.getId();
+            Date expiration = claims.getExpiration();
+            long ttl = (expiration.getTime() - System.currentTimeMillis()) / 1000;
+            if (ttl > 0) {
+                tokenBlacklistService.blacklistToken(jti, ttl);
+            }
+        }
+
+        // 3. Clear Spring Security
+        SecurityContextHolder.clearContext();
+    }
+
+    public String logout(){
+        // IMPORTANT: keeps encoding safe
+        String tenantId = TenantContextHolder.get().getEntraTenantId();
+        return UriComponentsBuilder
+                .fromHttpUrl("https://login.microsoftonline.com/" + tenantId + "/oauth2/v2.0/logout")
+                .queryParam("post_logout_redirect_uri", props.getAuthRedirectUri())
+                .build(true) // IMPORTANT: keeps encoding safe
+                .toUriString();
     }
 
     @NotNull

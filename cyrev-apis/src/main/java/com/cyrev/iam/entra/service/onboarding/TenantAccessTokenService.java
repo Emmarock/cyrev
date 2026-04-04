@@ -30,7 +30,6 @@ public class TenantAccessTokenService {
     }
 
     public EntraTokenResponse getTenantUserAccessTokenFromCode(String code) {
-        EntraTokenResponse response = tokenClient.getTokenFromCode(code);
-        return response;
+        return tokenClient.getTokenFromCode(code);
     }
 }

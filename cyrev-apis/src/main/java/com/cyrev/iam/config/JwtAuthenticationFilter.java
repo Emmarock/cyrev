@@ -2,6 +2,7 @@ package com.cyrev.iam.config;
 
 import com.cyrev.iam.domain.AuthenticatedUser;
 import com.cyrev.iam.service.JwtTokenProvider;
+import com.cyrev.iam.service.TokenBlacklistService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -13,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.token.TokenService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider tokenProvider;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -45,7 +48,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String username = claims.get("username", String.class);
         String tenantId = claims.get("tenantId", String.class);
 
-        List<String> roles = claims.get("roles", String.class).lines().toList();
+        List<String> roles = claims.get("roles", String.class)
+                .lines()
+                .toList();
+
+        String jti = claims.getId();
+        if (tokenBlacklistService.isBlacklisted(jti)) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Token has been revoked");
+            return;
+        }
+
         List<GrantedAuthority> authorities = roles.stream()
                 .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
                 .collect(Collectors.toList());

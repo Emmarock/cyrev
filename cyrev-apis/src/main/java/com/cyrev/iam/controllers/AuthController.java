@@ -9,6 +9,7 @@ import com.cyrev.iam.service.EmailVerificationService;
 import com.cyrev.iam.annotations.CurrentUserId;
 import com.cyrev.iam.service.AuthService;
 import dev.samstevens.totp.exceptions.QrGenerationException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
@@ -47,6 +50,23 @@ public class AuthController {
                         "Login Successful",
                         response
                 ));
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletRequest request) throws ParseException {
+        authService.logout(request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/logout/full")
+    public ResponseEntity<Void> logoutFull(HttpServletRequest request) {
+
+        String logoutUrl = authService.logout();
+
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create(logoutUrl))
+                .build();
     }
 
     @PostMapping("/mfa/register")

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class JwtTokenProvider {
@@ -24,7 +25,9 @@ public class JwtTokenProvider {
     private long mfaExpiration;
 
     public String generateToken(User user) {
+        String jti = UUID.randomUUID().toString();
         return Jwts.builder()
+                .setId(jti)
                 .setSubject(user.getId().toString())
                 .claim("email", user.getEmail())
                 .claim("username", user.getUsername())
@@ -39,8 +42,10 @@ public class JwtTokenProvider {
     }
 
     public String generateMFAToken(User user) {
+        String jti = UUID.randomUUID().toString();
         return Jwts.builder()
                 .setSubject(user.getId().toString())
+                .setId(jti)
                 .claim("username", user.getUsername())
                 .claim("email", user.getEmail())
                 .claim("tenantId", user.getTenant()!=null?user.getTenant().getId():null)
