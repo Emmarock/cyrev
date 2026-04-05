@@ -3,20 +3,6 @@ app:
 spring:
   main:
     lazy-initialization: true
-  data:
-    redis:
-      host: cyrev-redis.redis.cache.windows.net
-      port: 6380
-      password: ${REDIS_PASSWORD}
-      timeout: 2s
-      connect-timeout: 2s
-      ssl:
-        enabled: true
-      lettuce:
-        pool:
-          max-active: 10
-          max-idle: 5
-          min-idle: 1
   security:
     oauth2:
       client:
@@ -147,4 +133,8 @@ sendgrid:
   api-key: ${SENDGRID_API_KEY}
   from-email: info@ayokunmidapo.com
 redis:
-  enabled: true
+  enabled: false
+token:
+  blacklist:
+    max-size: 10_000
+    default-ttl-seconds: 3600
