@@ -64,18 +64,32 @@ jobs:
         run: |
           docker push $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }}
           docker push $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:latest
+      - name: Set Container App Secrets
+        run: |
+          az containerapp secret set \
+            --name $CONTAINER_APP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --secrets \
+              db-url="${{ secrets.DB_URL }}" \
+              temporal-api-key="${{ secrets.TEMPORAL_API_KEY }}" \
+              temporal-namespace="${{ secrets.TEMPORAL_NAMESPACE }}" \
+              temporal-address="${{ secrets.TEMPORAL_ADDRESS }}" \
+              sendgrid-api-key="${{ secrets.SENDGRID_API_KEY }}" \
+              redis-connection-string="${{ secrets.REDIS_CONNECTION_STRING }}"
+      - name: Export container App yaml file
+
+        az containerapp export \
+        --name cyrev-service \
+        --resource-group CyRev \
+        --output yaml \
+        > app.yaml
+      - name: Update YAML with new image
+        run: |
+          sed -i 's|cyrev-service:latest|cyrev-service:${{ github.sha }}|g' app.yaml
+
       - name: Deploy to Azure Container App
         run: |
           az containerapp update \
             --name $CONTAINER_APP_NAME \
             --resource-group $RESOURCE_GROUP \
-            --image $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }} \
-            --set-env-vars \
-              SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
-              TEMPORAL_API_KEY=${{ secrets.TEMPORAL_API_KEY }} \
-              TEMPORAL_NAMESPACE=${{ secrets.TEMPORAL_NAMESPACE }} \
-              TEMPORAL_ADDRESS=${{ secrets.TEMPORAL_ADDRESS }} \
-              SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }} \
-              REDIS_CONNECTION_STRING=${{ secrets.REDIS_CONNECTION_STRING }} \
-              TEMPORAL_HOST=temporal \
-              TEMPORAL_PORT=7233 \
+            --yaml app.yaml
