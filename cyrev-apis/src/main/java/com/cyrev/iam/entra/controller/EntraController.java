@@ -60,6 +60,7 @@ public class EntraController {
                 .build();
     }
 
+
     @PostMapping("/users")
     @TenantAdmin
     public ResponseEntity<CyrevApiResponse<EntraUser>> createUser(@RequestBody EntraUser entraUser) {
