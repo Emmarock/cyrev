@@ -64,30 +64,26 @@ jobs:
         run: |
           docker push $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }}
           docker push $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:latest
+      - name: Set Container App Secrets
+        run: |
+          az containerapp secret set \
+            --name $CONTAINER_APP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --secrets \
+              db-url="${{ secrets.DB_URL }}" \
+              temporal-api-key="${{ secrets.TEMPORAL_API_KEY }}" \
+              temporal-namespace="${{ secrets.TEMPORAL_NAMESPACE }}" \
+              temporal-address="${{ secrets.TEMPORAL_ADDRESS }}" \
+              sendgrid-api-key="${{ secrets.SEND_GRID_API_KEY }}" \
+              redis-connection-string="${{ secrets.REDIS_CONNECTION_STRING }}"
 
-      - name: Deploy to Azure Container App (with Redis)
+      - name: Update YAML with new image
+        run: |
+          sed -i 's|cyrev-service:latest|cyrev-service:${{ github.sha }}|g' app.yaml
+
+      - name: Deploy to Azure Container App
         run: |
           az containerapp update \
             --name $CONTAINER_APP_NAME \
             --resource-group $RESOURCE_GROUP \
-            --image $AZURE_CONTAINER_REGISTRY/$IMAGE_NAME:${{ github.sha }} \
-            --set-env-vars \
-              SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
-              TEMPORAL_API_KEY=${{ secrets.TEMPORAL_API_KEY }} \
-              TEMPORAL_NAMESPACE=${{ secrets.TEMPORAL_NAMESPACE }} \
-              TEMPORAL_ADDRESS=${{ secrets.TEMPORAL_ADDRESS }} \
-              SEND_GRID_API_KEY=${{ secrets.SEND_GRID_API_KEY }} \
-              SPRING_REDIS_HOST=localhost \
-              SPRING_REDIS_PORT=6379 \
-            --container-name cyrev-service \
-            --min-replicas 1 \
-            --max-replicas 3
-          
-          # Add Redis sidecar container
-          az containerapp update \
-            --name $CONTAINER_APP_NAME \
-            --resource-group $RESOURCE_GROUP \
-            --add-container name=redis \
-            image=redis:7 \
-            cpu=0.5 \
-            memory=1Gi
+            --yaml infra/cyrev-containerapp.yaml
