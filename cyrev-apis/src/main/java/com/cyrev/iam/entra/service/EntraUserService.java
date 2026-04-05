@@ -45,7 +45,6 @@ public class EntraUserService {
         body.put("passwordProfile", passwordProfile);
         log.info("Creating EntraUser: {} in tenant {} using graph url {}", body, tenantId, URI);
         resilientGraphClient.post(tenantId, URI, body);
-
         return EntraUserMapper.fromGraph(body);
     }
 

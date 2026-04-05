@@ -74,7 +74,7 @@ jobs:
               temporal-api-key="${{ secrets.TEMPORAL_API_KEY }}" \
               temporal-namespace="${{ secrets.TEMPORAL_NAMESPACE }}" \
               temporal-address="${{ secrets.TEMPORAL_ADDRESS }}" \
-              sendgrid-api-key="${{ secrets.SEND_GRID_API_KEY }}" \
+              sendgrid-api-key="${{ secrets.SENDGRID_API_KEY }}" \
               redis-connection-string="${{ secrets.REDIS_CONNECTION_STRING }}"
 
       - name: Update YAML with new image
