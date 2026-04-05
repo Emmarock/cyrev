@@ -86,4 +86,4 @@ jobs:
           az containerapp update \
             --name $CONTAINER_APP_NAME \
             --resource-group $RESOURCE_GROUP \
-            --yaml infra/cyrev-containerapp.yaml
+            --yaml app.yaml

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 public class ApplicationService {
 
     private final GraphServiceClient<?> graphClient;
-
     public Application createApplication(String displayName) {
         Application app = new Application();
         app.displayName = displayName;
