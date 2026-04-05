@@ -33,7 +33,6 @@ public class ApprovalController {
 
         return ResponseEntity.ok(requests);
     }
-
     /**
      * Approve a governance request
      */
