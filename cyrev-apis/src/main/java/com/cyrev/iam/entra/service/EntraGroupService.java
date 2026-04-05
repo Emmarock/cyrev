@@ -25,7 +25,6 @@ public class EntraGroupService {
         body.put("mailEnabled", false);
         body.put("securityEnabled", true);
         body.put("mailNickname", entraGroup.getMailNickname());
-
         graphClient.post(tenantId, "/v1.0/groups", body);
         return EntraGroupMapper.fromGraph(body);
     }

@@ -77,6 +77,13 @@ jobs:
               sendgrid-api-key="${{ secrets.SENDGRID_API_KEY }}" \
               redis-connection-string="${{ secrets.REDIS_CONNECTION_STRING }}"
 
+      - name: Export container App yaml file
+        run: |
+          az containerapp export \
+            --name $CONTAINER_APP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --output yaml \
+            > app.yaml
       - name: Update YAML with new image
         run: |
           sed -i 's|cyrev-service:latest|cyrev-service:${{ github.sha }}|g' app.yaml
