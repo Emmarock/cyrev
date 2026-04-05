@@ -144,3 +144,5 @@ entra:
 sendgrid:
   api-key: ${SENDGRID_API_KEY}
   from-email: info@ayokunmidapo.com
+redis:
+  enabled: true

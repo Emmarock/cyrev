@@ -8,7 +8,6 @@ import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
 import com.cyrev.iam.config.EntraProperties;
 import com.cyrev.iam.entra.service.clients.MicrosoftGraphClient;
-import com.nimbusds.jwt.JWTParser;
 import dev.samstevens.totp.exceptions.QrGenerationException;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
