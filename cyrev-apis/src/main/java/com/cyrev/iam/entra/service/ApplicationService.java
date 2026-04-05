@@ -17,7 +17,6 @@ public class ApplicationService {
                 .buildRequest()
                 .post(app);
     }
-
     public void deleteApplication(String appId) {
         graphClient.applications(appId)
                 .buildRequest()
