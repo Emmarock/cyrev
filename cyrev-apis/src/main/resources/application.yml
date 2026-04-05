@@ -1,10 +1,20 @@
 app:
   base-url: https://cybrooke.vercel.app
 spring:
+  main:
+    lazy-initialization: true
   data:
     redis:
       url: ${SPRING_DATA_REDIS_URL}
-      timeout: 5s
+      timeout: 2s
+      connect-timeout: 2s
+      ssl:
+        enabled: true
+      lettuce:
+        pool:
+          max-active: 10
+          max-idle: 5
+          min-idle: 1
   security:
     oauth2:
       client:
