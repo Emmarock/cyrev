@@ -28,4 +28,5 @@ public class RedisTokenBlacklistService implements TokenBlacklistService {
     public boolean isBlacklisted(String jti) {
         return redisTemplate.get().hasKey(PREFIX + jti);
     }
+
 }
