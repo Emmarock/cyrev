@@ -3,8 +3,8 @@ app:
 spring:
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
+      url: ${SPRING_DATA_REDIS_URL}
+      timeout: 5s
   security:
     oauth2:
       client:
@@ -115,6 +115,9 @@ server:
   port: 8090
 
 management:
+  health:
+    redis:
+      enabled: false   # prevent redis readiness failure
   endpoints:
     web:
       exposure:
