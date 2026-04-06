@@ -13,7 +13,6 @@
     <modules>
         <module>common</module>
         <module>cyrev-apis</module>
-        <module>cyrev-workers</module>
     </modules>
     <properties>
         <java.version>17</java.version>
