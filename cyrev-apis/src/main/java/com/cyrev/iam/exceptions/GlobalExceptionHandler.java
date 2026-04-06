@@ -62,49 +62,6 @@ public class GlobalExceptionHandler {
         );
     }
 
-    /* =====================
-       TEMPORAL ERRORS
-       ===================== */
-
-    @ExceptionHandler(WorkflowServiceException.class)
-    public ResponseEntity<ApiErrorResponse> handleTemporalServiceException(
-            WorkflowServiceException ex,
-            HttpServletRequest request
-    ) {
-        log.error("Temporal service error", ex);
-
-        return buildError(
-                HttpStatus.SERVICE_UNAVAILABLE,
-                "Workflow service is currently unavailable",
-                request
-        );
-    }
-
-    @ExceptionHandler(WorkflowExecutionAlreadyStarted.class)
-    public ResponseEntity<ApiErrorResponse> handleWorkflowAlreadyStarted(
-            WorkflowExecutionAlreadyStarted ex,
-            HttpServletRequest request
-    ) {
-        return buildError(
-                HttpStatus.CONFLICT,
-                "Provisioning already in progress for this user",
-                request
-        );
-    }
-
-    @ExceptionHandler(ActivityFailure.class)
-    public ResponseEntity<ApiErrorResponse> handleActivityFailure(
-            ActivityFailure ex,
-            HttpServletRequest request
-    ) {
-        log.error("Activity failure", ex);
-
-        return buildError(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Provisioning activity failed",
-                request
-        );
-    }
 
     /* =====================
        VALIDATION ERRORS
