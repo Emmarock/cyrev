@@ -2,9 +2,6 @@ package com.cyrev.iam.exceptions;
 
 import com.cyrev.common.dtos.ApiErrorResponse;
 import com.cyrev.common.dtos.ErrorMessageParser;
-import io.temporal.client.WorkflowExecutionAlreadyStarted;
-import io.temporal.client.WorkflowServiceException;
-import io.temporal.failure.ActivityFailure;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
