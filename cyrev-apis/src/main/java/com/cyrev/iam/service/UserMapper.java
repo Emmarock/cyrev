@@ -32,7 +32,6 @@ public class UserMapper {
         user.setAuthProvider(dto.getAuthProvider()==null?AuthProvider.CYREV:dto.getAuthProvider());
         return user;
     }
-
     public Address toAddress(@NotNull AddressDto dto) {
         return Address.builder()
                 .city(dto.getCity())

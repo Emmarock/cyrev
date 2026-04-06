@@ -102,7 +102,9 @@ server:
   port: 8090
 
 management:
-  endpoints:
+  endpoint:
+    health:
+      show-details: always
     web:
       exposure:
         include: "*"
