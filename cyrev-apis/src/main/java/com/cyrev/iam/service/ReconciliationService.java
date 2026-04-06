@@ -17,14 +17,8 @@ public class ReconciliationService {
     }
 
     public int reconcileWithEntra() {
-        // Example logic: fetch users from Microsoft Entra
         List<User> internalUsers = userRepository.findAll();
-        // call external API to fetch Entra users (pseudo-code)
-        // List<User> entraUsers = entraClient.fetchUsers();
-
-        // Compare and sync
         int reconciledCount = 0;
-        // reconciliation logic here
         return reconciledCount;
     }
 }
