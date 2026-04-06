@@ -102,9 +102,6 @@ server:
   port: 8090
 
 management:
-  health:
-    redis:
-      enabled: false   # prevent redis readiness failure
   endpoints:
     web:
       exposure:
