@@ -65,3 +65,5 @@ logs/
 target/
 tmp/
 /.idea/
+.idea/
+/src/main/resources/application-dev.yml
