@@ -110,9 +110,9 @@ management:
         include: "*"
 
 entra:
-  client-id: ${ENTRA_YOUR_CLIENT_ID}
-  client-secret: ${ENTRA_YOUR_CLIENT_SECRET}
-  tenant-id: ${ENTRA_YOUR_TENANT_ID}
+  client-id: ${ENTRA_CLIENT_ID:a3dcf9db-1092-404c-b7b6-2be943e8ace6}
+  client-secret: ${ENTRA_CLIENT_ID:Ohp8Q~k1u6WyawOn6JI8wL78AlWbyzWK1zcJLaPA}
+  tenant-id: ${AZURE_TENANT_ID:0ad4f99a-a964-4b11-b55d-686b61408a0c}
   redirect-uri: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io/api/entra/admin-consent-callback
   auth-redirect-uri: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io/api/auth/callback
   authority: https://login.microsoftonline.com
