@@ -9,8 +9,8 @@ spring:
         registration:
           microsoft:
             client-name: Microsoft
-            client-id: ${entra.client-id}
-            client-secret: ${entra.client-secret}
+            client-id: ${ENTRA_CLIENT_ID}
+            client-secret: ${ENTRA_CLIENT_SECRET}
             authorization-grant-type: authorization_code
             redirect-uri: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io/api/auth/callback
             scope:
@@ -100,7 +100,6 @@ security:
 
 server:
   port: 8090
-
 management:
   endpoint:
     health:
@@ -110,9 +109,9 @@ management:
         include: "*"
 
 entra:
-  client-id: ${ENTRA_YOUR_CLIENT_ID}
-  client-secret: ${ENTRA_YOUR_CLIENT_SECRET}
-  tenant-id: ${ENTRA_YOUR_TENANT_ID}
+  client-id: ${ENTRA_CLIENT_ID}
+  client-secret: ${ENTRA_CLIENT_SECRET}
+  tenant-id: ${ENTRA_TENANT_ID}
   redirect-uri: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io/api/entra/admin-consent-callback
   auth-redirect-uri: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io/api/auth/callback
   authority: https://login.microsoftonline.com

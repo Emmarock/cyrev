@@ -52,7 +52,10 @@ public class UserService {
         if(userRepository.findByUsername(userCreationDTO.getUsername()).isPresent()) {
             throw new BadRequestException("Username already exists");
         }
-        SaasTenant saasTenant = saasTenantRepository.findByEntraTenantId(tenantId).orElseThrow();
+        SaasTenant saasTenant = null;
+        if(tenantId!=null) {
+            saasTenant = saasTenantRepository.findByEntraTenantId(tenantId).orElseThrow(()->new BadRequestException("Tenant not found"));
+        }
         User entity = userMapper.toEntity(userCreationDTO);
         entity.setTenant(saasTenant);
         User user = userRepository.save(entity);

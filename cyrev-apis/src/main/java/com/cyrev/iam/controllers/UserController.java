@@ -64,11 +64,11 @@ public class UserController {
                 ));
     }
 
+
     @PostMapping
-    @TenantAdmin
     public ResponseEntity<CyrevApiResponse<User>> createUser(@Valid @RequestBody UserCreationDTO user) throws BadRequestException {
         TenantContext tenant = TenantContextHolder.get();
-        var created = userService.createUser(tenant.getEntraTenantId(), user);
+        var created = userService.createUser(tenant!=null?tenant.getEntraTenantId():null, user);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new CyrevApiResponse<>(
                         true,
