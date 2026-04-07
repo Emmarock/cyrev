@@ -9,8 +9,8 @@ spring:
         registration:
           microsoft:
             client-name: Microsoft
-            client-id: ${entra.client-id}
-            client-secret: ${entra.client-secret}
+            client-id: ${ENTRA_CLIENT_ID}
+            client-secret: ${ENTRA_CLIENT_SECRET}
             authorization-grant-type: authorization_code
             redirect-uri: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io/api/auth/callback
             scope:
