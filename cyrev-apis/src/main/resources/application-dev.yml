@@ -1,18 +1,36 @@
+app:
+  base-url: https://cybrooke.vercel.app
+
 spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  security:
+    oauth2:
+      client:
+        registration:
+          microsoft:
+            client-name: Microsoft
+            client-id: ${entra.client-id}
+            client-secret: ${entra.client-secret}
+            scope:
+              - openid
+              - profile
+              - email
+              - User.Read
+        provider:
+          microsoft:
+            authorization-uri: https://login.microsoftonline.com/common/oauth2/v2.0/authorize
+            token-uri: https://login.microsoftonline.com/common/oauth2/v2.0/token
+            user-info-uri: https://graph.microsoft.com/oidc/userinfo
+            user-name-attribute: sub
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/common/v2.0
   config:
     activate:
       on-profile: dev
-  mail:
-    host: localhost
-    port: 1025
-    username: ''
-    password: ''
-    properties:
-      mail:
-        smtp:
-          auth: false
-          starttls:
-            enable: false
   datasource:
     url: jdbc:postgresql://localhost:5432/cyrev_iamdb_dev
     username: postgres
@@ -23,7 +41,22 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
+azure:
+  tenant-id: ${AZURE_TENANT_ID:0ad4f99a-a964-4b11-b55d-686b61408a0c}
+  client-id: ${AZURE_CLIENT_ID:e25e3c8a-2392-4b29-b144-df85bba55f6d}
+  client-secret: ${AZURE_CLIENT_SECRET:BOS8Q~PLv9Thy9broRiTsLOw~m_0LcXNML1BQaWw}
+microsoft:
+  graph:
+    base-url: https://graph.microsoft.com/v1.0
+    tenant-id: ${AZURE_TENANT_ID:0ad4f99a-a964-4b11-b55d-686b61408a0c}
 
-temporal:
-  host: localhost
-  port: 7233
+mail:
+  sender: info@ayokunmidapo.com
+
+entra:
+  client-id: ${ENTRA_CLIENT_ID:a3dcf9db-1092-404c-b7b6-2be943e8ace6}
+  client-secret: ${ENTRA_CLIENT_ID:Ohp8Q~k1u6WyawOn6JI8wL78AlWbyzWK1zcJLaPA}
+  tenant-id: ${AZURE_TENANT_ID:0ad4f99a-a964-4b11-b55d-686b61408a0c}
+sendgrid:
+  api-key: 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
+  from-email: info@ayokunmidapo.com
