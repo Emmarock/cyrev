@@ -100,7 +100,6 @@ security:
 
 server:
   port: 8090
-
 management:
   endpoint:
     health:
