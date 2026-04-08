@@ -73,7 +73,8 @@ public class TenantContextFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         List<String> patterns = List.of(
-                "/api/auth/**"
+                "/api/auth/**",
+                "/api/entra/connect-entra"
         );
 
         return patterns.stream().anyMatch(p -> matcher.match(p, path));
