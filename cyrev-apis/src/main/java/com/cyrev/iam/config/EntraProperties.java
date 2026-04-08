@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "entra")
 public class EntraProperties {
-    private String clientId;
+    private String appId;
     private String clientSecret;
     private String tenantId;
     private String redirectUri;

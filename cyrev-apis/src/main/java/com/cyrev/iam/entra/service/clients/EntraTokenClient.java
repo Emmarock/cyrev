@@ -29,7 +29,7 @@ public class EntraTokenClient {
                 .uri(url)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .bodyValue(
-                        "client_id=" + props.getClientId() +
+                        "client_id=" + props.getAppId() +
                         "&client_secret=" + props.getClientSecret() +
                         "&scope=https://graph.microsoft.com/.default" +
                         "&grant_type=client_credentials")
@@ -45,7 +45,7 @@ public class EntraTokenClient {
                 .uri(url)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters
-                        .fromFormData("client_id", props.getClientId())
+                        .fromFormData("client_id", props.getAppId())
                         .with("client_secret", props.getClientSecret())
                         .with("code", code)
                         .with("redirect_uri", props.getAuthRedirectUri())

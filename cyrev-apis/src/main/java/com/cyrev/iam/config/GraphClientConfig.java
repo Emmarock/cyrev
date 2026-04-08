@@ -15,7 +15,7 @@ public class GraphClientConfig {
     @Bean
     public GraphServiceClient<?> graphClient(EntraProperties props) {
         ClientSecretCredential credential = new ClientSecretCredentialBuilder()
-                .clientId(props.getClientId())
+                .clientId(props.getAppId())
                 .clientSecret(props.getClientSecret())
                 .tenantId(props.getTenantId())
                 .build();

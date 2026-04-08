@@ -15,8 +15,8 @@ public class AzureTokenService {
     @Value("${azure.tenant-id}")
     private String tenantId;
 
-    @Value("${azure.client-id}")
-    private String clientId;
+    @Value("${azure.app-id}")
+    private String appId;
 
     @Value("${azure.client-secret}")
     private String clientSecret;
@@ -31,7 +31,7 @@ public class AzureTokenService {
                 .uri(tokenUrl)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .bodyValue(
-                        "client_id=" + clientId +
+                        "client_id=" + appId +
                         "&client_secret=" + clientSecret +
                         "&scope=https://graph.microsoft.com/.default" +
                         "&grant_type=client_credentials"
