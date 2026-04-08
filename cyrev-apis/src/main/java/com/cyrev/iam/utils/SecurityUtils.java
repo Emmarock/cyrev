@@ -9,9 +9,6 @@ public class SecurityUtils {
         // prevent instantiation
     }
 
-    /**
-     * Returns the current tenant ID from the SecurityContext
-     */
     public static String getCurrentTenant() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -27,9 +24,6 @@ public class SecurityUtils {
         return null;
     }
 
-    /**
-     * Returns the current authenticated user ID (optional)
-     */
     public static String getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
