@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class EntraProperties {
     private String clientId;
     private String clientSecret;
-    private String tenantId;
+    private String appId;
     private String redirectUri;
     private String authRedirectUri;
     private String authority;
