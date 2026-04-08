@@ -1,5 +1,7 @@
 app:
   base-url: https://cybrooke.vercel.app
+api:
+  base-url: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io
 spring:
   main:
     lazy-initialization: true
@@ -12,7 +14,7 @@ spring:
             client-id: ${ENTRA_CLIENT_ID}
             client-secret: ${ENTRA_CLIENT_SECRET}
             authorization-grant-type: authorization_code
-            redirect-uri: ${app.base-url}/api/auth/callback
+            redirect-uri: ${api.base-url}/api/auth/callback
             scope:
               - openid
               - profile
@@ -120,8 +122,8 @@ entra:
   client-id: ${ENTRA_CLIENT_ID}
   client-secret: ${ENTRA_CLIENT_SECRET}
   app-id: ${AZURE_APP_ID}
-  redirect-uri: ${app.base-url}/api/entra/admin-consent-callback
-  auth-redirect-uri: ${app.base-url}/api/auth/callback
+  redirect-uri: ${api.base-url}/api/entra/admin-consent-callback
+  auth-redirect-uri: ${api.base-url}/api/auth/callback
   authority: https://login.microsoftonline.com
   auth-token-url: https://login.microsoftonline.com/common/oauth2/v2.0/token
 sendgrid:
