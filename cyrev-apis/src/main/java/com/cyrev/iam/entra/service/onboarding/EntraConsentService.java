@@ -33,7 +33,7 @@ public class EntraConsentService {
                     .encodeToString(stateJson.getBytes(StandardCharsets.UTF_8));
             return props.getAuthority()
                     + "/common/adminconsent"
-                    + "?client_id=" + URLEncoder.encode(props.getClientId(), StandardCharsets.UTF_8)
+                    + "?client_id=" + URLEncoder.encode(props.getAppId(), StandardCharsets.UTF_8)
                     + "&redirect_uri=" + URLEncoder.encode(props.getRedirectUri(), StandardCharsets.UTF_8)
                     + "&state=" + URLEncoder.encode(stateEncoded, StandardCharsets.UTF_8);
         } catch (JsonProcessingException e) {

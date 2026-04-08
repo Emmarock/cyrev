@@ -154,7 +154,7 @@ public class AuthService {
         String scope = URLEncoder.encode("openid profile email User.Read", StandardCharsets.UTF_8);
 
         return "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
-                + "?client_id=" + props.getClientId()
+                + "?client_id=" + props.getAppId()
                 + "&response_type=code"
                 + "&redirect_uri=" + props.getAuthRedirectUri()
                 + "&scope="+scope
