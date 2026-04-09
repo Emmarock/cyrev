@@ -30,7 +30,6 @@ public class TenantContextFilter extends OncePerRequestFilter {
     private final SaasTenantRepository saasTenantRepository;
     private static final AntPathMatcher matcher = new AntPathMatcher();
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -41,18 +40,64 @@ public class TenantContextFilter extends OncePerRequestFilter {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
             if (auth != null && auth.getPrincipal() instanceof AuthenticatedUser user) {
-                log.info(user.toString());
+
+                log.info("Authenticated user: {}", user);
+
                 String tenantId = user.getTenantId();
-                log.info("User {} has been authenticated and the tenant id is {}", user.getUsername(), tenantId);
-                SaasTenant tenant = saasTenantRepository
-                        .findById(UUID.fromString(tenantId))
-                        .orElse(null);
-                if (tenant == null || !tenant.isConsentGranted() || tenant.getStatus()!= TenantStatus.ACTIVE) {
-                    log.error("Tenant with id {} was not found", tenantId);
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Ensure entra consent has been granted and tenant is active");
+
+                // ✅ CASE 1: Missing tenantId
+                if (tenantId == null || tenantId.isBlank()) {
+
+                    boolean isSuperAdmin = user.getAuthorities().stream()
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));
+
+                    if (isSuperAdmin) {
+                        log.info("Super admin {} accessing without tenant", user.getUsername());
+                        chain.doFilter(request, response);
+                        return;
+                    }
+
+                    log.error("Tenant ID missing for non-admin user {}", user.getUsername());
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Tenant context is required");
                     return;
                 }
 
+                // ✅ CASE 2: Validate UUID format
+                UUID tenantUuid;
+                try {
+                    tenantUuid = UUID.fromString(tenantId);
+                } catch (IllegalArgumentException ex) {
+                    log.error("Invalid tenantId format: {}", tenantId);
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid tenant ID");
+                    return;
+                }
+
+                log.info("User {} authenticated with tenantId {}", user.getUsername(), tenantId);
+
+                // ✅ CASE 3: Fetch tenant
+                SaasTenant tenant = saasTenantRepository
+                        .findById(tenantUuid)
+                        .orElse(null);
+
+                if (tenant == null) {
+                    log.error("Tenant {} not found", tenantId);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Tenant not found");
+                    return;
+                }
+
+                if (!tenant.isConsentGranted()) {
+                    log.error("Tenant {} has not granted consent", tenantId);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Entra consent not granted");
+                    return;
+                }
+
+                if (tenant.getStatus() != TenantStatus.ACTIVE) {
+                    log.error("Tenant {} is not active", tenantId);
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Tenant is not active");
+                    return;
+                }
+
+                // ✅ CASE 4: Set tenant context
                 TenantContextHolder.set(
                         TenantContext.builder()
                                 .entraTenantId(tenant.getEntraTenantId())
@@ -68,6 +113,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
             TenantContextHolder.clear();
         }
     }
+
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
