@@ -49,7 +49,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 if (tenantId == null || tenantId.isBlank()) {
 
                     boolean isSuperAdmin = user.getAuthorities().stream()
-                            .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN") || a.getAuthority().equals("ROLE_ADMIN"));
 
                     if (isSuperAdmin) {
                         log.info("Super admin {} accessing without tenant", user.getUsername());
