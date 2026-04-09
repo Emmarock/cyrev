@@ -11,8 +11,9 @@ public class EntraProperties {
     private String appId;
     private String clientSecret;
     private String tenantId;
-    private String redirectUri;
-    private String authRedirectUri;
+    private String consentRedirectUri;
+    private String loginRedirectUri;
+    private String signupRedirectUri;
     private String authority;
     private String authTokenUrl;
 }

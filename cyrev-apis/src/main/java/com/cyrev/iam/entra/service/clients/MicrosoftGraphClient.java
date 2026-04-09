@@ -4,11 +4,14 @@ import com.cyrev.common.dtos.*;
 import com.cyrev.common.entities.SaasTenant;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.UserRepository;
-import com.cyrev.iam.entra.service.EntraOrganizationService;
+import com.cyrev.iam.entra.service.onboarding.ConsentStateService;
 import com.cyrev.iam.entra.service.onboarding.TenantAccessTokenService;
 import com.cyrev.iam.entra.service.onboarding.SaasTenantService;
+import com.cyrev.iam.entra.service.utils.StatePayload;
 import com.cyrev.iam.exceptions.BadRequestException;
 import com.cyrev.iam.service.UserMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.JWTParser;
 import com.nimbusds.jwt.SignedJWT;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,32 +36,65 @@ public class MicrosoftGraphClient {
     private final SaasTenantService saasTenantService;
     private final ResilientGraphClient resilientGraphClient;
     private final TenantAccessTokenService tokenService;
+    private final ConsentStateService consentStateService;
+    private final ObjectMapper objectMapper;
 
-    public User handleLoginCallback(String code) throws ParseException {
-
-        EntraTokenResponse tokenResponse = tokenService.getTenantUserAccessTokenFromCode(code);
-
-        SignedJWT jwt = (SignedJWT) JWTParser.parse(tokenResponse.getIdToken());  // using Nimbus JWT library
-        String tenantId = jwt.getJWTClaimsSet().getStringClaim("tid"); // "tid" claim has the tenant id
-        SaasTenant tenant = saasTenantService.findTenant(UUID.fromString(tenantId));
-        if (tenant == null) {
-            throw new BadRequestException(
-                    "Your organization has not been onboarded. Contact your admin. If you are an admin ensure consent has been given"
-            );
-        }
+    //TODO: find out what happens if the user who is signing up is not an admin of the cyrev
+    public User handleSignupCallback(String code) throws ParseException, JsonProcessingException {
+        String state = consentStateService.generate();
+        StatePayload payload = new StatePayload(
+                LocalDateTime.now().plusMinutes(10),
+                state
+        );
+        String stateJson = objectMapper.writeValueAsString(payload);
+        String stateEncoded = Base64.getUrlEncoder()
+                .encodeToString(stateJson.getBytes(StandardCharsets.UTF_8));
+        EntraTokenResponse tokenResponse = tokenService.getSignupAccessTokenFromCode(code);
+        log.info("signup token response={}", tokenResponse);
+        String tenantId = getTenantIdFromMicrosoftToken(tokenResponse.getIdToken());
         EntraUser entraUser = getUserProfile(tokenResponse.getAccessToken(), code);
-        if(tenant.getStatus()!= TenantStatus.ACTIVE){
-            saasTenantService.activateTenant(UUID.fromString(tenantId));
-        }
-        Optional<User> existing = userRepository.findUserByEmailAndTenant_Id(entraUser.getMail(), tenant.getId());
+        SaasTenant tenant = saasTenantService.registerTenant(stateEncoded, UUID.fromString(tenantId), false);
+        return createUser(entraUser, tenant);
+    }
+
+    public User createUserOnSignIn(String tokenId, EntraUser entraUser) throws ParseException, JsonProcessingException {
+        String state = consentStateService.generate();
+        StatePayload payload = new StatePayload(
+                LocalDateTime.now().plusMinutes(10),
+                state
+        );
+        String stateJson = objectMapper.writeValueAsString(payload);
+        String stateEncoded = Base64.getUrlEncoder()
+                .encodeToString(stateJson.getBytes(StandardCharsets.UTF_8));
+        String tenantId = getTenantIdFromMicrosoftToken(tokenId);
+        SaasTenant tenant = saasTenantService.registerTenant(stateEncoded, UUID.fromString(tenantId), false);
+        return createUser(entraUser, tenant);
+    }
+
+    private static String getTenantIdFromMicrosoftToken(String tokenId) throws ParseException {
+        SignedJWT jwt = (SignedJWT) JWTParser.parse(tokenId);  // using Nimbus JWT library
+        return jwt.getJWTClaimsSet().getStringClaim("tid");     // "tid" claim has the tenant id
+    }
+
+    public User handleLoginCallback(String code) {
+        EntraTokenResponse tokenResponse = tokenService.getLoginAccessTokenFromCode(code);
+        log.info("login token response={}", tokenResponse);
+        EntraUser entraUser = getUserProfile(tokenResponse.getAccessToken(), code);
+        Optional<User> existing = userRepository.findByEmail(entraUser.getMail());
         log.info("Existing user found: {}", existing.isPresent());
-        return existing.orElseGet(() -> createUser(entraUser, tenant));
+        return existing.orElseGet(() -> {
+            try {
+                return createUserOnSignIn(tokenResponse.getIdToken(), entraUser);
+            } catch (ParseException | JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @NotNull
     private User createUser(EntraUser entraUser, SaasTenant tenant) {
         Optional<User> existing = userRepository.findByEmail(entraUser.getMail());
-        User user = existing.orElseThrow(() -> new BadRequestException("User not found"));
+        User user = existing.orElseGet(User::new);
         user.setEmail(entraUser.getMail());
         user.setFirstName(entraUser.getGivenName());
         user.setLastName(entraUser.getFamilyName());
@@ -63,6 +102,9 @@ public class MicrosoftGraphClient {
         user.setAuthProvider(user.getAuthProvider());
         user.setTenant(tenant);
         user.setEmailVerified(true);
+        user.setMfaEnabled(false);
+        user.setStatus(UserStatus.ACTIVE);
+        user.setAuthProvider(AuthProvider.MICROSOFT);
         user.setRole(user.isMfaEnabled()?user.getRole():Role.MFA_WRITE);
         user.setProviderUserId(entraUser.getId());
         return userRepository.save(user);

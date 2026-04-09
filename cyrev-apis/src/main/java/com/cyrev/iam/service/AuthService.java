@@ -66,7 +66,7 @@ public class AuthService {
         return authResponse;
     }
 
-    public void logout(HttpServletRequest request) throws ParseException {
+    public void logout(HttpServletRequest request) {
         // 1. Extract access token
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -89,7 +89,7 @@ public class AuthService {
         String tenantId = TenantContextHolder.get().getEntraTenantId();
         return UriComponentsBuilder
                 .fromHttpUrl("https://login.microsoftonline.com/" + tenantId + "/oauth2/v2.0/logout")
-                .queryParam("post_logout_redirect_uri", props.getAuthRedirectUri())
+                .queryParam("post_logout_redirect_uri", props.getLoginRedirectUri())
                 .build(true) // IMPORTANT: keeps encoding safe
                 .toUriString();
     }
@@ -150,19 +150,23 @@ public class AuthService {
         throw new UsernameNotFoundException("Invalid MFA code");
     }
 
-    public String buildLoginUrl() {
+    public String buildLoginUrl(boolean connectingEntra, boolean isSignup) {
         String scope = URLEncoder.encode("openid profile email User.Read", StandardCharsets.UTF_8);
-
-        return "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+        String redirectUrl = isSignup ? props.getSignupRedirectUri(): props.getLoginRedirectUri();
+        String defaultUrl = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
                 + "?client_id=" + props.getAppId()
                 + "&response_type=code"
-                + "&redirect_uri=" + props.getAuthRedirectUri()
+                + "&redirect_uri=" + redirectUrl
                 + "&scope="+scope
                 + "&response_mode=query"
                 + "&state=" + UUID.randomUUID();
+        if (connectingEntra) {
+            defaultUrl += "&connectingEntra=true";
+        }
+        return defaultUrl;
     }
 
-    public AuthResponse providerAuth(String code){
+    public AuthResponse providerLoginAuth(String code){
         try{
             User user = microsoftGraphClient.handleLoginCallback(code);
             String token;
@@ -173,7 +177,18 @@ public class AuthService {
             }
             return getAuthResponse(token, user);
         }catch(Exception e){
-            log.error("Provider authentication failed: {}", e.getMessage());
+            log.error("Provider login authentication failed: {}", e.getMessage());
+            throw new AccessDeniedException(e.getMessage());
+        }
+    }
+
+    public AuthResponse providerSignUpAuth(String code){
+        try{
+            User user = microsoftGraphClient.handleSignupCallback(code);
+            String token = jwtTokenProvider.generateMFAToken(user);
+            return getAuthResponse(token, user);
+        }catch(Exception e){
+            log.error("Provider signup authentication failed: {}", e.getMessage());
             throw new AccessDeniedException(e.getMessage());
         }
     }

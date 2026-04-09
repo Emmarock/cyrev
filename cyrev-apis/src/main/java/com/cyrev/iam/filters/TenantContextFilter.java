@@ -49,7 +49,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
                         .orElse(null);
                 if (tenant == null || !tenant.isConsentGranted() || tenant.getStatus()!= TenantStatus.ACTIVE) {
                     log.error("Tenant with id {} was not found", tenantId);
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Tenant not registered");
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Ensure entra consent has been granted and tenant is active");
                     return;
                 }
 
@@ -74,7 +74,9 @@ public class TenantContextFilter extends OncePerRequestFilter {
 
         List<String> patterns = List.of(
                 "/api/auth/**",
-                "/api/entra/connect-entra"
+                "/api/entra/connect-entra",
+                "/api/users/invites",
+                "/api/users/invites/accept"
         );
 
         return patterns.stream().anyMatch(p -> matcher.match(p, path));
