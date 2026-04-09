@@ -4,7 +4,6 @@ import com.cyrev.common.dtos.CyrevApiResponse;
 import com.cyrev.common.dtos.EntraGroup;
 import com.cyrev.common.dtos.EntraOrganization;
 import com.cyrev.common.dtos.EntraUser;
-import com.cyrev.common.entities.SaasTenant;
 import com.cyrev.iam.annotations.TenantAdmin;
 import com.cyrev.iam.entra.service.*;
 import com.cyrev.iam.entra.service.onboarding.EntraConsentService;
@@ -53,8 +52,8 @@ public class EntraController {
                     .location(deniedRedirect)
                     .build();
         }
-        saasTenantService.registerTenant(state, tenant);
-        String redirectUrl = authService.buildLoginUrl();
+        saasTenantService.registerTenant(state, tenant, true);
+        String redirectUrl = authService.buildLoginUrl(true, false);
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(redirectUrl))
                 .build();

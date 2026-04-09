@@ -6,6 +6,7 @@ import com.cyrev.common.repository.SaasTenantRepository;
 import com.cyrev.iam.entra.service.EntraOrganizationService;
 import com.cyrev.iam.entra.service.utils.StatePayload;
 import com.cyrev.iam.exceptions.BadRequestException;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,23 +29,20 @@ public class SaasTenantService {
     private final EntraOrganizationService entraOrganizationService;
     private final ObjectMapper objectMapper;
     @Transactional
-    public void registerTenant(String state, UUID tenantId) {
+    public SaasTenant registerTenant(String state, UUID tenantId, boolean isConsentGranted) {
         try{
             SaasTenant saasTenant = findTenant(tenantId);
+            // This is because the tenant detail might exist before now, and we only need to grant consent
             if(saasTenant != null){
-                return;
+                if(!saasTenant.isConsentGranted() && isConsentGranted){
+                    saasTenant.setConsentGranted(true);
+                    saasTenant.setStatus(TenantStatus.ACTIVE);
+                    saasTenant = saasTenantRepository.save(saasTenant);
+                }
+                return saasTenant;
             }
-            String decoded = new String(
-                    Base64.getUrlDecoder().decode(state),
-                    StandardCharsets.UTF_8
-            );
-            StatePayload  statePayload = objectMapper.readValue(decoded, StatePayload.class);
-            LocalDateTime expiryTime = statePayload.getExpiryTime();
-            String originalState = statePayload.getState();
 
-            if(expiryTime.isBefore(LocalDateTime.now())) {
-                throw new BadRequestException("Consent has expired");
-            }
+            String originalState =getOriginalState(state);
             consentStateService.validate(originalState);
             // get organization
             String orgName = entraOrganizationService.verifyTenant(tenantId.toString()).getDisplayName();
@@ -52,24 +50,39 @@ public class SaasTenantService {
             tenant.setTenantId(tenantId);
             tenant.setEntraTenantId(tenantId.toString());
             tenant.setDisplayName(orgName);
-            tenant.setConsentGranted(true);
+            tenant.setConsentGranted(isConsentGranted);
             tenant.setConsentedAt(Instant.now());
-            tenant.setStatus(TenantStatus.PENDING);
-            saasTenantRepository.save(tenant);
+            tenant.setStatus(isConsentGranted? TenantStatus.ACTIVE : TenantStatus.PENDING);
+            return saasTenantRepository.save(tenant);
         }catch(Exception e){
             log.error("Unable to register tenant: {}", e.getMessage());
             throw new BadRequestException("Unable to register tenant");
         }
     }
 
+    private String getOriginalState(String state) throws JsonProcessingException {
+        String decoded = new String(
+                Base64.getUrlDecoder().decode(state),
+                StandardCharsets.UTF_8
+        );
+        StatePayload  statePayload = objectMapper.readValue(decoded, StatePayload.class);
+        LocalDateTime expiryTime = statePayload.getExpiryTime();
+        String originalState = statePayload.getState();
+
+        if(expiryTime.isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Consent has expired");
+        }
+        return originalState;
+    }
+
     public SaasTenant findTenant( UUID tenantId) {
         return saasTenantRepository.findByEntraTenantId(tenantId.toString()).orElse(null);
     }
 
-    public void activateTenant(UUID tenantId) {
+    public SaasTenant activateTenant(UUID tenantId) {
         SaasTenant tenant = saasTenantRepository.findByEntraTenantId(tenantId.toString())
                 .orElseThrow(()-> new BadRequestException("SaasTenant not found"));
         tenant.setStatus(TenantStatus.ACTIVE);
-        saasTenantRepository.save(tenant);
+        return saasTenantRepository.save(tenant);
     }
 }

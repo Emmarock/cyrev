@@ -122,8 +122,9 @@ entra:
   client-id: ${ENTRA_CLIENT_ID}
   client-secret: ${ENTRA_CLIENT_SECRET}
   app-id: ${AZURE_APP_ID}
-  redirect-uri: ${api.base-url}/api/entra/admin-consent-callback
-  auth-redirect-uri: ${api.base-url}/api/auth/callback
+  consent-redirect-uri: ${api.base-url}/api/entra/admin-consent-callback
+  login-redirect-uri: ${api.base-url}/api/auth/login-callback
+  signup-redirect-uri: ${api.base-url}/api/auth/signup-callback
   authority: https://login.microsoftonline.com
   auth-token-url: https://login.microsoftonline.com/common/oauth2/v2.0/token
 sendgrid:

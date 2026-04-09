@@ -30,16 +30,15 @@ public class InviteService {
     private final EmailVerificationService emailVerificationService;
     private final VerificationTokenGenerator verificationTokenGenerator;
 
+    //TODO: allow user invitation from users who do not have tenant connected
+    // to entra to invite other users, who can then connect to entra
+
     @Transactional
     public UserInviteDTO sendInvite(UUID inviter, InviteUserRequest request) {
-        TenantContext tenantContext = TenantContextHolder.get();
-        String entraTenantId = tenantContext.getEntraTenantId();
+
         User user = userRepository.findById(inviter).orElseThrow(()-> new EntityNotFoundException("User not found"));
         if (inviteRepository.existsByEmailAndStatus(request.getBusinessEmail(), InviteStatus.PENDING)) {
             throw new RuntimeException("User already invited");
-        }
-        if(user.getTenant()==null || entraTenantId==null){
-            throw new RuntimeException("User tenant can not be null");
         }
         String verificationToken = verificationTokenGenerator.generateToken();
         UserInvite invite = UserInvite.builder()
@@ -88,11 +87,13 @@ public class InviteService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setAuthProvider(AuthProvider.CYREV);
         user.setRole(invite.getRole());
-        user.setTenant(inviter.getTenant());
+        user.setTenant(inviter.getTenant()!=null? inviter.getTenant() :  null);
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
         invite.setStatus(InviteStatus.ACCEPTED);
         inviteRepository.save(invite);
-        return AcceptInviteDTO.builder().inviteStatus(invite.getStatus()).message("User created successfully").build();
+        return AcceptInviteDTO.builder()
+                .inviteStatus(invite.getStatus())
+                .message("User created successfully").build();
     }
 }

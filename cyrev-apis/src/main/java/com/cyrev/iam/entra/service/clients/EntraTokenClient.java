@@ -38,7 +38,7 @@ public class EntraTokenClient {
                 .block();
     }
 
-    public EntraTokenResponse getTokenFromCode(String code) {
+    public EntraTokenResponse getTokenFromCode(String code, String redirectUri) {
 
         String url = props.getAuthTokenUrl();
         return webClient.post()
@@ -48,7 +48,7 @@ public class EntraTokenClient {
                         .fromFormData("client_id", props.getAppId())
                         .with("client_secret", props.getClientSecret())
                         .with("code", code)
-                        .with("redirect_uri", props.getAuthRedirectUri())
+                        .with("redirect_uri", redirectUri)
                         .with("grant_type", "authorization_code"))
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, response ->
