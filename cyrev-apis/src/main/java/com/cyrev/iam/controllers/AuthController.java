@@ -144,7 +144,7 @@ public class AuthController {
     public void signupCallback(@RequestParam String code, HttpServletResponse response) {
         try{
             AuthResponse authResponse = authService.providerSignUpAuth(code);
-            String redirectUrl = appBaseUrl +"/signup?accessToken=" + authResponse.getAccessToken();
+            String redirectUrl = appBaseUrl +"/signup/complete?accessToken=" + authResponse.getAccessToken();
             response.sendRedirect(redirectUrl);
         }
         catch (Exception ex) {
