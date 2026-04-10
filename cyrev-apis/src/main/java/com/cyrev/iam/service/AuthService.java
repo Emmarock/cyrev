@@ -26,7 +26,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
@@ -98,6 +97,7 @@ public class AuthService {
     @NotNull
     private static AuthResponse getAuthResponse(String token, User user) {
         SaasTenant saasTenant = user.getTenant();
+        boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
         return new AuthResponse(
                 token,
                 user.getAuthProvider(),
@@ -105,12 +105,14 @@ public class AuthService {
                 user.getUsername(),
                 user.getTenant() != null ? user.getTenant().getId().toString() : null,
                 user.isMfaEnabled(),
-                saasTenant != null && saasTenant.isConsentGranted()
+                consentGranted
         );
     }
 
     private AuthResponse issueFullAccessToken( boolean sendEmail, User user) {
-        String token = jwtTokenProvider.generateToken(user);
+        SaasTenant saasTenant = user.getTenant();
+        boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
+        String token = jwtTokenProvider.generateToken(user, consentGranted);
         if (sendEmail) {
             notificationPublisherService.publishSignupEvent(user.getFirstName(), user.getEmail());
         }
@@ -172,11 +174,13 @@ public class AuthService {
     public AuthResponse providerLoginAuth(String code){
         try{
             User user = microsoftGraphClient.handleLoginCallback(code);
+            SaasTenant saasTenant = user.getTenant();
+            boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
             String token;
             if (!user.isMfaEnabled()) {
                 token = jwtTokenProvider.generateMFAToken(user);
             }else{
-                token = jwtTokenProvider.generateToken(user);
+                token = jwtTokenProvider.generateToken(user, consentGranted);
             }
             return getAuthResponse(token, user);
         }catch(Exception e){
@@ -188,7 +192,9 @@ public class AuthService {
     public AuthResponse providerSignUpAuth(String code){
         try{
             User user = microsoftGraphClient.handleSignupCallback(code);
-            String token = jwtTokenProvider.generateToken(user);
+            SaasTenant saasTenant = user.getTenant();
+            boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
+            String token = jwtTokenProvider.generateToken(user, consentGranted);
             return getAuthResponse(token, user);
         }catch(Exception e){
             log.error("Provider signup authentication failed: {}", e.getMessage());
