@@ -132,7 +132,7 @@ public class GlobalExceptionHandler {
    SERVER ERROR
    ===================== */
 
-    @ExceptionHandler({DataAccessException.class, SQLException.class})
+    @ExceptionHandler({NullPointerException.class, DataAccessException.class, SQLException.class})
     public ResponseEntity<ApiErrorResponse> handleValidationError(
             Exception ex,
             HttpServletRequest request

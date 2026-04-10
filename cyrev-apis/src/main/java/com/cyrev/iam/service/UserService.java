@@ -15,6 +15,7 @@ import com.cyrev.common.services.NotificationPublisherService;
 import com.cyrev.iam.entra.service.onboarding.SaasTenantService;
 import com.cyrev.iam.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -52,9 +54,14 @@ public class UserService {
                 .orElseThrow(()->new BadRequestException("Tenant not found"));
         var user = userRepository.findByEmailAndTenant_Id(completeSignupDTO.getBusinessEmail(), saasTenant.getId())
                 .orElseThrow(()->new BadRequestException("User not found in this tenant"));
-        Address address = userMapper.toAddress(completeSignupDTO.getCompanyAddress());
-        address.setTenant(saasTenant);
-        addressRepository.save(address);
+        Address address = addressRepository.findByTenant_Id(saasTenant.getId())
+                .orElseGet(()->{
+                    Address innerAddress = userMapper.toAddress(completeSignupDTO.getCompanyAddress());
+                    innerAddress.setTenant(saasTenant);
+                    addressRepository.save(innerAddress);
+                    return innerAddress;
+                });
+        log.info("Signup complete with tenant id {} address id {}", saasTenant.getId(), address.getId());
         notificationPublisherService.publishSignupEvent(user.getFirstName(), user.getEmail());
     }
 
