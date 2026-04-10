@@ -185,7 +185,7 @@ public class AuthService {
     public AuthResponse providerSignUpAuth(String code){
         try{
             User user = microsoftGraphClient.handleSignupCallback(code);
-            String token = jwtTokenProvider.generateMFAToken(user);
+            String token = jwtTokenProvider.generateToken(user);
             return getAuthResponse(token, user);
         }catch(Exception e){
             log.error("Provider signup authentication failed: {}", e.getMessage());
