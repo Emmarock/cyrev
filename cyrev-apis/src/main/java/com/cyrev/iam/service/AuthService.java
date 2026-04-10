@@ -58,7 +58,9 @@ public class AuthService {
         );
 
         User user = getUser(request.getEmail());
-        String token = jwtTokenProvider.generateMFAToken(user);
+        SaasTenant saasTenant = user.getTenant();
+        boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
+        String token = jwtTokenProvider.generateMFAToken(user, consentGranted);
         AuthResponse authResponse = getAuthResponse(token, user);
         if (sendEmail) {
             notificationPublisherService.publishLoginEvent(user.getFirstName(), user.getEmail());
@@ -84,9 +86,28 @@ public class AuthService {
         SecurityContextHolder.clearContext();
     }
 
-    public String logout(){
+    public String logoutFull(HttpServletRequest request){
+        String authHeader = request.getHeader("Authorization");
+        Claims claims = null;
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            claims = jwtTokenProvider.parseClaims(token);
+            String jti = claims.getId();
+            Date expiration = claims.getExpiration();
+            long ttl = (expiration.getTime() - System.currentTimeMillis()) / 1000;
+            if (ttl > 0) {
+                tokenBlacklistService.blacklistToken(jti, ttl);
+            }
+        }
         // IMPORTANT: keeps encoding safe
-        String tenantId = TenantContextHolder.get().getEntraTenantId();
+        if(claims==null){
+            throw new AccessDeniedException("No claims found");
+        }
+        Object tenant = claims.get("tenantId");
+        String tenantId = tenant!=null? tenant.toString():null;
+        if(tenantId==null){
+            throw new AccessDeniedException("Only microsoft sign-in can be logout via this route");
+        }
         return UriComponentsBuilder
                 .fromHttpUrl("https://login.microsoftonline.com/" + tenantId + "/oauth2/v2.0/logout")
                 .queryParam("post_logout_redirect_uri", props.getLoginRedirectUri())
@@ -178,7 +199,7 @@ public class AuthService {
             boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
             String token;
             if (!user.isMfaEnabled()) {
-                token = jwtTokenProvider.generateMFAToken(user);
+                token = jwtTokenProvider.generateMFAToken(user, consentGranted);
             }else{
                 token = jwtTokenProvider.generateToken(user, consentGranted);
             }

@@ -49,7 +49,7 @@ public class AuthController {
     }
 
     @GetMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletRequest request) throws ParseException {
+    public ResponseEntity<Void> logout(HttpServletRequest request) {
         authService.logout(request);
         return ResponseEntity.noContent().build();
     }
@@ -57,7 +57,7 @@ public class AuthController {
     @GetMapping("/logout/full")
     public ResponseEntity<Void> logoutFull(HttpServletRequest request) {
 
-        String logoutUrl = authService.logout();
+        String logoutUrl = authService.logoutFull(request);
 
         return ResponseEntity
                 .status(HttpStatus.FOUND)
