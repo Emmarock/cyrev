@@ -130,7 +130,7 @@ public class AuthController {
     public void callback(@RequestParam String code, HttpServletResponse response) {
         try{
             AuthResponse authResponse = authService.providerLoginAuth(code);
-            String redirectUrl = appBaseUrl +"/login?accessToken=" + authResponse.getAccessToken();
+            String redirectUrl = appBaseUrl +"?accessToken=" + authResponse.getAccessToken();
             response.sendRedirect(redirectUrl);
         }
         catch (Exception ex) {
