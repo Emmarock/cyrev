@@ -57,7 +57,7 @@ public class AuthController {
     @GetMapping("/logout/full")
     public ResponseEntity<Void> logoutFull(HttpServletRequest request) {
 
-        String logoutUrl = authService.logout();
+        String logoutUrl = authService.logoutFull(request);
 
         return ResponseEntity
                 .status(HttpStatus.FOUND)
