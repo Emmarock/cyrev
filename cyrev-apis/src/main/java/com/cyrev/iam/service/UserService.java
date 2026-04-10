@@ -1,14 +1,18 @@
 package com.cyrev.iam.service;
 
+import com.cyrev.common.dtos.CompleteSignupDTO;
 import com.cyrev.common.dtos.UserCreationDTO;
 import com.cyrev.common.dtos.UserUpdateRequestDTO;
 import com.cyrev.common.entities.Address;
+import com.cyrev.common.entities.Organization;
 import com.cyrev.common.entities.SaasTenant;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.AddressRepository;
+import com.cyrev.common.repository.OrganizationRepository;
 import com.cyrev.common.repository.SaasTenantRepository;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
+import com.cyrev.iam.entra.service.onboarding.SaasTenantService;
 import com.cyrev.iam.exceptions.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,6 +46,17 @@ public class UserService {
         return userRepository.findUserByIdAndTenant_Id(id,tenantId).orElseThrow(()-> new BadRequestException("User not found in this tenant"));
     }
 
+    @Transactional
+    public void completeSignup(String tenantId, CompleteSignupDTO completeSignupDTO) {
+        SaasTenant saasTenant =  saasTenantRepository.findByEntraTenantId(tenantId)
+                .orElseThrow(()->new BadRequestException("Tenant not found"));
+        var user = userRepository.findUserByEmailAndTenant_Id(completeSignupDTO.getBusinessEmail(), UUID.fromString(tenantId))
+                .orElseThrow(()->new BadRequestException("User not found in this tenant"));
+        Address address = userMapper.toAddress(completeSignupDTO.getCompanyAddress());
+        address.setTenant(saasTenant);
+        addressRepository.save(address);
+        notificationPublisherService.publishSignupEvent(user.getFirstName(), user.getEmail());
+    }
 
     @Transactional
     public User createUser(String tenantId, UserCreationDTO userCreationDTO) throws BadRequestException {
@@ -60,8 +75,8 @@ public class UserService {
         entity.setTenant(saasTenant);
         User user = userRepository.save(entity);
         Address address = userMapper.toAddress(userCreationDTO.getCompanyAddress());
+        address.setTenant(saasTenant);
         addressRepository.save(address);
-
         userRepository.save(user);
         // create email event here
         String verificationLink = emailVerificationService.generateVerificationLink(user);
