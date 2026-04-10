@@ -52,8 +52,10 @@ public class MicrosoftGraphClient {
         EntraTokenResponse tokenResponse = tokenService.getSignupAccessTokenFromCode(code);
         log.info("signup token response={}", tokenResponse);
         String tenantId = getTenantIdFromMicrosoftToken(tokenResponse.getIdToken());
+        log.info("tenantId={} received from microsoft", tenantId);
         EntraUser entraUser = getUserProfile(tokenResponse.getAccessToken(), code);
         SaasTenant tenant = saasTenantService.registerTenant(stateEncoded, UUID.fromString(tenantId), false);
+        log.info("tenant={} registered successfully", tenant);
         return createUser(entraUser, tenant);
     }
 
