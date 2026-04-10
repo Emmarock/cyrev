@@ -24,7 +24,7 @@ public class JwtTokenProvider {
     @Value("${security.jwt.mfa-expiry}")
     private long mfaExpiration;
 
-    public String generateToken(User user) {
+    public String generateToken(User user, boolean entraConnected) {
         String jti = UUID.randomUUID().toString();
         return Jwts.builder()
                 .setId(jti)
@@ -35,6 +35,7 @@ public class JwtTokenProvider {
                 .claim("authProvider", user.getAuthProvider())
                 .claim("roles", user.getRole()) // ["ADMIN","USER"]
                 .claim("isMfaEnabled", user.isMfaEnabled())
+                .claim("isEntraConnected", entraConnected)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes()), SignatureAlgorithm.HS256)
