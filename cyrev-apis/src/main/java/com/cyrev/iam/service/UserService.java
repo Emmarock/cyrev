@@ -50,7 +50,7 @@ public class UserService {
     public void completeSignup(String tenantId, CompleteSignupDTO completeSignupDTO) {
         SaasTenant saasTenant =  saasTenantRepository.findByEntraTenantId(tenantId)
                 .orElseThrow(()->new BadRequestException("Tenant not found"));
-        var user = userRepository.findUserByEmailAndTenant_Id(completeSignupDTO.getBusinessEmail(), UUID.fromString(tenantId))
+        var user = userRepository.findByEmailAndTenant_Id(completeSignupDTO.getBusinessEmail(), UUID.fromString(tenantId))
                 .orElseThrow(()->new BadRequestException("User not found in this tenant"));
         Address address = userMapper.toAddress(completeSignupDTO.getCompanyAddress());
         address.setTenant(saasTenant);

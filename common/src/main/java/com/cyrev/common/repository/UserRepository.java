@@ -25,5 +25,5 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
 
     Optional<User> findUserByIdAndTenant_Id(UUID id, UUID tenantId);
-    Optional<User> findUserByEmailAndTenant_Id(String email, UUID tenantId);
+    Optional<User> findByEmailAndTenant_Id(String email, UUID tenantId);
 }
