@@ -42,7 +42,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String generateMFAToken(User user) {
+    public String generateMFAToken(User user, boolean entraConnected) {
         String jti = UUID.randomUUID().toString();
         return Jwts.builder()
                 .setSubject(user.getId().toString())
@@ -53,6 +53,7 @@ public class JwtTokenProvider {
                 .claim("authProvider", user.getAuthProvider())
                 .claim("roles", Role.MFA_WRITE.toString())
                 .claim("isMfaEnabled", user.isMfaEnabled())
+                .claim("isEntraConnected", entraConnected)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + mfaExpiration))
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes()), SignatureAlgorithm.HS256)

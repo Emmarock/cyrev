@@ -58,7 +58,9 @@ public class AuthService {
         );
 
         User user = getUser(request.getEmail());
-        String token = jwtTokenProvider.generateMFAToken(user);
+        SaasTenant saasTenant = user.getTenant();
+        boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
+        String token = jwtTokenProvider.generateMFAToken(user, consentGranted);
         AuthResponse authResponse = getAuthResponse(token, user);
         if (sendEmail) {
             notificationPublisherService.publishLoginEvent(user.getFirstName(), user.getEmail());
@@ -178,7 +180,7 @@ public class AuthService {
             boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
             String token;
             if (!user.isMfaEnabled()) {
-                token = jwtTokenProvider.generateMFAToken(user);
+                token = jwtTokenProvider.generateMFAToken(user, consentGranted);
             }else{
                 token = jwtTokenProvider.generateToken(user, consentGranted);
             }
