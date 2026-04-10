@@ -103,7 +103,11 @@ public class AuthService {
         if(claims==null){
             throw new AccessDeniedException("No claims found");
         }
-        String tenantId = claims.get("tenantId").toString();
+        Object tenant = claims.get("tenantId");
+        String tenantId = tenant!=null? tenant.toString():null;
+        if(tenantId==null){
+            throw new AccessDeniedException("Only microsoft sign-in can be logout via this route");
+        }
         return UriComponentsBuilder
                 .fromHttpUrl("https://login.microsoftonline.com/" + tenantId + "/oauth2/v2.0/logout")
                 .queryParam("post_logout_redirect_uri", props.getLoginRedirectUri())
