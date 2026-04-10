@@ -2,6 +2,7 @@ package com.cyrev.iam.service;
 
 import com.cyrev.common.dtos.AuthResponse;
 import com.cyrev.common.dtos.LoginRequest;
+import com.cyrev.common.entities.SaasTenant;
 import com.cyrev.common.entities.TenantContextHolder;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.UserRepository;
@@ -96,13 +97,15 @@ public class AuthService {
 
     @NotNull
     private static AuthResponse getAuthResponse(String token, User user) {
+        SaasTenant saasTenant = user.getTenant();
         return new AuthResponse(
                 token,
                 user.getAuthProvider(),
                 user.getId(),
                 user.getUsername(),
                 user.getTenant() != null ? user.getTenant().getId().toString() : null,
-                user.isMfaEnabled()
+                user.isMfaEnabled(),
+                saasTenant != null && saasTenant.isConsentGranted()
         );
     }
 
