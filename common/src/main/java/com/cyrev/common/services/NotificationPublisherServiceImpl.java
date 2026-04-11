@@ -144,7 +144,6 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
         message.put("firstname", firstname);
         message.put("subject", "Signup Notification");
         EmailEvent event = new EmailEvent(email, fileName, message);
-
         eventPublisher.publishEvent(event);
     }
 
