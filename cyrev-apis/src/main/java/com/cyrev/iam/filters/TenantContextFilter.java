@@ -85,7 +85,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                if (!request.getRequestURI().equals("/api/users/complete-signup")) {
+                if (request.getRequestURI().equals("/api/users/complete-signup")) {
                     log.info("User {} is completing signup process", user.getUserId().toString());
                     chain.doFilter(request, response);
                     return;
