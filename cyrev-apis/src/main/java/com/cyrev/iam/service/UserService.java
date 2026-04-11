@@ -55,6 +55,7 @@ public class UserService {
                     .orElseThrow(()->new BadRequestException("Tenant not found"));
             var user = userRepository.findByEmailAndTenant_Id(completeSignupDTO.getBusinessEmail(), saasTenant.getId())
                     .orElseThrow(()->new BadRequestException("User not found in this tenant"));
+            log.info("about to create address with tenant id {} user id {}", saasTenant.getId(), user.getId());
             Address address = addressRepository.findByTenant_Id(saasTenant.getId())
                     .orElseGet(()->{
                         Address innerAddress = userMapper.toAddress(completeSignupDTO.getCompanyAddress());

@@ -77,7 +77,7 @@ public class UserController {
     }
 
     @PostMapping("/complete-signup")
-    public ResponseEntity<CyrevApiResponse<User>> completeMicrosoftSignUp(@Valid @RequestBody CompleteSignupDTO completeSignupRequest) throws BadRequestException {
+    public ResponseEntity<CyrevApiResponse<User>> completeMicrosoftSignUp(@Valid @RequestBody CompleteSignupDTO completeSignupRequest) {
         TenantContext tenant = TenantContextHolder.get();
         userService.completeSignup(tenant.getEntraTenantId(), completeSignupRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
