@@ -190,12 +190,7 @@ public class AuthService {
             User user = microsoftGraphClient.handleLoginCallback(code);
             SaasTenant saasTenant = user.getTenant();
             boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
-            String token;
-            if (!user.isMfaEnabled()) {
-                token = jwtTokenProvider.generateMFAToken(user, consentGranted);
-            }else{
-                token = jwtTokenProvider.generateToken(user, consentGranted);
-            }
+            String token = jwtTokenProvider.generateToken(user, consentGranted);
             return getAuthResponse(token, user);
         }catch(Exception e){
             log.error("Provider login authentication failed: {}", e.getMessage());
