@@ -160,7 +160,7 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
 
     @Override
     public void publishVerificationEvent(String firstname, String email, String url) {
-        String templatePath = "templates/verification.html";
+        String templatePath = "verification.html";
         Map<String, Object> message = new HashMap<>();
         message.put("firstname", firstname);
         message.put("url", url);
