@@ -164,7 +164,6 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
         Map<String, Object> message = new HashMap<>();
         message.put("firstname", firstname);
         message.put("url", url);
-        message.put("year", url);
         message.put("subject", "CyRev Verification Link");
         EmailEvent event = new EmailEvent(email, templatePath, message);
         eventPublisher.publishEvent(event);
