@@ -50,19 +50,23 @@ public class UserService {
 
     @Transactional
     public void completeSignup(String tenantId, CompleteSignupDTO completeSignupDTO) {
-        SaasTenant saasTenant =  saasTenantRepository.findByEntraTenantId(tenantId)
-                .orElseThrow(()->new BadRequestException("Tenant not found"));
-        var user = userRepository.findByEmailAndTenant_Id(completeSignupDTO.getBusinessEmail(), saasTenant.getId())
-                .orElseThrow(()->new BadRequestException("User not found in this tenant"));
-        Address address = addressRepository.findByTenant_Id(saasTenant.getId())
-                .orElseGet(()->{
-                    Address innerAddress = userMapper.toAddress(completeSignupDTO.getCompanyAddress());
-                    innerAddress.setTenant(saasTenant);
-                    addressRepository.save(innerAddress);
-                    return innerAddress;
-                });
-        log.info("Signup complete with tenant id {} address id {}", saasTenant.getId(), address.getId());
-        notificationPublisherService.publishSignupEvent(user.getFirstName(), user.getEmail());
+        try{
+            SaasTenant saasTenant =  saasTenantRepository.findByEntraTenantId(tenantId)
+                    .orElseThrow(()->new BadRequestException("Tenant not found"));
+            var user = userRepository.findByEmailAndTenant_Id(completeSignupDTO.getBusinessEmail(), saasTenant.getId())
+                    .orElseThrow(()->new BadRequestException("User not found in this tenant"));
+            Address address = addressRepository.findByTenant_Id(saasTenant.getId())
+                    .orElseGet(()->{
+                        Address innerAddress = userMapper.toAddress(completeSignupDTO.getCompanyAddress());
+                        innerAddress.setTenant(saasTenant);
+                        addressRepository.save(innerAddress);
+                        return innerAddress;
+                    });
+            log.info("Signup complete with tenant id {} address id {}", saasTenant.getId(), address.getId());
+            notificationPublisherService.publishSignupEvent(user.getFirstName(), user.getEmail());
+        }catch (Exception e){
+            log.error(e.getMessage());
+        }
     }
 
     @Transactional
