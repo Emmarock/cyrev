@@ -49,7 +49,8 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 if (tenantId == null || tenantId.isBlank()) {
 
                     boolean isSuperAdmin = user.getAuthorities().stream()
-                            .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN") || a.getAuthority().equals("ROLE_ADMIN"));
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN")
+                                    || a.getAuthority().equals("ROLE_ADMIN"));
 
                     if (isSuperAdmin) {
                         log.info("Super admin {} accessing without tenant", user.getUsername());
@@ -85,27 +86,29 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                if (request.getRequestURI().equals("/api/users/complete-signup")) {
-                    log.info("User {} is completing signup process", user.getUserId().toString());
-                    chain.doFilter(request, response);
-                    setTenantContext(tenant);
-                    log.info("Tenant {} context has been set", tenant);
-                    return;
-                }
-                if (!tenant.isConsentGranted()) {
-                    log.error("Tenant {} has not granted consent", tenantId);
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Entra consent not granted");
-                    return;
+                // ✅ SPECIAL CASE: skip strict checks for signup completion
+                boolean isSignupEndpoint =
+                        matcher.match("/api/users/complete-signup", request.getRequestURI());
+
+                if (!isSignupEndpoint) {
+
+                    if (!tenant.isConsentGranted()) {
+                        log.error("Tenant {} has not granted consent", tenantId);
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Entra consent not granted");
+                        return;
+                    }
+
+                    if (tenant.getStatus() != TenantStatus.ACTIVE) {
+                        log.error("Tenant {} is not active", tenantId);
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Tenant is not active");
+                        return;
+                    }
                 }
 
-                if (tenant.getStatus() != TenantStatus.ACTIVE) {
-                    log.error("Tenant {} is not active", tenantId);
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Tenant is not active");
-                    return;
-                }
-
-                // ✅ CASE 4: Set tenant context
+                // ✅ ALWAYS set context BEFORE proceeding
                 setTenantContext(tenant);
+
+                log.info("Tenant context set for tenant {}", tenantId);
             }
 
             chain.doFilter(request, response);
@@ -120,7 +123,6 @@ public class TenantContextFilter extends OncePerRequestFilter {
                 TenantContext.builder()
                         .entraTenantId(tenant.getEntraTenantId())
                         .internalTenantId(tenant.getId())
-                        .plan(tenant.getPlan())
                         .build()
         );
     }

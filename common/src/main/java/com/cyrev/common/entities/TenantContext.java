@@ -10,6 +10,4 @@ import java.util.UUID;
 public class TenantContext {
     private final String entraTenantId;
     private final UUID internalTenantId;
-    private final String plan;
-    private final String userObjectId;
 }
