@@ -7,14 +7,18 @@ import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
 import com.sendgrid.helpers.mail.objects.Personalization;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.Year;
 import java.util.Map;
+
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SendGridEmailService implements NotificationService{
 
     private final SendGrid sendGrid;
@@ -27,9 +31,11 @@ public class SendGridEmailService implements NotificationService{
         return MailProvider.SENDGRID;
     }
 
-    @Override
-    public void sendHtmlEmail(String to, String subject, Map<String,Object> body) {
+    private final EmailTemplateService emailTemplateService;
 
+    @Override
+    public void sendHtmlEmail(String to, String fileName, Map<String,Object> body) {
+        sendTemplateEmail(to, fileName, body);
     }
 
     @Override
@@ -54,30 +60,44 @@ public class SendGridEmailService implements NotificationService{
 
     public void sendTemplateEmail(
             String to,
-            String templateId,
+            String fileName,
             Map<String, Object> dynamicData
-    ) throws IOException {
+    ) {
 
-        Mail mail = new Mail();
-        mail.setFrom(new Email(fromEmail));
-        mail.setTemplateId(templateId);
+        try{
+            dynamicData.putIfAbsent("year", Year.now().getValue());
+            dynamicData.putIfAbsent("supportEmail", "support@cyrev.com");
+            dynamicData.putIfAbsent("email", to);
+            String content = emailTemplateService.renderTemplate(fileName, dynamicData);
 
-        Personalization personalization = new Personalization();
-        personalization.addTo(new Email(to));
+            Mail mail = new Mail();
+            mail.setFrom(new Email(fromEmail));
+            mail.setSubject((String) dynamicData.getOrDefault("subject", "Cyrev Notification"));
 
-        dynamicData.forEach(personalization::addDynamicTemplateData);
+            Personalization personalization = new Personalization();
+            personalization.addTo(new Email(to));
+            mail.addPersonalization(personalization);
 
-        mail.addPersonalization(personalization);
+            Content htmlContent = new Content("text/html", content);
+            mail.addContent(htmlContent);
 
-        Request request = new Request();
-        request.setMethod(Method.POST);
-        request.setEndpoint("mail/send");
-        request.setBody(mail.build());
+            Request request = new Request();
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
 
-        Response response = sendGrid.api(request);
+            Response response = sendGrid.api(request);
 
-        if (response.getStatusCode() >= 400) {
-            throw new RuntimeException("SendGrid Error: " + response.getBody());
+            if (response.getStatusCode() >= 400) {
+                log.error("SendGrid error: status={}, body={}",
+                        response.getStatusCode(),
+                        response.getBody());
+
+                throw new RuntimeException("SendGrid Error: " + response.getBody());
+            }
+            log.info("Email sent successfully to {}", to);
+        }catch(Exception e){
+            log.error(e.getMessage());
         }
     }
 }

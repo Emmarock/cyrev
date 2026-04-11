@@ -36,7 +36,7 @@ public class MicrosoftEmailNotificationService implements NotificationService {
     }
 
     @Override
-    public void sendHtmlEmail(String to, String subject, Map<String,Object> body) {
-        graphMailService.sendMail(to, subject, body.get("html").toString());
+    public void sendHtmlEmail(String to, String templatePath, Map<String,Object> body) {
+        graphMailService.sendMail(to, templatePath, body.get("html").toString());
     }
 }

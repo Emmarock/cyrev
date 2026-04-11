@@ -8,13 +8,17 @@ import java.util.Map;
 public class EmailEvent {
 
     private final String to;
+    private String fileName;
     private final Map<String,Object> body;
-    private final boolean html;
 
-    public EmailEvent(String to, Map<String,Object> body, boolean html) {
+    public EmailEvent(String to, String fileName, Map<String,Object> body) {
         this.to = to;
+        this.fileName = fileName;
         this.body = body;
-        this.html = html;
     }
 
+    public EmailEvent(String to, Map<String, Object> body) {
+        this.body = body;
+        this.to = to;
+    }
 }

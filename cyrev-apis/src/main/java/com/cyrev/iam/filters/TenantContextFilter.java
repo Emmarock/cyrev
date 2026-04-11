@@ -85,7 +85,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                if (!tenant.isConsentGranted()) {
+                if (!tenant.isConsentGranted() && !request.getRequestURI().equals("/api/users/complete-signup")) {
                     log.error("Tenant {} has not granted consent", tenantId);
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Entra consent not granted");
                     return;
