@@ -45,11 +45,8 @@ public class AuthService {
     private final EntraProperties props;
     private final MicrosoftGraphClient microsoftGraphClient;
     private final TokenBlacklistService tokenBlacklistService;
-    public AuthResponse login(LoginRequest request) {
-       return login(request,true);
-    }
 
-    public AuthResponse login(LoginRequest request, boolean sendEmail) {
+    public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -62,9 +59,7 @@ public class AuthService {
         boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
         String token = jwtTokenProvider.generateMFAToken(user, consentGranted);
         AuthResponse authResponse = getAuthResponse(token, user);
-        if (sendEmail) {
-            notificationPublisherService.publishLoginEvent(user.getFirstName(), user.getEmail());
-        }
+        notificationPublisherService.publishLoginEvent(user.getFirstName(), user.getEmail());
         return authResponse;
     }
 
@@ -130,13 +125,11 @@ public class AuthService {
         );
     }
 
-    private AuthResponse issueFullAccessToken( boolean sendEmail, User user) {
+    private AuthResponse issueFullAccessToken( User user) {
         SaasTenant saasTenant = user.getTenant();
         boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
         String token = jwtTokenProvider.generateToken(user, consentGranted);
-        if (sendEmail) {
-            notificationPublisherService.publishSignupEvent(user.getFirstName(), user.getEmail());
-        }
+        notificationPublisherService.publishSignupEvent(user.getFirstName(), user.getEmail());
         return getAuthResponse(token, user);
     }
 
@@ -171,7 +164,7 @@ public class AuthService {
         if (mfaVerified) {
             user.setMfaEnabled(true);
             userRepository.save(user);
-            return issueFullAccessToken(true, user);
+            return issueFullAccessToken( user);
         }
         throw new UsernameNotFoundException("Invalid MFA code");
     }

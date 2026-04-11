@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public interface NotificationService {
     MailProvider getProvider();
-    void sendHtmlEmail(String to, String subject, Map<String,Object> body);
+    void sendHtmlEmail(String to, String templatePath, Map<String,Object> body);
 
     void sendTextEmail(String to, String subject, String body) throws IOException;
 }

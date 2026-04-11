@@ -9,14 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT;
 
 @Component
 @RequiredArgsConstructor
@@ -36,14 +33,14 @@ public class EmailEventListener {
     }
 
     @Async
-    @TransactionalEventListener(phase = AFTER_COMMIT)
+    @EventListener
     public void handleEmailEvent(EmailEvent event) throws IOException {
         Map<String,Object> content= event.getBody();
         log.info("Received email event for user {}",event.getTo());
-        if (event.isHtml()) {
+        if (event.getFileName() != null) {
             getEmailNotificationService().sendHtmlEmail(
                     event.getTo(),
-                    content.get("subject").toString(),
+                    event.getFileName(),
                     content
             );
         } else {

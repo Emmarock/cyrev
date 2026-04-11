@@ -43,7 +43,7 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
         message.put("body", body);
         message.put("subject", subject);
 
-        EmailEvent event = new EmailEvent(user.getEmail(),message,false);
+        EmailEvent event = new EmailEvent(user.getEmail(),message);
         eventPublisher.publishEvent(event);
     }
 
@@ -62,7 +62,7 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
         Map<String, Object> message = new HashMap<>();
         message.put("body", body);
         message.put("subject", subject);
-        EmailEvent event = new EmailEvent(user.getEmail(),message,false);
+        EmailEvent event = new EmailEvent(user.getEmail(),message);
         eventPublisher.publishEvent(event);
     }
 
@@ -89,7 +89,7 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
         Map<String, Object> message = new HashMap<>();
         message.put("body", body);
         message.put("subject", subject);
-        EmailEvent event = new EmailEvent(user.getEmail(),message,false);
+        EmailEvent event = new EmailEvent(user.getEmail(),message);
         eventPublisher.publishEvent(event);
     }
 
@@ -112,7 +112,7 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
         Map<String, Object> message = new HashMap<>();
         message.put("body", body);
         message.put("subject", subject);
-        EmailEvent event = new EmailEvent(email,message,false);
+        EmailEvent event = new EmailEvent(email,message);
         eventPublisher.publishEvent(event);
     }
 
@@ -133,59 +133,41 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
         Map<String, Object> message = new HashMap<>();
         message.put("body", body);
         message.put("subject", subject);
-        EmailEvent event = new EmailEvent(user.getEmail(), message,false);
+        EmailEvent event = new EmailEvent(user.getEmail(), message);
         eventPublisher.publishEvent(event);
     }
 
     @Override
     public void publishSignupEvent(String firstname, String email) {
-        String body = """
-            Welcome  %s 🎉,
-            
-            Your have successfully signup on CYREV.
-            
-            If you did not initiate this action, please contact support immediately
-            """.formatted(firstname);
         Map<String, Object> message = new HashMap<>();
-        message.put("body", body);
+        String fileName = "signup.html";
+        message.put("firstname", firstname);
         message.put("subject", "Signup Notification");
-        EmailEvent event = new EmailEvent(email, message, false);
+        EmailEvent event = new EmailEvent(email, fileName, message);
 
         eventPublisher.publishEvent(event);
     }
 
     @Override
     public void publishLoginEvent(String firstname, String email) {
-        String body = """
-            Welcome  %s 🎉,
-            
-            Your have successfully login on CYREV.
-            
-            If you did not initiate this action, please contact support immediately
-            """.formatted(firstname);
+        String fileName = "login.html";
         Map<String, Object> message = new HashMap<>();
-        message.put("body", body);
+        message.put("firstname", firstname);
         message.put("subject", "Login Notification");
-        EmailEvent event = new EmailEvent(email, message, false);
+        EmailEvent event = new EmailEvent(email, fileName, message);
 
         eventPublisher.publishEvent(event);
     }
 
     @Override
     public void publishVerificationEvent(String firstname, String email, String url) {
-        String body = """
-            Welcome  %s 🎉, \n
-            
-            We are happy to have you onboard CYREV. \n
-            
-            please click on this <a href="%s">link</a> to complete your email verification. \n
-            
-            If you or your system admin did not initiate this action, please contact support immediately.
-            """.formatted(firstname, url);
+        String templatePath = "templates/verification.html";
         Map<String, Object> message = new HashMap<>();
-        message.put("body", body);
+        message.put("firstname", firstname);
+        message.put("url", url);
+        message.put("year", url);
         message.put("subject", "CyRev Verification Link");
-        EmailEvent event = new EmailEvent(email, message, false);
+        EmailEvent event = new EmailEvent(email, templatePath, message);
         eventPublisher.publishEvent(event);
         log.info("publish email verification link to user");
     }
