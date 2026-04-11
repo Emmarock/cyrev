@@ -9,6 +9,7 @@ import com.cyrev.iam.annotations.TenantAdmin;
 import com.cyrev.iam.service.InviteService;
 import com.cyrev.iam.service.UserService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
+@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -79,6 +81,7 @@ public class UserController {
     @PostMapping("/complete-signup")
     public ResponseEntity<CyrevApiResponse<User>> completeMicrosoftSignUp(@Valid @RequestBody CompleteSignupDTO completeSignupRequest) {
         TenantContext tenant = TenantContextHolder.get();
+        log.info("calling completeMicrosoftSignUp");
         userService.completeSignup(tenant.getEntraTenantId(), completeSignupRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new CyrevApiResponse<>(
