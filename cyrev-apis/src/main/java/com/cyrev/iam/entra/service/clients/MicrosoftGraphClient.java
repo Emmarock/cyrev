@@ -107,7 +107,7 @@ public class MicrosoftGraphClient {
         user.setMfaEnabled(false);
         user.setStatus(UserStatus.ACTIVE);
         user.setAuthProvider(AuthProvider.MICROSOFT);
-        user.setRole(user.isMfaEnabled()?user.getRole():Role.MFA_WRITE);
+        user.setRole(Role.ADMIN);
         user.setProviderUserId(entraUser.getId());
         return userRepository.save(user);
     }
