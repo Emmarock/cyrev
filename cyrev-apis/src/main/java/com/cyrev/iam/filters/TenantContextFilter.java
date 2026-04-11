@@ -89,6 +89,7 @@ public class TenantContextFilter extends OncePerRequestFilter {
                     log.info("User {} is completing signup process", user.getUserId().toString());
                     chain.doFilter(request, response);
                     setTenantContext(tenant);
+                    log.info("Tenant {} context has been set", tenant);
                     return;
                 }
                 if (!tenant.isConsentGranted()) {
