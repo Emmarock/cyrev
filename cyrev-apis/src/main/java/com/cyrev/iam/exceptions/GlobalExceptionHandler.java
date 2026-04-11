@@ -137,6 +137,7 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request
     ) {
+        log.error("Unhandled exception", ex);
         return buildError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "unable to process request",
