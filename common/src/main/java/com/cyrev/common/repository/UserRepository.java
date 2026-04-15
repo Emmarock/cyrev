@@ -3,6 +3,8 @@ package com.cyrev.common.repository;
 import com.cyrev.common.dtos.AuthProvider;
 import com.cyrev.common.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             AuthProvider provider,
             String providerUserId
     );
+    @Query("SELECT u FROM User u WHERE u.email LIKE CONCAT('%@', :domain)")
+    Optional<User> findByEmailDomain(@Param("domain") String domain);
 
 
     Optional<User> findUserByIdAndTenant_Id(UUID id, UUID tenantId);

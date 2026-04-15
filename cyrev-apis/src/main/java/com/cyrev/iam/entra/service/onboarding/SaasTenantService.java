@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ public class SaasTenantService {
     private final ConsentStateService consentStateService;
     private final EntraOrganizationService entraOrganizationService;
     private final ObjectMapper objectMapper;
+    private final ApplicationEventPublisher publisher;
     @Transactional
     public SaasTenant registerTenant(String state, UUID tenantId, boolean isConsentGranted) {
         try{
@@ -53,7 +55,8 @@ public class SaasTenantService {
             tenant.setConsentGranted(isConsentGranted);
             tenant.setConsentedAt(Instant.now());
             tenant.setStatus(isConsentGranted? TenantStatus.ACTIVE : TenantStatus.PENDING);
-            return saasTenantRepository.save(tenant);
+            tenant = saasTenantRepository.save(tenant);
+            return tenant;
         }catch(Exception e){
             log.error("Unable to register tenant: {}", e.getMessage());
             throw new BadRequestException("Unable to register tenant");

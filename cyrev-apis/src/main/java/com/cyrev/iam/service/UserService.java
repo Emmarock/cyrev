@@ -79,6 +79,10 @@ public class UserService {
         if(userRepository.findByUsername(userCreationDTO.getUsername()).isPresent()) {
             throw new BadRequestException("Username already exists");
         }
+        if(userRepository.findByEmailDomain(userCreationDTO.getBusinessEmail().split("@")[1]).isPresent()) {
+            throw new BadRequestException("Domain already exists in cyrev, please contact our customer support for more information.");
+        }
+
         SaasTenant saasTenant = null;
         if(tenantId!=null) {
             saasTenant = saasTenantRepository.findByEntraTenantId(tenantId).orElseThrow(()->new BadRequestException("Tenant not found"));

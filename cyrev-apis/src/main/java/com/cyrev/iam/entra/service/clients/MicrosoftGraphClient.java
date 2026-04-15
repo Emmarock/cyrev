@@ -54,6 +54,9 @@ public class MicrosoftGraphClient {
         String tenantId = getTenantIdFromMicrosoftToken(tokenResponse.getIdToken());
         log.info("tenantId={} received from microsoft", tenantId);
         EntraUser entraUser = getUserProfile(tokenResponse.getAccessToken(), code);
+        if(userRepository.findByEmailDomain(entraUser.getMail().split("@")[1]).isPresent()) {
+            throw new BadRequestException("Domain already exists in cyrev, please contact our customer support for more information.");
+        }
         SaasTenant tenant = saasTenantService.registerTenant(stateEncoded, UUID.fromString(tenantId), false);
         log.info("tenant={} registered successfully", tenant);
         return createUser(entraUser, tenant);
