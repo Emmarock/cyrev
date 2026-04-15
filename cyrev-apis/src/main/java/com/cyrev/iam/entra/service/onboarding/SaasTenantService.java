@@ -29,7 +29,6 @@ public class SaasTenantService {
     private final ConsentStateService consentStateService;
     private final EntraOrganizationService entraOrganizationService;
     private final ObjectMapper objectMapper;
-    private final ApplicationEventPublisher publisher;
     @Transactional
     public SaasTenant registerTenant(String state, UUID tenantId, boolean isConsentGranted) {
         try{
@@ -82,10 +81,4 @@ public class SaasTenantService {
         return saasTenantRepository.findByEntraTenantId(tenantId.toString()).orElse(null);
     }
 
-    public SaasTenant activateTenant(UUID tenantId) {
-        SaasTenant tenant = saasTenantRepository.findByEntraTenantId(tenantId.toString())
-                .orElseThrow(()-> new BadRequestException("SaasTenant not found"));
-        tenant.setStatus(TenantStatus.ACTIVE);
-        return saasTenantRepository.save(tenant);
-    }
 }

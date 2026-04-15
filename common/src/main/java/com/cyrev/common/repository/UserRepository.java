@@ -20,10 +20,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
 
     boolean existsByEmail(String email);
-    Optional<User> findByAuthProviderAndProviderUserId(
-            AuthProvider provider,
-            String providerUserId
-    );
     @Query("SELECT u FROM User u WHERE u.email LIKE CONCAT('%@', :domain)")
     Optional<User> findByEmailDomain(@Param("domain") String domain);
 
