@@ -118,7 +118,6 @@ public class MicrosoftGraphClient {
                 .userPrincipalName((String) response.get("userPrincipalName"))
                 .givenName((String) response.get("givenName"))
                 .familyName((String) response.get("surname"))
-                .accountEnabled((boolean) response.get("accountEnabled"))
                 .build();
     }
     public EntraUser getUserProfile(String accessToken, String code) {
