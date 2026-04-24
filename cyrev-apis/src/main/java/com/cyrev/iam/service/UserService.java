@@ -80,7 +80,7 @@ public class UserService {
             throw new BadRequestException("Username already exists");
         }
         if(userRepository.findByEmailDomain(userCreationDTO.getBusinessEmail().split("@")[1]).isPresent()) {
-            throw new BadRequestException("Domain already exists in cyrev, please contact our customer support for more information.");
+            throw new BadRequestException("Your organization already exists in cyrev, please contact our customer support for more information.");
         }
 
         SaasTenant saasTenant = null;
