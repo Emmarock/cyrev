@@ -87,13 +87,9 @@ public class MicrosoftGraphClient {
         EntraUser entraUser = getUserProfile(tokenResponse.getAccessToken(), code);
         Optional<User> existing = userRepository.findByEmail(entraUser.getMail());
         log.info("Existing user found: {}", existing.isPresent());
-        return existing.orElseGet(() -> {
-            try {
-                return createUserOnSignIn(tokenResponse.getIdToken(), entraUser);
-            } catch (ParseException | JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        return existing.orElseThrow(
+                ()-> new BadRequestException("You need an administrator invite to login to cyrev")
+        );
     }
 
     @NotNull
@@ -122,6 +118,7 @@ public class MicrosoftGraphClient {
                 .userPrincipalName((String) response.get("userPrincipalName"))
                 .givenName((String) response.get("givenName"))
                 .familyName((String) response.get("surname"))
+                .accountEnabled((boolean) response.get("accountEnabled"))
                 .build();
     }
     public EntraUser getUserProfile(String accessToken, String code) {
