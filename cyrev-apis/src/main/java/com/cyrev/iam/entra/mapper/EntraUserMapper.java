@@ -13,7 +13,7 @@ public class EntraUserMapper {
                 .id((String) data.get("id"))
                 .displayName((String) data.get("displayName"))
                 .userPrincipalName((String) data.get("userPrincipalName"))
-                .mail((String) data.get("mail"))
+                .mail((String) data.get("userPrincipalName"))
                 .accountEnabled((Boolean) data.get("accountEnabled"))
                 .build();
     }

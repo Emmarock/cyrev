@@ -1,5 +1,6 @@
 package com.cyrev.common.dtos;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class EntraUser {
 
     private String id;
@@ -21,5 +23,5 @@ public class EntraUser {
 
     private String mail;
 
-    private Boolean accountEnabled;
+    private boolean accountEnabled;
 }

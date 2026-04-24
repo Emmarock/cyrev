@@ -75,7 +75,7 @@ public class EntraUserService {
     public List<EntraUser> listUsers() {
         String tenantId = getEntraTenantId();
         Map<String, Object> response =
-                resilientGraphClient.get(tenantId, URI);
+                resilientGraphClient.get(tenantId, URI+"?$select=id,displayName,userPrincipalName,accountEnabled");
 
         List<Map<String, Object>> users =
                 (List<Map<String, Object>>) response.get("value");
