@@ -1,5 +1,5 @@
 app:
-  base-url: https://cybrooke.vercel.app
+  base-url: https://cyrev.cybrooke.com
 api:
   base-url: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io
 spring:
