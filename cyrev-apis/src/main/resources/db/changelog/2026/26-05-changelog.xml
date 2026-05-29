@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd"
+        objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+
+    <changeSet id="1779638400000-1" author="apata">
+        <createTable tableName="business">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_business"/>
+            </column>
+            <column name="created_at" type="DATETIME"/>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+            <column name="version" type="BIGINT"/>
+            <column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="org_code" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contract_start_date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contract_end_date" type="DATE"/>
+            <column name="relationship_owner_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tenant_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="contract_status" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="employee_id_format" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="employee_id_sequence" type="BIGINT" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1779638400000-2" author="apata">
+        <addUniqueConstraint columnNames="org_code" constraintName="uc_business_org_code" tableName="business"/>
+    </changeSet>
+
+    <changeSet id="1779638400000-3" author="apata">
+        <addForeignKeyConstraint baseColumnNames="relationship_owner_id" baseTableName="business"
+                                 constraintName="FK_BUSINESS_ON_RELATIONSHIP_OWNER"
+                                 referencedColumnNames="id" referencedTableName="users"/>
+    </changeSet>
+
+    <changeSet id="1779638400000-4" author="apata">
+        <addForeignKeyConstraint baseColumnNames="tenant_id" baseTableName="business"
+                                 constraintName="FK_BUSINESS_ON_TENANT"
+                                 referencedColumnNames="id" referencedTableName="saas_tenant"/>
+    </changeSet>
+
+    <changeSet id="1779638400000-5" author="apata">
+        <createTable tableName="business_users">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_business_users"/>
+            </column>
+            <column name="created_at" type="DATETIME"/>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="created_by" type="VARCHAR(255)"/>
+            <column name="updated_by" type="VARCHAR(255)"/>
+            <column name="version" type="BIGINT"/>
+            <column name="deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="employee_id" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="business_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+            <column name="manager_id" type="UUID"/>
+            <column name="start_date" type="DATE"/>
+            <column name="end_date" type="DATE"/>
+            <column name="unit" type="VARCHAR(255)"/>
+            <column name="department" type="VARCHAR(255)"/>
+            <column name="division" type="VARCHAR(255)"/>
+            <column name="identity_status" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="approval_status" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="approval_decided_by" type="VARCHAR(255)"/>
+            <column name="approval_decided_at" type="DATETIME"/>
+            <column name="approval_reason" type="VARCHAR(4000)"/>
+            <column name="entra_object_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="1779638400000-6" author="apata">
+        <addUniqueConstraint columnNames="employee_id" constraintName="uc_business_users_employee_id"
+                             tableName="business_users"/>
+    </changeSet>
+
+    <changeSet id="1779638400000-7" author="apata">
+        <addForeignKeyConstraint baseColumnNames="business_id" baseTableName="business_users"
+                                 constraintName="FK_BUSINESS_USERS_ON_BUSINESS"
+                                 referencedColumnNames="id" referencedTableName="business"/>
+    </changeSet>
+
+    <changeSet id="1779638400000-8" author="apata">
+        <addForeignKeyConstraint baseColumnNames="manager_id" baseTableName="business_users"
+                                 constraintName="FK_BUSINESS_USERS_ON_MANAGER"
+                                 referencedColumnNames="id" referencedTableName="business_users"/>
+    </changeSet>
+
+    <changeSet id="1779638400000-9" author="apata">
+        <createIndex indexName="idx_business_users_business" tableName="business_users">
+            <column name="business_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="1779638400000-10" author="apata">
+        <createIndex indexName="idx_business_users_approval_status" tableName="business_users">
+            <column name="approval_status"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 public class GroupRemoveStrategy implements GovernanceStrategy {
 
     private final ResilientGraphClient graph;
+    private final GroupTypeValidator groupTypeValidator;
 
     @Override
     public GovernanceOperationType getOperationType() {
@@ -19,6 +20,8 @@ public class GroupRemoveStrategy implements GovernanceStrategy {
 
     @Override
     public void execute(GovernanceRequestEntity request) {
+
+        groupTypeValidator.requireCloudManaged(request.getTenantId(), request.getTargetId());
 
         graph.delete(
                 request.getTenantId(),

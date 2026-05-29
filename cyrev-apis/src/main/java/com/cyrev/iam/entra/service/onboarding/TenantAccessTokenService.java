@@ -11,6 +11,10 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class TenantAccessTokenService {
+
+    private static final String EXCHANGE_AUDIENCE = "exchange";
+    private static final String EXCHANGE_SCOPE = "https://outlook.office365.com/.default";
+
     private final EntraProperties props;
     private final TenantTokenCache cache;
     private final EntraTokenClient tokenClient;
@@ -26,6 +30,21 @@ public class TenantAccessTokenService {
         EntraTokenResponse response = tokenClient.getToken(tenantId);
 
         cache.storeToken(tenantId, response.getAccessToken(), response.getExpiresIn());
+
+        return response.getAccessToken();
+    }
+
+    public String getTenantExchangeAccessToken(String tenantId) {
+
+        Optional<String> cached = cache.getToken(tenantId, EXCHANGE_AUDIENCE);
+
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+
+        EntraTokenResponse response = tokenClient.getToken(tenantId, EXCHANGE_SCOPE);
+
+        cache.storeToken(tenantId, EXCHANGE_AUDIENCE, response.getAccessToken(), response.getExpiresIn());
 
         return response.getAccessToken();
     }

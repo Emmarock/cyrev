@@ -25,4 +25,30 @@ public interface NotificationPublisherService {
     void publishLoginEvent( String firstname, String email);
 
     void publishVerificationEvent(String firstname, String email, String url);
+
+    void publishBusinessUserPendingApproval(
+            String adminEmail,
+            String businessUserFullName,
+            String employeeId,
+            String companyName,
+            UUID businessUserId
+    );
+
+    void publishBusinessUserDecision(
+            String recipientEmail,
+            String businessUserFullName,
+            String employeeId,
+            boolean approved,
+            String reason
+    );
+
+    void publishAccessRequestPendingApproval(
+            String adminEmail,
+            String requesterFullName,
+            String requesterEmail,
+            String resourceCategory,
+            String resourceLabel,
+            UUID requestId,
+            String justification
+    );
 }

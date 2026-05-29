@@ -20,6 +20,10 @@ public class EntraTokenClient {
     private final EntraProperties props;
 
     public EntraTokenResponse getToken(String tenantId) {
+        return getToken(tenantId, "https://graph.microsoft.com/.default");
+    }
+
+    public EntraTokenResponse getToken(String tenantId, String scope) {
 
         String url = props.getAuthority()
                 + "/" + tenantId
@@ -31,7 +35,7 @@ public class EntraTokenClient {
                 .bodyValue(
                         "client_id=" + props.getAppId() +
                         "&client_secret=" + props.getClientSecret() +
-                        "&scope=https://graph.microsoft.com/.default" +
+                        "&scope=" + scope +
                         "&grant_type=client_credentials")
                 .retrieve()
                 .bodyToMono(EntraTokenResponse.class)

@@ -1,0 +1,68 @@
+app:
+  base-url: https://1c55-2a02-6b6f-fb20-3300-e160-7d33-8bb9-49.ngrok-free.app
+api:
+  base-url: https://1c55-2a02-6b6f-fb20-3300-e160-7d33-8bb9-49.ngrok-free.app
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  security:
+    oauth2:
+      client:
+        registration:
+          microsoft:
+            client-name: Microsoft
+            client-id: ${entra.client-id}
+            client-secret: ${entra.client-secret}
+            scope:
+              - openid
+              - profile
+              - email
+              - User.Read
+        provider:
+          microsoft:
+            authorization-uri: https://login.microsoftonline.com/common/oauth2/v2.0/authorize
+            token-uri: https://login.microsoftonline.com/common/oauth2/v2.0/token
+            user-info-uri: https://graph.microsoft.com/oidc/userinfo
+            user-name-attribute: sub
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/common/v2.0
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cyrev_iamdb_dev
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+azure:
+  tenant-id: ${AZURE_TENANT_ID:0ad4f99a-a964-4b11-b55d-686b61408a0c}
+  app-id: ${AZURE_APP_ID:a3dcf9db-1092-404c-b7b6-2be943e8ace6}
+  client-secret: ${AZURE_CLIENT_SECRET:}
+microsoft:
+  graph:
+    base-url: https://graph.microsoft.com/v1.0
+    tenant-id: ${AZURE_TENANT_ID:0ad4f99a-a964-4b11-b55d-686b61408a0c}
+
+mail:
+  sender: info@ayokunmidapo.com
+
+entra:
+  tenant-id: ${AZURE_TENANT_ID:0ad4f99a-a964-4b11-b55d-686b61408a0c}
+  client-secret: ${ENTRA_CLIENT_SECRET:}
+  app-id:  ${AZURE_APP_ID:a3dcf9db-1092-404c-b7b6-2be943e8ace6}
+  consent-redirect-uri: ${api.base-url}/api/entra/admin-consent-callback
+  login-redirect-uri: ${api.base-url}/api/auth/login-callback
+  signup-redirect-uri: ${api.base-url}/api/auth/signup-callback
+  authority: https://login.microsoftonline.com
+  auth-token-url: https://login.microsoftonline.com/common/oauth2/v2.0/token
+sendgrid:
+  api-key: ${SENDGRID_API_KEY:}
+  from-email: info@ayokunmidapo.com

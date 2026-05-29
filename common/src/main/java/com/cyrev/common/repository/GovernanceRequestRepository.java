@@ -16,4 +16,8 @@ public interface GovernanceRequestRepository extends JpaRepository<GovernanceReq
             String tenantId,
             ApprovalStatus approvalStatus
     );
+    List<GovernanceRequestEntity> findByTenantIdAndPrincipalIdOrderByCreatedAtDesc(
+            String tenantId,
+            String principalId
+    );
 }

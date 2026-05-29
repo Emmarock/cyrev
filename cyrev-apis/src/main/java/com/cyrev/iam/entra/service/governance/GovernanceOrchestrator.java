@@ -41,6 +41,7 @@ public class GovernanceOrchestrator {
         request.setPrincipalId(principalId);
         request.setAdditionalId(additionalId);
         request.setStatus(GovernanceStatus.PENDING);
+        request.setApprovalRequired(approvalRequired);
         request.setApprovalStatus(
                 approvalRequired ?
                         ApprovalStatus.PENDING_APPROVAL :

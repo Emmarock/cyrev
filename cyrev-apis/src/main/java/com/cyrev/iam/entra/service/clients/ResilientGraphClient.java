@@ -38,6 +38,26 @@ public class ResilientGraphClient {
     }
 
     /**
+     * POST returning the response body. Use when Graph echoes back generated identifiers
+     * (e.g. user object id on user creation).
+     */
+    @Retryable(
+            value = { WebClientResponseException.class },
+            maxAttemptsExpression = "#{${graph.retry.max-attempts:3}}",
+            backoff = @Backoff(delayExpression = "#{${graph.retry.delay-ms:1000}}",
+                    multiplier = 2)
+    )
+    public Map<String, Object> postForBody(String tenantId, String uri, Object body) {
+        return graphBaseClient.tenantClient(tenantId)
+                .post()
+                .uri(uri)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .block();
+    }
+
+    /**
      * GET request from Microsoft Graph
      */
     @Retryable(
@@ -102,6 +122,13 @@ public class ResilientGraphClient {
     @Recover
     public Map<String, Object> recover(WebClientResponseException e, String tenantId, String uri) {
         log.error("Graph GET failed after retries. tenantId={}, uri={}, error={}",
+                tenantId, uri, e.getMessage());
+        throw e;
+    }
+
+    @Recover
+    public Map<String, Object> recoverPostForBody(WebClientResponseException e, String tenantId, String uri, Object body) {
+        log.error("Graph POST (body) failed after retries. tenantId={}, uri={}, error={}",
                 tenantId, uri, e.getMessage());
         throw e;
     }

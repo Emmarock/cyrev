@@ -85,7 +85,7 @@ public class MicrosoftGraphClient {
         EntraTokenResponse tokenResponse = tokenService.getLoginAccessTokenFromCode(code);
         log.info("login token response={}", tokenResponse);
         EntraUser entraUser = getUserProfile(tokenResponse.getAccessToken(), code);
-        Optional<User> existing = userRepository.findByEmail(entraUser.getMail());
+        Optional<User> existing = userRepository.findByEmail(entraUser.getUserPrincipalName());
         log.info("Existing user found: {}", existing.isPresent());
         return existing.orElseThrow(
                 ()-> new BadRequestException("You need an administrator invite to login to cyrev")

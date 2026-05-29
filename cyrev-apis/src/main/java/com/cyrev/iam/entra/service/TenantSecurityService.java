@@ -33,6 +33,22 @@ public class TenantSecurityService {
         log.info("User {} is an admin of this tenant", user.getUserId());
     }
 
+    public void validateTenantRelationshipManager(AuthenticatedUser user, TenantContext tenantContext) {
+
+        UUID tenantId = tenantContext.getInternalTenantId();
+        User tenantUser = userService.findTenantUser(user.getUserId(), tenantId);
+        Role role = tenantUser.getRole();
+
+        boolean allowed = Role.RELATIONSHIP_MANAGER.equals(role)
+                || Role.ADMIN.equals(role)
+                || Role.SUPER_ADMIN.equals(role);
+
+        if (!allowed) {
+            log.error("User {} is not a relationship manager (or admin) of tenant {}", user.getUserId(), tenantId);
+            throw new AccessDeniedException("User is not a relationship manager of this tenant");
+        }
+    }
+
     private boolean checkIfUserIsTenantAdmin(UUID userId, UUID tenantId) {
         log.info("Checking if user {} is an admin of this tenant {}", userId, tenantId);
         User user = userService.findTenantUser(userId, tenantId);

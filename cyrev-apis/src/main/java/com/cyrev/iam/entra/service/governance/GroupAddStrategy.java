@@ -13,6 +13,7 @@ import java.util.Map;
 public class GroupAddStrategy implements GovernanceStrategy {
 
     private final ResilientGraphClient graph;
+    private final GroupTypeValidator groupTypeValidator;
 
     @Override
     public GovernanceOperationType getOperationType() {
@@ -21,6 +22,8 @@ public class GroupAddStrategy implements GovernanceStrategy {
 
     @Override
     public void execute(GovernanceRequestEntity request) {
+
+        groupTypeValidator.requireCloudManaged(request.getTenantId(), request.getTargetId());
 
         Map<String, String> body = Map.of(
                 "@odata.id",

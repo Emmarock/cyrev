@@ -159,6 +159,101 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
     }
 
     @Override
+    public void publishBusinessUserPendingApproval(
+            String adminEmail,
+            String businessUserFullName,
+            String employeeId,
+            String companyName,
+            UUID businessUserId
+    ) {
+        String subject = "Approval Required: New Business User Onboarding";
+        String body = """
+                A new business user is awaiting your approval.
+
+                Name: %s
+                Employee ID: %s
+                Company: %s
+                Reference: %s
+
+                Please review and approve or reject in Cyrev IAM.
+                """
+                .formatted(businessUserFullName, employeeId, companyName, businessUserId);
+
+        Map<String, Object> message = new HashMap<>();
+        message.put("body", body);
+        message.put("subject", subject);
+
+        EmailEvent event = new EmailEvent(adminEmail, message);
+        eventPublisher.publishEvent(event);
+        log.info("Published business user pending approval notification for {}", businessUserId);
+    }
+
+    @Override
+    public void publishBusinessUserDecision(
+            String recipientEmail,
+            String businessUserFullName,
+            String employeeId,
+            boolean approved,
+            String reason
+    ) {
+        String subject = approved
+                ? "Business User Onboarding Approved"
+                : "Business User Onboarding Rejected";
+
+        String body = approved
+                ? "%s (%s) has been approved and provisioned.".formatted(businessUserFullName, employeeId)
+                : "%s (%s) was rejected.%nReason: %s".formatted(
+                        businessUserFullName,
+                        employeeId,
+                        reason == null ? "(none provided)" : reason);
+
+        Map<String, Object> message = new HashMap<>();
+        message.put("body", body);
+        message.put("subject", subject);
+
+        EmailEvent event = new EmailEvent(recipientEmail, message);
+        eventPublisher.publishEvent(event);
+    }
+
+    @Override
+    public void publishAccessRequestPendingApproval(
+            String adminEmail,
+            String requesterFullName,
+            String requesterEmail,
+            String resourceCategory,
+            String resourceLabel,
+            UUID requestId,
+            String justification
+    ) {
+        String subject = "Approval Required: " + resourceCategory + " access request";
+        String body = """
+                %s (%s) has requested %s access.
+
+                Resource: %s
+                Reference: %s
+                Justification: %s
+
+                Please review and approve or reject in Cyrev IAM.
+                """
+                .formatted(
+                        requesterFullName,
+                        requesterEmail,
+                        resourceCategory,
+                        resourceLabel,
+                        requestId,
+                        justification == null || justification.isBlank() ? "(none provided)" : justification
+                );
+
+        Map<String, Object> message = new HashMap<>();
+        message.put("body", body);
+        message.put("subject", subject);
+
+        EmailEvent event = new EmailEvent(adminEmail, message);
+        eventPublisher.publishEvent(event);
+        log.info("Published access-request pending-approval notification for {}", requestId);
+    }
+
+    @Override
     public void publishVerificationEvent(String firstname, String email, String url) {
         String templatePath = "verification.html";
         Map<String, Object> message = new HashMap<>();

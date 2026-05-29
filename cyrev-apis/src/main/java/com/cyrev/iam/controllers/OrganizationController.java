@@ -3,12 +3,12 @@ package com.cyrev.iam.controllers;
 import com.cyrev.common.dtos.CyrevApiResponse;
 import com.cyrev.common.dtos.OrganizationCreationDTO;
 import com.cyrev.common.entities.Organization;
+import com.cyrev.iam.annotations.TenantAdmin;
 import com.cyrev.iam.service.OrganizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public class OrganizationController {
      * Update an existing organization
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @TenantAdmin
     public ResponseEntity<CyrevApiResponse<Organization>> updateOrganization(
             @PathVariable("id") UUID orgId,
             @Valid @RequestBody OrganizationCreationDTO dto) {
@@ -43,7 +43,7 @@ public class OrganizationController {
      * Get all organizations
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @TenantAdmin
     public ResponseEntity<CyrevApiResponse<List<Organization>>> getAllOrganizations() {
         List<Organization> organizations = organizationService.getAllOrganizations();
         return ResponseEntity.status(HttpStatus.OK)
@@ -58,7 +58,7 @@ public class OrganizationController {
      * Get organization by ID
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @TenantAdmin
     public ResponseEntity<CyrevApiResponse<Organization>> getOrganizationById(@PathVariable("id") UUID orgId) {
         Organization organization = organizationService.getOrganizationById(orgId);
         return ResponseEntity.status(HttpStatus.OK)

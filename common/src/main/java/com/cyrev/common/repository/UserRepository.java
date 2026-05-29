@@ -1,11 +1,13 @@
 package com.cyrev.common.repository;
 
 import com.cyrev.common.dtos.AuthProvider;
+import com.cyrev.common.dtos.Role;
 import com.cyrev.common.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -26,4 +28,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Optional<User> findUserByIdAndTenant_Id(UUID id, UUID tenantId);
     Optional<User> findByEmailAndTenant_Id(String email, UUID tenantId);
+
+    List<User> findAllByTenant_IdAndRoleIn(UUID tenantId, Collection<Role> roles);
 }
