@@ -47,6 +47,12 @@ public class OpenApiConfig {
                         .group("entra")
                         .pathsToMatch("/api/entra/**")
                         .build();
+        }@Bean
+        public GroupedOpenApi businessApi() {
+                return GroupedOpenApi.builder()
+                        .group("business")
+                        .pathsToMatch("/api/business/**","/api/business-users/**","/api/access-requests/**")
+                        .build();
         }
 
 }
