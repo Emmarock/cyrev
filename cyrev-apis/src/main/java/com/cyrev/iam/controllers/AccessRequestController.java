@@ -9,6 +9,7 @@ import com.cyrev.common.entities.GovernanceRequestEntity;
 import com.cyrev.common.entities.TenantContext;
 import com.cyrev.common.entities.TenantContextHolder;
 import com.cyrev.iam.annotations.CurrentUserId;
+import com.cyrev.iam.annotations.RelationshipManager;
 import com.cyrev.iam.service.AccessRequestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class AccessRequestController {
     private final AccessRequestService accessRequestService;
 
     @PostMapping("/access-packages")
+    @RelationshipManager
     public ResponseEntity<CyrevApiResponse<GovernanceRequestEntity>> requestAccessPackage(
             @CurrentUserId UUID currentUserId,
             @Valid @RequestBody AccessPackageAccessRequestDTO request
@@ -49,6 +51,7 @@ public class AccessRequestController {
     }
 
     @PostMapping("/applications")
+    @RelationshipManager
     public ResponseEntity<CyrevApiResponse<GovernanceRequestEntity>> requestApplication(
             @CurrentUserId UUID currentUserId,
             @Valid @RequestBody ApplicationAccessRequestDTO request
@@ -64,6 +67,7 @@ public class AccessRequestController {
     }
 
     @PostMapping("/groups")
+    @RelationshipManager
     public ResponseEntity<CyrevApiResponse<GovernanceRequestEntity>> requestGroup(
             @CurrentUserId UUID currentUserId,
             @Valid @RequestBody GroupAccessRequestDTO request
@@ -79,6 +83,7 @@ public class AccessRequestController {
     }
 
     @PostMapping("/shared-mailboxes")
+    @RelationshipManager
     public ResponseEntity<CyrevApiResponse<GovernanceRequestEntity>> requestSharedMailbox(
             @CurrentUserId UUID currentUserId,
             @Valid @RequestBody SharedMailboxAccessRequestDTO request
@@ -94,6 +99,7 @@ public class AccessRequestController {
     }
 
     @GetMapping("/mine")
+    @RelationshipManager
     public ResponseEntity<CyrevApiResponse<List<GovernanceRequestEntity>>> myRequests(
             @CurrentUserId UUID currentUserId
     ) {

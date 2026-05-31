@@ -51,7 +51,7 @@ public class OpenApiConfig {
         public GroupedOpenApi businessApi() {
                 return GroupedOpenApi.builder()
                         .group("business")
-                        .pathsToMatch("/api/business/**","/api/business-users/**","/api/access-requests/**")
+                        .pathsToMatch("/api/businesses/**","/api/business-users/**","/api/access-requests/**")
                         .build();
         }
 
