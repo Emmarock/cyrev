@@ -81,16 +81,23 @@ public class MicrosoftGraphClient {
         return jwt.getJWTClaimsSet().getStringClaim("tid");     // "tid" claim has the tenant id
     }
 
-    public User handleLoginCallback(String code) throws JsonProcessingException {
+    public User handleLoginCallback(String code) throws JsonProcessingException, ParseException {
         log.info("login callback code={}", code);
         EntraTokenResponse tokenResponse = tokenService.getLoginAccessTokenFromCode(code);
+        String tenantId = getTenantIdFromMicrosoftToken(tokenResponse.getIdToken());
+        SaasTenant tenant = saasTenantService.findTenant(UUID.fromString(tenantId));
         log.info("getLoginAccessTokenFromCode : Entra login token response={}", objectMapper.writeValueAsString(tokenResponse));
         EntraUser entraUser = getUserProfile(tokenResponse.getAccessToken(), code);
         Optional<User> existing = userRepository.findByEmail(entraUser.getUserPrincipalName());
         log.info("Existing user found: {}", existing.isPresent());
-        return existing.orElseThrow(
-                ()-> new BadRequestException("You need an administrator invite to login to cyrev")
-        );
+        if(existing.isPresent()) {
+            User user = existing.get();
+            user.setTenant(tenant);
+            user= userRepository.save(user);
+            return user;
+        }else{
+            throw new BadRequestException("You need an administrator invite to login to cyrev");
+        }
     }
 
     @NotNull
@@ -119,7 +126,7 @@ public class MicrosoftGraphClient {
                 .userPrincipalName((String) response.get("userPrincipalName"))
                 .givenName((String) response.get("givenName"))
                 .familyName((String) response.get("surname"))
-                .build();
+                .accountEnabled((boolean) response.get("accountEnabled")).build();
     }
     public EntraUser getUserProfile(String accessToken, String code) {
         Map<String, Object> response =resilientGraphClient.getUserProfile(accessToken,code, "/me");
