@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import static reactor.netty.http.HttpConnectionLiveness.log;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final AuthService authService;
@@ -131,6 +133,7 @@ public class AuthController {
         try{
             AuthResponse authResponse = authService.providerLoginAuth(code);
             String redirectUrl = appBaseUrl +"?accessToken=" + authResponse.getAccessToken();
+            log.info("redirect url ={}", redirectUrl);
             response.sendRedirect(redirectUrl);
         }
         catch (Exception ex) {

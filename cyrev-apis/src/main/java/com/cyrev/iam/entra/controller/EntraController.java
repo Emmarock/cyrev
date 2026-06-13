@@ -11,6 +11,7 @@ import com.cyrev.iam.entra.service.onboarding.SaasTenantService;
 import com.cyrev.iam.service.AuthService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,7 @@ import java.util.UUID;
 @RequestMapping("/api/entra")
 @RequiredArgsConstructor
 @Tag(name = "Entra Connection", description = "API for establishing connection to entra")
+@Slf4j
 public class EntraController {
 
     private final EntraUserService entraUserService;
@@ -55,6 +57,7 @@ public class EntraController {
 
         saasTenantService.registerTenant(state, tenant, true);
         String redirectUrl = authService.buildLoginUrl(true, false);
+        log.info("Redirect URL Retrieved: {}", redirectUrl);
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(redirectUrl))
                 .build();

@@ -9,6 +9,7 @@ import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
 import com.cyrev.iam.config.EntraProperties;
 import com.cyrev.iam.entra.service.clients.MicrosoftGraphClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.samstevens.totp.exceptions.QrGenerationException;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,7 +46,7 @@ public class AuthService {
     private final EntraProperties props;
     private final MicrosoftGraphClient microsoftGraphClient;
     private final TokenBlacklistService tokenBlacklistService;
-
+    private final ObjectMapper objectMapper;
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -189,6 +190,7 @@ public class AuthService {
         try{
             User user = microsoftGraphClient.handleLoginCallback(code);
             SaasTenant saasTenant = user.getTenant();
+            log.info("SaasTenant = {} ", objectMapper.writeValueAsString(saasTenant));
             boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
             log.info("Entra consent granted = {}",consentGranted);
             String token = jwtTokenProvider.generateToken(user, consentGranted);

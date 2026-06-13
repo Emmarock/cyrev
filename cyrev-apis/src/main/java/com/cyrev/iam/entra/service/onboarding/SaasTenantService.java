@@ -35,6 +35,7 @@ public class SaasTenantService {
             SaasTenant saasTenant = findTenant(tenantId);
             // This is because the tenant detail might exist before now, and we only need to grant consent
             if(saasTenant != null){
+                log.info("Tenant with id {} already exists", tenantId);
                 if(!saasTenant.isConsentGranted() && isConsentGranted){
                     saasTenant.setConsentGranted(true);
                     saasTenant.setStatus(TenantStatus.ACTIVE);
@@ -42,7 +43,7 @@ public class SaasTenantService {
                 }
                 return saasTenant;
             }
-
+            log.info("Tenant with id {} does not exist registering a new tenant", tenantId);
             String originalState =getOriginalState(state);
             consentStateService.validate(originalState);
             // get organization
@@ -55,6 +56,7 @@ public class SaasTenantService {
             tenant.setConsentedAt(Instant.now());
             tenant.setStatus(isConsentGranted? TenantStatus.ACTIVE : TenantStatus.PENDING);
             tenant = saasTenantRepository.save(tenant);
+            log.info("Tenant with id {} has been registered", tenantId);
             return tenant;
         }catch(Exception e){
             log.error("Unable to register tenant: {}", e.getMessage());

@@ -82,8 +82,9 @@ public class MicrosoftGraphClient {
     }
 
     public User handleLoginCallback(String code) {
+        log.info("login callback code={}", code);
         EntraTokenResponse tokenResponse = tokenService.getLoginAccessTokenFromCode(code);
-        log.info("login token response={}", tokenResponse.toString());
+        log.info("getLoginAccessTokenFromCode : Entra login token response={}", tokenResponse.toString());
         EntraUser entraUser = getUserProfile(tokenResponse.getAccessToken(), code);
         Optional<User> existing = userRepository.findByEmail(entraUser.getUserPrincipalName());
         log.info("Existing user found: {}", existing.isPresent());
@@ -114,7 +115,7 @@ public class MicrosoftGraphClient {
     private EntraUser mapToEntraUser(Map<String, Object> response) {
         return EntraUser.builder()
                 .id((String) response.get("id"))
-                .mail(response.get("mail") == null?(String) response.get("userPrincipalName"): (String) response.get("mail"))
+                .mail(response.get("mail") == null ? (String) response.get("userPrincipalName") : (String) response.get("mail"))
                 .userPrincipalName((String) response.get("userPrincipalName"))
                 .givenName((String) response.get("givenName"))
                 .familyName((String) response.get("surname"))
@@ -122,6 +123,10 @@ public class MicrosoftGraphClient {
     }
     public EntraUser getUserProfile(String accessToken, String code) {
         Map<String, Object> response =resilientGraphClient.getUserProfile(accessToken,code, "/me");
+        try {
+            log.info("getUserProfile response={}", objectMapper.writeValueAsString(response));
+        } catch (JsonProcessingException ignored) {
+        }
         return mapToEntraUser(response);
     }
 }
