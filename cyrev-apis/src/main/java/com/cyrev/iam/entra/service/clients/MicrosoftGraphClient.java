@@ -120,13 +120,15 @@ public class MicrosoftGraphClient {
     }
 
     private EntraUser mapToEntraUser(Map<String, Object> response) {
+        Object accountEnabled = response.get("accountEnabled");
         return EntraUser.builder()
                 .id((String) response.get("id"))
                 .mail(response.get("mail") == null ? (String) response.get("userPrincipalName") : (String) response.get("mail"))
                 .userPrincipalName((String) response.get("userPrincipalName"))
                 .givenName((String) response.get("givenName"))
                 .familyName((String) response.get("surname"))
-                .accountEnabled((boolean) response.get("accountEnabled")).build();
+                .accountEnabled(accountEnabled == null ? true : (Boolean) accountEnabled)
+                .build();
     }
     public EntraUser getUserProfile(String accessToken, String code) {
         Map<String, Object> response =resilientGraphClient.getUserProfile(accessToken,code, "/me");
