@@ -52,6 +52,7 @@ public class EntraController {
                     .location(deniedRedirect)
                     .build();
         }
+
         saasTenantService.registerTenant(state, tenant, true);
         String redirectUrl = authService.buildLoginUrl(true, false);
         return ResponseEntity.status(HttpStatus.FOUND)

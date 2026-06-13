@@ -56,7 +56,9 @@ public class UserController {
     @GetMapping()
     public ResponseEntity<CyrevApiResponse<User>> getUser(@CurrentUserId UUID id) {
         TenantContext tenant = TenantContextHolder.get();
-        var user = userService.findTenantUser(id,tenant.getInternalTenantId());
+        User user = tenant == null
+                ? userService.getUser(id)
+                : userService.findTenantUser(id, tenant.getInternalTenantId());
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new CyrevApiResponse<>(
                         true,

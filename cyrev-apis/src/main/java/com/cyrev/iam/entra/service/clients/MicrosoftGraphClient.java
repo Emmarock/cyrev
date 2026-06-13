@@ -83,7 +83,7 @@ public class MicrosoftGraphClient {
 
     public User handleLoginCallback(String code) {
         EntraTokenResponse tokenResponse = tokenService.getLoginAccessTokenFromCode(code);
-        log.info("login token response={}", tokenResponse);
+        log.info("login token response={}", tokenResponse.toString());
         EntraUser entraUser = getUserProfile(tokenResponse.getAccessToken(), code);
         Optional<User> existing = userRepository.findByEmail(entraUser.getUserPrincipalName());
         log.info("Existing user found: {}", existing.isPresent());
