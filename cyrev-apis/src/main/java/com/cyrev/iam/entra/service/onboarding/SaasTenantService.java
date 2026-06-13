@@ -35,8 +35,9 @@ public class SaasTenantService {
             SaasTenant saasTenant = findTenant(tenantId);
             // This is because the tenant detail might exist before now, and we only need to grant consent
             if(saasTenant != null){
-                log.info("Tenant with id {} already exists", tenantId);
-                if(!saasTenant.isConsentGranted() && isConsentGranted){
+                log.info("Tenant with id {} already exists, consent granted before now ? {} is consent granted now {}",
+                        tenantId, saasTenant.isConsentGranted(), isConsentGranted);
+                if(isConsentGranted){
                     saasTenant.setConsentGranted(true);
                     saasTenant.setStatus(TenantStatus.ACTIVE);
                     saasTenant = saasTenantRepository.save(saasTenant);
