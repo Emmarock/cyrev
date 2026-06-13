@@ -49,6 +49,7 @@ public class EntraController {
     @GetMapping("/admin-consent-callback")
     public ResponseEntity<Void> callback(@RequestParam UUID tenant, @RequestParam String state, @RequestParam(required = false) String admin_consent) {
         if (!"True".equalsIgnoreCase(admin_consent)) {
+            log.error("admin has refused to give it's consent");
             URI deniedRedirect = URI.create("/error?reason=consent_denied");
             return ResponseEntity.status(HttpStatus.FOUND)
                     .location(deniedRedirect)
@@ -57,7 +58,7 @@ public class EntraController {
 
         saasTenantService.registerTenant(state, tenant, true);
         String redirectUrl = authService.buildLoginUrl(true, false);
-        log.info("Redirect URL Retrieved: {}", redirectUrl);
+        log.info("Admin has consented :  Redirect URL Retrieved: {}", redirectUrl);
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(redirectUrl))
                 .build();

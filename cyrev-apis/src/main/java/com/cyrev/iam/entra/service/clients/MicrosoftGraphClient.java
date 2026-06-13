@@ -81,10 +81,10 @@ public class MicrosoftGraphClient {
         return jwt.getJWTClaimsSet().getStringClaim("tid");     // "tid" claim has the tenant id
     }
 
-    public User handleLoginCallback(String code) {
+    public User handleLoginCallback(String code) throws JsonProcessingException {
         log.info("login callback code={}", code);
         EntraTokenResponse tokenResponse = tokenService.getLoginAccessTokenFromCode(code);
-        log.info("getLoginAccessTokenFromCode : Entra login token response={}", tokenResponse.toString());
+        log.info("getLoginAccessTokenFromCode : Entra login token response={}", objectMapper.writeValueAsString(tokenResponse));
         EntraUser entraUser = getUserProfile(tokenResponse.getAccessToken(), code);
         Optional<User> existing = userRepository.findByEmail(entraUser.getUserPrincipalName());
         log.info("Existing user found: {}", existing.isPresent());

@@ -189,6 +189,7 @@ public class AuthService {
     public AuthResponse providerLoginAuth(String code){
         try{
             User user = microsoftGraphClient.handleLoginCallback(code);
+            log.info("local user details ={}", objectMapper.writeValueAsString(user));
             SaasTenant saasTenant = user.getTenant();
             log.info("SaasTenant = {} ", objectMapper.writeValueAsString(saasTenant));
             boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
