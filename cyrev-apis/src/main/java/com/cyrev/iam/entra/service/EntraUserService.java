@@ -8,7 +8,6 @@ import com.cyrev.iam.entra.mapper.EntraUserMapper;
 import com.cyrev.iam.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cyrev.iam.entra.service.clients.ResilientGraphClient;
@@ -24,7 +23,6 @@ public class EntraUserService {
     public static final String URI = "/users";
     private final ResilientGraphClient resilientGraphClient;
     private final SaasTenantRepository saasTenantRepository;
-    private final PasswordEncoder passwordEncoder;
     private final UserService userService;
 
     public String extractMailNickname(String email) {
@@ -34,7 +32,7 @@ public class EntraUserService {
         // create the user in entra
         String tenantId = getEntraTenantId();
         Map<String, Object> passwordProfile = new HashMap<>();
-        passwordProfile.put("password", passwordEncoder.encode(tempPassword));
+        passwordProfile.put("password", tempPassword);
         passwordProfile.put("forceChangePasswordNextSignIn", true);
 
         Map<String, Object> body = new HashMap<>();
