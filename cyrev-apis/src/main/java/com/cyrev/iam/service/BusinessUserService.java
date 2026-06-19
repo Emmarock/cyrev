@@ -1,13 +1,10 @@
 package com.cyrev.iam.service;
 
-import com.cyrev.common.dtos.ApprovalStatus;
-import com.cyrev.common.dtos.ContractStatus;
-import com.cyrev.common.dtos.CreateBusinessUserDTO;
-import com.cyrev.common.dtos.IdentityStatus;
-import com.cyrev.common.dtos.Role;
+import com.cyrev.common.dtos.*;
 import com.cyrev.common.entities.Business;
 import com.cyrev.common.entities.BusinessUser;
 import com.cyrev.common.entities.User;
+import com.cyrev.common.mapper.BusinessUserMapper;
 import com.cyrev.common.repository.BusinessRepository;
 import com.cyrev.common.repository.BusinessUserRepository;
 import com.cyrev.common.repository.UserRepository;
@@ -40,6 +37,7 @@ public class BusinessUserService {
     private final UserRepository userRepository;
     private final ResilientGraphClient graphClient;
     private final NotificationPublisherService notificationPublisher;
+    private final BusinessUserMapper businessUserMapper;
 
     /**
      * Relationship-manager flow: persists a local business_user record in PENDING_APPROVAL
@@ -47,7 +45,7 @@ public class BusinessUserService {
      * an admin approves the request.
      */
     @Transactional
-    public BusinessUser onboardBusinessUser(UUID tenantInternalId, CreateBusinessUserDTO dto) {
+    public BusinessUserDto onboardBusinessUser(UUID tenantInternalId, CreateBusinessUserDTO dto) {
         Business business = businessRepository.findWithLockingById(dto.getBusinessId())
                 .orElseThrow(() -> new EntityNotFoundException("Business not found: " + dto.getBusinessId()));
 
@@ -94,11 +92,11 @@ public class BusinessUserService {
 
         notifyAdmins(tenantInternalId, saved, business);
 
-        return saved;
+        return businessUserMapper.toDto(saved);
     }
 
     @Transactional
-    public BusinessUser approve(UUID tenantInternalId, UUID businessUserId, String approverPrincipal, String entraTenantId) {
+    public BusinessUserDto approve(UUID tenantInternalId, UUID businessUserId, String approverPrincipal, String entraTenantId) {
         BusinessUser businessUser = requireBusinessUser(tenantInternalId, businessUserId);
         if (businessUser.getApprovalStatus() != ApprovalStatus.PENDING_APPROVAL) {
             throw new BadRequestException("Business user is not pending approval");
@@ -114,11 +112,11 @@ public class BusinessUserService {
 
         BusinessUser saved = businessUserRepository.save(businessUser);
         notifyDecision(saved, true, null);
-        return saved;
+        return businessUserMapper.toDto(saved);
     }
 
     @Transactional
-    public BusinessUser reject(UUID tenantInternalId, UUID businessUserId, String approverPrincipal, String reason) {
+    public BusinessUserDto reject(UUID tenantInternalId, UUID businessUserId, String approverPrincipal, String reason) {
         BusinessUser businessUser = requireBusinessUser(tenantInternalId, businessUserId);
         if (businessUser.getApprovalStatus() != ApprovalStatus.PENDING_APPROVAL) {
             throw new BadRequestException("Business user is not pending approval");
@@ -135,14 +133,14 @@ public class BusinessUserService {
 
         BusinessUser saved = businessUserRepository.save(businessUser);
         notifyDecision(saved, false, reason);
-        return saved;
+        return businessUserMapper.toDto(saved);
     }
 
     /**
      * Offboarding: marks the business_user as PRE_LEAVER and disables their Entra account.
      */
     @Transactional
-    public BusinessUser offboard(UUID tenantInternalId, UUID businessUserId, String entraTenantId) {
+    public BusinessUserDto offboard(UUID tenantInternalId, UUID businessUserId, String entraTenantId) {
         BusinessUser businessUser = requireBusinessUser(tenantInternalId, businessUserId);
         if (businessUser.getIdentityStatus() == IdentityStatus.LEAVER) {
             throw new BadRequestException("Business user already offboarded");
@@ -151,20 +149,30 @@ public class BusinessUserService {
         disableEntraAccount(entraTenantId, businessUser);
 
         businessUser.setIdentityStatus(IdentityStatus.LEAVER);
-        return businessUserRepository.save(businessUser);
+        businessUser =  businessUserRepository.save(businessUser);
+        return businessUserMapper.toDto(businessUser);
     }
 
-    public List<BusinessUser> listPendingApprovals(UUID tenantInternalId) {
-        return businessUserRepository.findAllByBusiness_Tenant_IdAndApprovalStatus(
-                tenantInternalId, ApprovalStatus.PENDING_APPROVAL);
+    public List<BusinessUserDto> listPendingApprovals(UUID tenantInternalId) {
+        return businessUserRepository
+                .findAllByBusiness_Tenant_IdAndApprovalStatus(
+                        tenantInternalId,
+                        ApprovalStatus.PENDING_APPROVAL
+                )
+                .stream()
+                .map(businessUserMapper::toDto)
+                .toList();
     }
 
-    public List<BusinessUser> listForBusiness(UUID businessId) {
-        return businessUserRepository.findAllByBusiness_Id(businessId);
+    public List<BusinessUserDto> listForBusiness(UUID businessId) {
+        return businessUserRepository.findAllByBusiness_Id(businessId)
+                .stream()
+                .map(businessUserMapper::toDto)
+                .toList();
     }
 
-    public BusinessUser get(UUID tenantInternalId, UUID businessUserId) {
-        return requireBusinessUser(tenantInternalId, businessUserId);
+    public BusinessUserDto get(UUID tenantInternalId, UUID businessUserId) {
+        return businessUserMapper.toDto(requireBusinessUser(tenantInternalId, businessUserId));
     }
 
     private BusinessUser requireBusinessUser(UUID tenantInternalId, UUID businessUserId) {

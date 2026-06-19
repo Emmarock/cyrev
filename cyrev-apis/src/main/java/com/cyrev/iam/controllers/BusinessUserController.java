@@ -1,6 +1,7 @@
 package com.cyrev.iam.controllers;
 
 import com.cyrev.common.dtos.BusinessUserApprovalDTO;
+import com.cyrev.common.dtos.BusinessUserDto;
 import com.cyrev.common.dtos.CreateBusinessUserDTO;
 import com.cyrev.common.dtos.CyrevApiResponse;
 import com.cyrev.common.entities.BusinessUser;
@@ -31,9 +32,9 @@ public class BusinessUserController {
 
     @PostMapping
     @RelationshipManager
-    public ResponseEntity<CyrevApiResponse<BusinessUser>> onboard(@Valid @RequestBody CreateBusinessUserDTO request) {
+    public ResponseEntity<CyrevApiResponse<BusinessUserDto>> onboard(@Valid @RequestBody CreateBusinessUserDTO request) {
         TenantContext tenant = TenantContextHolder.get();
-        BusinessUser created = businessUserService.onboardBusinessUser(
+        BusinessUserDto created = businessUserService.onboardBusinessUser(
                 tenant.getInternalTenantId(),
                 request
         );
@@ -47,30 +48,30 @@ public class BusinessUserController {
 
     @GetMapping("/pending")
     @TenantAdmin
-    public ResponseEntity<CyrevApiResponse<List<BusinessUser>>> listPending() {
+    public ResponseEntity<CyrevApiResponse<List<BusinessUserDto>>> listPending() {
         TenantContext tenant = TenantContextHolder.get();
-        List<BusinessUser> pending = businessUserService.listPendingApprovals(tenant.getInternalTenantId());
+        List<BusinessUserDto> pending = businessUserService.listPendingApprovals(tenant.getInternalTenantId());
         return ResponseEntity.ok(new CyrevApiResponse<>(true, "Pending approvals retrieved", pending));
     }
 
     @GetMapping("/by-business/{businessId}")
-    public ResponseEntity<CyrevApiResponse<List<BusinessUser>>> listForBusiness(@PathVariable UUID businessId) {
-        List<BusinessUser> users = businessUserService.listForBusiness(businessId);
+    public ResponseEntity<CyrevApiResponse<List<BusinessUserDto>>> listForBusiness(@PathVariable UUID businessId) {
+        List<BusinessUserDto> users = businessUserService.listForBusiness(businessId);
         return ResponseEntity.ok(new CyrevApiResponse<>(true, "Business users retrieved", users));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CyrevApiResponse<BusinessUser>> get(@PathVariable UUID id) {
+    public ResponseEntity<CyrevApiResponse<BusinessUserDto>> get(@PathVariable UUID id) {
         TenantContext tenant = TenantContextHolder.get();
-        BusinessUser businessUser = businessUserService.get(tenant.getInternalTenantId(), id);
+        BusinessUserDto businessUser = businessUserService.get(tenant.getInternalTenantId(), id);
         return ResponseEntity.ok(new CyrevApiResponse<>(true, "Business user retrieved", businessUser));
     }
 
     @PostMapping("/{id}/approve")
     @TenantAdmin
-    public ResponseEntity<CyrevApiResponse<BusinessUser>> approve(@PathVariable UUID id) {
+    public ResponseEntity<CyrevApiResponse<BusinessUserDto>> approve(@PathVariable UUID id) {
         TenantContext tenant = TenantContextHolder.get();
-        BusinessUser approved = businessUserService.approve(
+        BusinessUserDto approved = businessUserService.approve(
                 tenant.getInternalTenantId(),
                 id,
                 currentPrincipal(),
@@ -81,9 +82,9 @@ public class BusinessUserController {
 
     @PostMapping("/{id}/reject")
     @TenantAdmin
-    public ResponseEntity<CyrevApiResponse<BusinessUser>> reject(@PathVariable UUID id, @RequestBody(required = false) BusinessUserApprovalDTO body) {
+    public ResponseEntity<CyrevApiResponse<BusinessUserDto>> reject(@PathVariable UUID id, @RequestBody(required = false) BusinessUserApprovalDTO body) {
         TenantContext tenant = TenantContextHolder.get();
-        BusinessUser rejected = businessUserService.reject(
+        BusinessUserDto rejected = businessUserService.reject(
                 tenant.getInternalTenantId(),
                 id,
                 currentPrincipal(),
@@ -94,9 +95,9 @@ public class BusinessUserController {
 
     @PostMapping("/{id}/offboard")
     @TenantAdmin
-    public ResponseEntity<CyrevApiResponse<BusinessUser>> offboard(@PathVariable UUID id) {
+    public ResponseEntity<CyrevApiResponse<BusinessUserDto>> offboard(@PathVariable UUID id) {
         TenantContext tenant = TenantContextHolder.get();
-        BusinessUser offboarded = businessUserService.offboard(
+        BusinessUserDto offboarded = businessUserService.offboard(
                 tenant.getInternalTenantId(),
                 id,
                 tenant.getEntraTenantId()
