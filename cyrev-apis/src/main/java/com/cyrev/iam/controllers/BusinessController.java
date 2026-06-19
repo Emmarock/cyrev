@@ -6,6 +6,7 @@ import com.cyrev.common.dtos.UpdateBusinessDTO;
 import com.cyrev.common.entities.Business;
 import com.cyrev.common.entities.TenantContext;
 import com.cyrev.common.entities.TenantContextHolder;
+import com.cyrev.iam.annotations.RelationshipManager;
 import com.cyrev.iam.annotations.TenantAdmin;
 import com.cyrev.iam.service.BusinessService;
 import jakarta.validation.Valid;
@@ -27,7 +28,7 @@ public class BusinessController {
     private final BusinessService businessService;
 
     @PostMapping
-    @TenantAdmin
+    @RelationshipManager
     public ResponseEntity<CyrevApiResponse<Business>> registerBusiness(@Valid @RequestBody CreateBusinessDTO request) {
         TenantContext tenant = TenantContextHolder.get();
         Business business = businessService.registerBusiness(tenant.getInternalTenantId(), request);
