@@ -2,8 +2,9 @@ package com.cyrev.common.mapper;
 
 import com.cyrev.common.dtos.BusinessUserDto;
 import com.cyrev.common.entities.BusinessUser;
+import org.springframework.stereotype.Component;
 
-
+@Component
 public final class BusinessUserMapper {
 
     private BusinessUserMapper() {
