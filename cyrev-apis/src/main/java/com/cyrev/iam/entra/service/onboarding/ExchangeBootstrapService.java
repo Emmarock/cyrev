@@ -82,6 +82,7 @@ public class ExchangeBootstrapService {
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("tenantId", entraTenantId);
+        result.put("tokenClaims", decodeNonSecretClaims(accessToken));
 
         String spObjectId;
         try {
@@ -144,6 +145,37 @@ public class ExchangeBootstrapService {
                     "No service principal found for appId " + props.getAppId() + " in tenant " + entraTenantId);
         }
         return (String) value.get(0).get("id");
+    }
+
+    /**
+     * Decodes only the non-secret authorization claims (aud, scp, roles, tid, appid)
+     * from the delegated token's payload, to diagnose what was actually issued without
+     * ever logging or returning the token itself. JWT payloads are base64, not
+     * encrypted, so the bearer already has full access to this same information.
+     */
+    private Map<String, Object> decodeNonSecretClaims(String accessToken) {
+        try {
+            String[] parts = accessToken.split("\\.");
+            if (parts.length < 2) {
+                return Map.of("error", "token is not a JWT");
+            }
+            String payloadJson = new String(Base64.getUrlDecoder().decode(padBase64Url(parts[1])), StandardCharsets.UTF_8);
+            Map<String, Object> claims = objectMapper.readValue(payloadJson, Map.class);
+            Map<String, Object> nonSecret = new LinkedHashMap<>();
+            for (String claim : List.of("aud", "scp", "roles", "tid", "appid", "idtyp")) {
+                if (claims.containsKey(claim)) {
+                    nonSecret.put(claim, claims.get(claim));
+                }
+            }
+            return nonSecret;
+        } catch (Exception e) {
+            return Map.of("error", "failed to decode token claims: " + e.getMessage());
+        }
+    }
+
+    private static String padBase64Url(String segment) {
+        int padding = (4 - segment.length() % 4) % 4;
+        return segment + "=".repeat(padding);
     }
 
     private String decodeAndValidateState(String state) {
