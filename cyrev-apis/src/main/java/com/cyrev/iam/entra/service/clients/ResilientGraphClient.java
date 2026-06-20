@@ -114,29 +114,29 @@ public class ResilientGraphClient {
     @Recover
     public void recover(WebClientResponseException e, String tenantId, String uri, Object body) {
         // Log the failure
-        log.error("Graph call failed after retries. tenantId={}, uri={}, body={}, error={}",
-                tenantId, uri, body, e.getMessage());
+        log.error("Graph call failed after retries. tenantId={}, uri={}, body={}, error={}, responseBody={}",
+                tenantId, uri, body, e.getMessage(), e.getResponseBodyAsString());
         throw e;
     }
 
     @Recover
     public Map<String, Object> recover(WebClientResponseException e, String tenantId, String uri) {
-        log.error("Graph GET failed after retries. tenantId={}, uri={}, error={}",
-                tenantId, uri, e.getMessage());
+        log.error("Graph GET failed after retries. tenantId={}, uri={}, error={}, responseBody={}",
+                tenantId, uri, e.getMessage(), e.getResponseBodyAsString());
         throw e;
     }
 
     @Recover
     public Map<String, Object> recoverPostForBody(WebClientResponseException e, String tenantId, String uri, Object body) {
-        log.error("Graph POST (body) failed after retries. tenantId={}, uri={}, error={}",
-                tenantId, uri, e.getMessage());
+        log.error("Graph POST (body) failed after retries. tenantId={}, uri={}, error={}, responseBody={}",
+                tenantId, uri, e.getMessage(), e.getResponseBodyAsString());
         throw e;
     }
 
     @Recover
     public void recoverDelete(WebClientResponseException e, String tenantId, String uri) {
-        log.error("Graph DELETE failed after retries. tenantId={}, uri={}, error={}",
-                tenantId, uri, e.getMessage());
+        log.error("Graph DELETE failed after retries. tenantId={}, uri={}, error={}, responseBody={}",
+                tenantId, uri, e.getMessage(), e.getResponseBodyAsString());
         throw e;
     }
     public <T> T get(String tenantId, String uri, Function<Map<String, Object>, T> mapper) {

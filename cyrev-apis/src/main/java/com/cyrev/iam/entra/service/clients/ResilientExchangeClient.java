@@ -76,15 +76,15 @@ public class ResilientExchangeClient {
 
     @Recover
     public void recover(WebClientResponseException e, String tenantId, String cmdletName, Map<String, Object> parameters) {
-        log.error("Exchange Online cmdlet {} failed after retries. tenantId={}, error={}",
-                cmdletName, tenantId, e.getMessage());
+        log.error("Exchange Online cmdlet {} failed after retries. tenantId={}, error={}, responseBody={}",
+                cmdletName, tenantId, e.getMessage(), e.getResponseBodyAsString());
         throw e;
     }
 
     @Recover
     public List<Map<String, Object>> recoverForList(WebClientResponseException e, String tenantId, String cmdletName, Map<String, Object> parameters) {
-        log.error("Exchange Online cmdlet {} (list) failed after retries. tenantId={}, error={}",
-                cmdletName, tenantId, e.getMessage());
+        log.error("Exchange Online cmdlet {} (list) failed after retries. tenantId={}, error={}, responseBody={}",
+                cmdletName, tenantId, e.getMessage(), e.getResponseBodyAsString());
         throw e;
     }
 }
