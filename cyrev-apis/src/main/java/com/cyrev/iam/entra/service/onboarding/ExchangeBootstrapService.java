@@ -88,8 +88,13 @@ public class ExchangeBootstrapService {
             spObjectId = lookupServicePrincipalObjectId(entraTenantId);
             result.put("servicePrincipalLookup", Map.of("success", true, "objectId", spObjectId));
         } catch (Exception e) {
-            log.error("Service principal lookup failed for tenant {}: {}", entraTenantId, e.getMessage());
-            result.put("servicePrincipalLookup", Map.of("success", false, "error", String.valueOf(e.getMessage())));
+            String body = (e instanceof WebClientResponseException wcre) ? wcre.getResponseBodyAsString() : null;
+            log.error("Service principal lookup failed for tenant {}: {}, responseBody={}", entraTenantId, e.getMessage(), body);
+            Map<String, Object> lookupResult = new LinkedHashMap<>();
+            lookupResult.put("success", false);
+            lookupResult.put("error", String.valueOf(e.getMessage()));
+            lookupResult.put("responseBody", body == null ? "" : body);
+            result.put("servicePrincipalLookup", lookupResult);
             return result;
         }
 
@@ -131,7 +136,7 @@ public class ExchangeBootstrapService {
     private String lookupServicePrincipalObjectId(String entraTenantId) {
         Map<String, Object> response = resilientGraphClient.get(
                 entraTenantId,
-                "/servicePrincipals?$filter=appId%20eq%20'" + props.getAppId() + "'"
+                "/servicePrincipals?$filter=appId eq '" + props.getAppId() + "'"
         );
         List<Map<String, Object>> value = (List<Map<String, Object>>) response.get("value");
         if (value == null || value.isEmpty()) {
