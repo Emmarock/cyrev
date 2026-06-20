@@ -36,6 +36,8 @@ public class SecurityConfig {
                                 "/actuator/health",
                                 "/api/entra/connect-entra",
                                 "/api/entra/admin-consent-callback",
+                                "/api/entra/exchange-bootstrap/start",
+                                "/api/entra/exchange-bootstrap/callback",
                                 "/api/auth/login",
                                 "/api/auth/**",
                                 "/api/auth/callback",

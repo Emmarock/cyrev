@@ -11,6 +11,7 @@ import com.cyrev.iam.annotations.RelationshipManager;
 import com.cyrev.iam.annotations.TenantAdmin;
 import com.cyrev.iam.entra.service.*;
 import com.cyrev.iam.entra.service.onboarding.EntraConsentService;
+import com.cyrev.iam.entra.service.onboarding.ExchangeBootstrapService;
 import com.cyrev.iam.entra.service.onboarding.SaasTenantService;
 import com.cyrev.iam.service.AuthService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -39,6 +41,7 @@ public class EntraController {
     private final SaasTenantService saasTenantService;
     private final EntraOrganizationService organizationService;
     private final AuthService authService;
+    private final ExchangeBootstrapService exchangeBootstrapService;
 
     @GetMapping("/connect-entra")
     public ResponseEntity<CyrevApiResponse<String>> connect() {
@@ -142,6 +145,21 @@ public class EntraController {
     public ResponseEntity<CyrevApiResponse<List<SharedMailboxDto>>> listSharedMailboxes() {
         List<SharedMailboxDto> mailboxes = entraUserService.listSharedMailboxes();
         return ResponseEntity.ok(new CyrevApiResponse<>(true, "Shared mailboxes retrieved", mailboxes));
+    }
+
+    @GetMapping("/exchange-bootstrap/start")
+    public ResponseEntity<CyrevApiResponse<String>> exchangeBootstrapStart(@RequestParam String tenantId) {
+        String url = exchangeBootstrapService.buildAuthorizeUrl(tenantId);
+        return ResponseEntity.ok(new CyrevApiResponse<>(true, "Redirect URL retrieved", url));
+    }
+
+    @GetMapping("/exchange-bootstrap/callback")
+    public ResponseEntity<Map<String, Object>> exchangeBootstrapCallback(
+            @RequestParam String code,
+            @RequestParam String state
+    ) {
+        Map<String, Object> result = exchangeBootstrapService.handleCallback(code, state);
+        return ResponseEntity.ok(result);
     }
 
 }

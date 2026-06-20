@@ -14,6 +14,7 @@ public class EntraProperties {
     private String consentRedirectUri;
     private String loginRedirectUri;
     private String signupRedirectUri;
+    private String bootstrapRedirectUri;
     private String authority;
     private String authTokenUrl;
 }

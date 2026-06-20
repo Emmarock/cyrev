@@ -20,6 +20,10 @@ public class ExchangeOnlineBaseClient {
 
     public WebClient tenantClient(String tenantId) {
         String accessToken = tokenService.getTenantExchangeAccessToken(tenantId);
+        return tenantClient(tenantId, accessToken);
+    }
+
+    public WebClient tenantClient(String tenantId, String accessToken) {
         return webClientBuilder
                 .baseUrl(EXCHANGE_BASE_URL + "/" + tenantId)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
