@@ -9,7 +9,6 @@ import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
 import com.cyrev.iam.config.EntraProperties;
 import com.cyrev.iam.entra.service.clients.MicrosoftGraphClient;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.samstevens.totp.exceptions.QrGenerationException;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,7 +45,6 @@ public class AuthService {
     private final EntraProperties props;
     private final MicrosoftGraphClient microsoftGraphClient;
     private final TokenBlacklistService tokenBlacklistService;
-    private final ObjectMapper objectMapper;
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -189,13 +187,11 @@ public class AuthService {
     public AuthResponse providerLoginAuth(String code){
         try{
             User user = microsoftGraphClient.handleLoginCallback(code);
-            log.info("local user details ={}", objectMapper.writeValueAsString(user));
+            log.info("Authenticated local user id={} email={}", user.getId(), user.getEmail());
             SaasTenant saasTenant = user.getTenant();
-            log.info("SaasTenant = {} ", objectMapper.writeValueAsString(saasTenant));
             boolean consentGranted = saasTenant != null && saasTenant.isConsentGranted();
             log.info("Entra consent granted = {}",consentGranted);
             String token = jwtTokenProvider.generateToken(user, consentGranted);
-            log.info("Token generated = {}",token);
             return getAuthResponse(token, user);
         }catch(Exception e){
             log.error("Provider login authentication failed: {}", e.getMessage());

@@ -50,7 +50,6 @@ public class MicrosoftGraphClient {
         String stateEncoded = Base64.getUrlEncoder()
                 .encodeToString(stateJson.getBytes(StandardCharsets.UTF_8));
         EntraTokenResponse tokenResponse = tokenService.getSignupAccessTokenFromCode(code);
-        log.info("signup token response={}", tokenResponse);
         String tenantId = getTenantIdFromMicrosoftToken(tokenResponse.getIdToken());
         log.info("tenantId={} received from microsoft", tenantId);
         EntraUser entraUser = getUserProfile(tokenResponse.getAccessToken(), code);
@@ -86,7 +85,6 @@ public class MicrosoftGraphClient {
         EntraTokenResponse tokenResponse = tokenService.getLoginAccessTokenFromCode(code);
         String tenantId = getTenantIdFromMicrosoftToken(tokenResponse.getIdToken());
         SaasTenant tenant = saasTenantService.findTenant(UUID.fromString(tenantId));
-        log.info("getLoginAccessTokenFromCode : Entra login token response={}", objectMapper.writeValueAsString(tokenResponse));
         EntraUser entraUser = getUserProfile(tokenResponse.getAccessToken(), code);
         Optional<User> existing = userRepository.findByEmail(entraUser.getUserPrincipalName());
         log.info("Existing user found: {}", existing.isPresent());
