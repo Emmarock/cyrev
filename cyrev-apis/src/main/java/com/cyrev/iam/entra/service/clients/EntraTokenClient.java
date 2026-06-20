@@ -29,15 +29,23 @@ public class EntraTokenClient {
                 + "/" + tenantId
                 + "/oauth2/v2.0/token";
 
+        log.info("Requesting token: tenantId={}, scope={}, clientId={}", tenantId, scope, props.getAppId());
+
         return webClient.post()
                 .uri(url)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .bodyValue(
-                        "client_id=" + props.getAppId() +
-                        "&client_secret=" + props.getClientSecret() +
-                        "&scope=" + scope +
-                        "&grant_type=client_credentials")
+                .body(BodyInserters
+                        .fromFormData("client_id", props.getAppId())
+                        .with("client_secret", props.getClientSecret())
+                        .with("scope", scope)
+                        .with("grant_type", "client_credentials"))
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(errorBody -> {
+                                    log.error("OAuth2 token request failed for tenant={}, scope={}: {}", tenantId, scope, errorBody);
+                                    return Mono.error(new RuntimeException("Token request failed: " + errorBody));
+                                }))
                 .bodyToMono(EntraTokenResponse.class)
                 .block();
     }
