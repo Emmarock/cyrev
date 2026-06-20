@@ -21,7 +21,7 @@ public class GraphBaseClient {
     public WebClient tenantClient(String tenantId) {
 
         String accessToken = tokenService.getTenantUserAccessToken(tenantId);
-        log.info("Creating EntraUser: {} in tenant {}", accessToken, tenantId);
+        log.debug("Resolved Graph access token for tenant={}", tenantId);
         return webClientBuilder
                 .baseUrl(GRAPH_BASE_URL)
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
