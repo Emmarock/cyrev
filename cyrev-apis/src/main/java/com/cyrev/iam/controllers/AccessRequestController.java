@@ -3,11 +3,13 @@ package com.cyrev.iam.controllers;
 import com.cyrev.common.dtos.AccessPackageAccessRequestDTO;
 import com.cyrev.common.dtos.ApplicationAccessRequestDTO;
 import com.cyrev.common.dtos.CyrevApiResponse;
+import com.cyrev.common.dtos.GovernanceRequestResponseDto;
 import com.cyrev.common.dtos.GroupAccessRequestDTO;
 import com.cyrev.common.dtos.SharedMailboxAccessRequestDTO;
 import com.cyrev.common.entities.GovernanceRequestEntity;
 import com.cyrev.common.entities.TenantContext;
 import com.cyrev.common.entities.TenantContextHolder;
+import com.cyrev.common.mapper.GovernanceRequestMapper;
 import com.cyrev.iam.annotations.CurrentUserId;
 import com.cyrev.iam.annotations.RelationshipManager;
 import com.cyrev.iam.service.AccessRequestService;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Employee self-service for requesting access to Entra resources (access packages,
@@ -33,10 +36,11 @@ import java.util.UUID;
 public class AccessRequestController {
 
     private final AccessRequestService accessRequestService;
+    private final GovernanceRequestMapper governanceRequestMapper;
 
     @PostMapping("/access-packages")
     @RelationshipManager
-    public ResponseEntity<CyrevApiResponse<GovernanceRequestEntity>> requestAccessPackage(
+    public ResponseEntity<CyrevApiResponse<GovernanceRequestResponseDto>> requestAccessPackage(
             @CurrentUserId UUID currentUserId,
             @Valid @RequestBody AccessPackageAccessRequestDTO request
     ) {
@@ -52,7 +56,7 @@ public class AccessRequestController {
 
     @PostMapping("/applications")
     @RelationshipManager
-    public ResponseEntity<CyrevApiResponse<GovernanceRequestEntity>> requestApplication(
+    public ResponseEntity<CyrevApiResponse<GovernanceRequestResponseDto>> requestApplication(
             @CurrentUserId UUID currentUserId,
             @Valid @RequestBody ApplicationAccessRequestDTO request
     ) {
@@ -68,7 +72,7 @@ public class AccessRequestController {
 
     @PostMapping("/groups")
     @RelationshipManager
-    public ResponseEntity<CyrevApiResponse<GovernanceRequestEntity>> requestGroup(
+    public ResponseEntity<CyrevApiResponse<GovernanceRequestResponseDto>> requestGroup(
             @CurrentUserId UUID currentUserId,
             @Valid @RequestBody GroupAccessRequestDTO request
     ) {
@@ -84,7 +88,7 @@ public class AccessRequestController {
 
     @PostMapping("/shared-mailboxes")
     @RelationshipManager
-    public ResponseEntity<CyrevApiResponse<GovernanceRequestEntity>> requestSharedMailbox(
+    public ResponseEntity<CyrevApiResponse<GovernanceRequestResponseDto>> requestSharedMailbox(
             @CurrentUserId UUID currentUserId,
             @Valid @RequestBody SharedMailboxAccessRequestDTO request
     ) {
@@ -100,20 +104,21 @@ public class AccessRequestController {
 
     @GetMapping("/mine")
     @RelationshipManager
-    public ResponseEntity<CyrevApiResponse<List<GovernanceRequestEntity>>> myRequests(
+    public ResponseEntity<CyrevApiResponse<List<GovernanceRequestResponseDto>>> myRequests(
             @CurrentUserId UUID currentUserId
     ) {
         TenantContext tenant = TenantContextHolder.get();
-        List<GovernanceRequestEntity> requests = accessRequestService.listMyRequests(
+        List<GovernanceRequestResponseDto> requests = accessRequestService.listMyRequests(
                 tenant.getEntraTenantId(),
                 currentUserId,
                 tenant.getInternalTenantId()
-        );
+        ).stream().map(governanceRequestMapper::toDto).collect(Collectors.toList());
         return ResponseEntity.ok(new CyrevApiResponse<>(true, "Access requests retrieved", requests));
     }
 
-    private ResponseEntity<CyrevApiResponse<GovernanceRequestEntity>> accepted(GovernanceRequestEntity entity) {
+    private ResponseEntity<CyrevApiResponse<GovernanceRequestResponseDto>> accepted(GovernanceRequestEntity entity) {
         return ResponseEntity.status(HttpStatus.ACCEPTED)
-                .body(new CyrevApiResponse<>(true, "Access request submitted for approval", entity));
+                .body(new CyrevApiResponse<>(true, "Access request submitted for approval",
+                        governanceRequestMapper.toDto(entity)));
     }
 }
