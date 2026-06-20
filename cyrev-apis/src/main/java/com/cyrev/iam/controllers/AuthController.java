@@ -155,4 +155,5 @@ public class AuthController {
             response.sendRedirect(appBaseUrl +"?error=auth_failed");
         }
     }
+
 }
