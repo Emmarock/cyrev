@@ -9,6 +9,7 @@ import com.cyrev.common.repository.BusinessRepository;
 import com.cyrev.common.repository.BusinessUserRepository;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
+import com.cyrev.iam.entra.service.EntraOrganizationService;
 import com.cyrev.iam.entra.service.clients.ResilientGraphClient;
 import com.cyrev.iam.exceptions.BadRequestException;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,6 +37,7 @@ public class BusinessUserService {
     private final BusinessRepository businessRepository;
     private final UserRepository userRepository;
     private final ResilientGraphClient graphClient;
+    private final EntraOrganizationService entraOrganizationService;
     private final NotificationPublisherService notificationPublisher;
     private final BusinessUserMapper businessUserMapper;
 
@@ -225,6 +227,9 @@ public class BusinessUserService {
         Business business = businessUser.getBusiness();
         String employeeId = businessUser.getEmployeeId();
 
+        String primaryDomain = entraOrganizationService.getPrimaryDomain(entraTenantId);
+        log.info("Resolved primary domain={} for entraTenantId={}", primaryDomain, entraTenantId);
+
         Map<String, Object> passwordProfile = new HashMap<>();
         passwordProfile.put("password", generateTemporaryPassword());
         passwordProfile.put("forceChangePasswordNextSignIn", true);
@@ -233,7 +238,7 @@ public class BusinessUserService {
         body.put("accountEnabled", true);
         body.put("displayName", businessUser.getFirstName() + " " + businessUser.getLastName());
         body.put("mailNickname", employeeId.toLowerCase());
-        body.put("userPrincipalName", employeeId.toLowerCase() + "@" + entraTenantId);
+        body.put("userPrincipalName", employeeId.toLowerCase() + "@" + primaryDomain);
         body.put("givenName", businessUser.getFirstName());
         body.put("surname", businessUser.getLastName());
         body.put("department", businessUser.getDepartment());

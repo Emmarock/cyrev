@@ -22,8 +22,6 @@ public class EntraUserService {
 
     public static final String URI = "/users";
     private final ResilientGraphClient resilientGraphClient;
-    private final SaasTenantRepository saasTenantRepository;
-    private final UserService userService;
 
     public String extractMailNickname(String email) {
         return email.split("@")[0];

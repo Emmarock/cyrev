@@ -35,6 +35,24 @@ public class EntraOrganizationService {
         );
     }
     @SuppressWarnings("unchecked")
+    public String getPrimaryDomain(String tenantId) {
+        Map<String, Object> response = graphClient.get(tenantId, "/organization");
+        List<Map<String, Object>> value = (List<Map<String, Object>>) response.get("value");
+        if (value == null || value.isEmpty()) {
+            throw new RuntimeException("No organization found in Graph response for tenant " + tenantId);
+        }
+        List<Map<String, Object>> verifiedDomains = (List<Map<String, Object>>) value.get(0).get("verifiedDomains");
+        if (verifiedDomains == null || verifiedDomains.isEmpty()) {
+            throw new RuntimeException("No verified domains found for tenant " + tenantId);
+        }
+        return verifiedDomains.stream()
+                .filter(d -> Boolean.TRUE.equals(d.get("isDefault")))
+                .map(d -> (String) d.get("name"))
+                .findFirst()
+                .orElseGet(() -> (String) verifiedDomains.get(0).get("name"));
+    }
+
+    @SuppressWarnings("unchecked")
     private EntraOrganization mapToOrganization(Map<String, Object> response) {
 
         List<Map<String, Object>> value =
