@@ -1,9 +1,13 @@
 package com.cyrev.iam.entra.controller;
 
+import com.cyrev.common.dtos.AccessPackageDto;
 import com.cyrev.common.dtos.CyrevApiResponse;
 import com.cyrev.common.dtos.EntraGroup;
 import com.cyrev.common.dtos.EntraOrganization;
 import com.cyrev.common.dtos.EntraUser;
+import com.cyrev.common.dtos.ServicePrincipalDto;
+import com.cyrev.common.dtos.SharedMailboxDto;
+import com.cyrev.iam.annotations.RelationshipManager;
 import com.cyrev.iam.annotations.TenantAdmin;
 import com.cyrev.iam.entra.service.*;
 import com.cyrev.iam.entra.service.onboarding.EntraConsentService;
@@ -30,6 +34,7 @@ public class EntraController {
     private final EntraUserService entraUserService;
     private final EntraGroupService entraGroupService;
     private final ApplicationService appService;
+    private final AccessPackageService accessPackageService;
     private final EntraConsentService consentService;
     private final SaasTenantService saasTenantService;
     private final EntraOrganizationService organizationService;
@@ -109,6 +114,34 @@ public class EntraController {
     @PostMapping("/applications")
     public Object createApp(@RequestParam String displayName) {
         return appService.createApplication(displayName);
+    }
+
+    @GetMapping("/groups")
+    @RelationshipManager
+    public ResponseEntity<CyrevApiResponse<List<EntraGroup>>> listGroups() {
+        List<EntraGroup> groups = entraGroupService.listGroups();
+        return ResponseEntity.ok(new CyrevApiResponse<>(true, "Groups retrieved", groups));
+    }
+
+    @GetMapping("/service-principals")
+    @RelationshipManager
+    public ResponseEntity<CyrevApiResponse<List<ServicePrincipalDto>>> listServicePrincipals() {
+        List<ServicePrincipalDto> principals = appService.listServicePrincipals();
+        return ResponseEntity.ok(new CyrevApiResponse<>(true, "Service principals retrieved", principals));
+    }
+
+    @GetMapping("/access-packages")
+    @RelationshipManager
+    public ResponseEntity<CyrevApiResponse<List<AccessPackageDto>>> listAccessPackages() {
+        List<AccessPackageDto> packages = accessPackageService.listAccessPackages();
+        return ResponseEntity.ok(new CyrevApiResponse<>(true, "Access packages retrieved", packages));
+    }
+
+    @GetMapping("/shared-mailboxes")
+    @RelationshipManager
+    public ResponseEntity<CyrevApiResponse<List<SharedMailboxDto>>> listSharedMailboxes() {
+        List<SharedMailboxDto> mailboxes = entraUserService.listSharedMailboxes();
+        return ResponseEntity.ok(new CyrevApiResponse<>(true, "Shared mailboxes retrieved", mailboxes));
     }
 
 }

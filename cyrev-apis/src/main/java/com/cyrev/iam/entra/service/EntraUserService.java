@@ -1,15 +1,15 @@
 package com.cyrev.iam.entra.service;
 
 import com.cyrev.common.dtos.EntraUser;
+import com.cyrev.common.dtos.SharedMailboxDto;
 import com.cyrev.common.entities.TenantContext;
 import com.cyrev.common.entities.TenantContextHolder;
-import com.cyrev.common.repository.SaasTenantRepository;
 import com.cyrev.iam.entra.mapper.EntraUserMapper;
-import com.cyrev.iam.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import com.cyrev.iam.entra.service.clients.ResilientExchangeClient;
 import com.cyrev.iam.entra.service.clients.ResilientGraphClient;
 
 import java.util.*;
@@ -22,6 +22,7 @@ public class EntraUserService {
 
     public static final String URI = "/users";
     private final ResilientGraphClient resilientGraphClient;
+    private final ResilientExchangeClient resilientExchangeClient;
 
     public String extractMailNickname(String email) {
         return email.split("@")[0];
@@ -78,6 +79,28 @@ public class EntraUserService {
 
         return users.stream()
                 .map(EntraUserMapper::fromGraph)
+                .collect(Collectors.toList());
+    }
+
+    public List<SharedMailboxDto> listSharedMailboxes() {
+        String tenantId = getEntraTenantId();
+        log.info("Listing shared mailboxes for tenant={}", tenantId);
+
+        List<Map<String, Object>> mailboxes = resilientExchangeClient.invokeForList(
+                tenantId,
+                "Get-Mailbox",
+                Map.of("RecipientTypeDetails", "SharedMailbox", "ResultSize", "Unlimited")
+        );
+
+        log.info("Found {} shared mailboxes for tenant={}", mailboxes.size(), tenantId);
+
+        return mailboxes.stream()
+                .map(m -> SharedMailboxDto.builder()
+                        .id((String) m.get("ExchangeObjectId"))
+                        .displayName((String) m.get("DisplayName"))
+                        .primarySmtpAddress((String) m.get("PrimarySmtpAddress"))
+                        .userPrincipalName((String) m.get("UserPrincipalName"))
+                        .build())
                 .collect(Collectors.toList());
     }
 }
