@@ -41,7 +41,7 @@ public class ApplicationService {
         String tenantId = tenant.getEntraTenantId();
         Map<String, Object> response = resilientGraphClient.get(
                 tenantId,
-                "/servicePrincipals?$select=id,displayName,appRoles&$expand=appRoles"
+                "/servicePrincipals?$select=id,displayName,appRoles"
         );
         List<Map<String, Object>> value = (List<Map<String, Object>>) response.get("value");
         if (value == null) return List.of();
