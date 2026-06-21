@@ -264,4 +264,16 @@ public class NotificationPublisherServiceImpl implements NotificationPublisherSe
         eventPublisher.publishEvent(event);
         log.info("publish email verification link to user");
     }
+
+    @Override
+    public void publishPasswordResetEvent(String firstname, String email, String url) {
+        String templatePath = "password-reset.html";
+        Map<String, Object> message = new HashMap<>();
+        message.put("firstname", firstname);
+        message.put("url", url);
+        message.put("subject", "Reset your Cyrev password");
+        EmailEvent event = new EmailEvent(email, templatePath, message);
+        eventPublisher.publishEvent(event);
+        log.info("publish password reset link to user");
+    }
 }

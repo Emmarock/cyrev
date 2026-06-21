@@ -2,9 +2,12 @@ package com.cyrev.iam.controllers;
 
 import com.cyrev.common.dtos.CyrevApiResponse;
 import com.cyrev.common.dtos.AuthResponse;
+import com.cyrev.common.dtos.ForgotPasswordRequest;
 import com.cyrev.common.dtos.LoginRequest;
+import com.cyrev.common.dtos.ResetPasswordRequest;
 import com.cyrev.common.dtos.UserUpdateRequestDTO;
 import com.cyrev.iam.service.EmailVerificationService;
+import com.cyrev.iam.service.PasswordResetService;
 import com.cyrev.iam.annotations.CurrentUserId;
 import com.cyrev.iam.service.AuthService;
 import dev.samstevens.totp.exceptions.QrGenerationException;
@@ -36,6 +39,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final EmailVerificationService emailVerificationService;
+    private final PasswordResetService passwordResetService;
     @Value("${app.base-url}")
     private String appBaseUrl;
 
@@ -103,6 +107,28 @@ public class AuthController {
                         true,
                         "Email verified",
                         "Email verified successfully"
+                ));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<CyrevApiResponse<String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.requestReset(request.getEmail());
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new CyrevApiResponse<>(
+                        true,
+                        "If that email exists, a reset link has been sent",
+                        null
+                ));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<CyrevApiResponse<String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new CyrevApiResponse<>(
+                        true,
+                        "Password reset successful",
+                        null
                 ));
     }
 

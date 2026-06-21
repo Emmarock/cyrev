@@ -26,6 +26,8 @@ public interface NotificationPublisherService {
 
     void publishVerificationEvent(String firstname, String email, String url);
 
+    void publishPasswordResetEvent(String firstname, String email, String url);
+
     void publishBusinessUserPendingApproval(
             String adminEmail,
             String businessUserFullName,
