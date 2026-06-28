@@ -39,7 +39,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update   # change to validate or none in prod if needed
-    show-sql: true
+    show-sql: false
     properties:
       hibernate.format_sql: true
   flyway:
