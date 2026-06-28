@@ -43,7 +43,7 @@ public class EntraConsentService {
                     "https://graph.microsoft.com/RoleManagement.ReadWrite.Directory"
             );
             return props.getAuthority()
-                    + "/common/v2.0/adminconsent"
+                    + "/organizations/v2.0/adminconsent"
                     + "?client_id=" + URLEncoder.encode(props.getAppId(), StandardCharsets.UTF_8)
                     + "&scope=" + URLEncoder.encode(scope, StandardCharsets.UTF_8)
                     + "&redirect_uri=" + URLEncoder.encode(props.getConsentRedirectUri(), StandardCharsets.UTF_8)
