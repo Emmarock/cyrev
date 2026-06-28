@@ -125,7 +125,6 @@ entra:
   consent-redirect-uri: ${api.base-url}/api/entra/admin-consent-callback
   login-redirect-uri: ${api.base-url}/api/auth/login-callback
   signup-redirect-uri: ${api.base-url}/api/auth/signup-callback
-  bootstrap-redirect-uri: ${api.base-url}/api/entra/exchange-bootstrap/callback
   authority: https://login.microsoftonline.com
   auth-token-url: https://login.microsoftonline.com/common/oauth2/v2.0/token
 sendgrid:

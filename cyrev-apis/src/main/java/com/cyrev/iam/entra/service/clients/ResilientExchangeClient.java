@@ -74,43 +74,6 @@ public class ResilientExchangeClient {
         return (List<Map<String, Object>>) response.get("value");
     }
 
-    /**
-     * Like {@link #invokeForList}, but authenticates with a caller-supplied delegated
-     * access token instead of the app's own client-credentials token. Used for
-     * one-time, admin-privileged bootstrap calls (e.g. New-ServicePrincipal) that the
-     * app's own app-only token isn't authorized to make.
-     */
-    @Retryable(
-            value = { WebClientResponseException.class },
-            maxAttemptsExpression = "#{${exchange.retry.max-attempts:3}}",
-            backoff = @Backoff(delayExpression = "#{${exchange.retry.delay-ms:1000}}",
-                    multiplier = 2)
-    )
-    public Map<String, Object> invokeDelegated(String tenantId, String accessToken, String cmdletName, Map<String, Object> parameters) {
-        Map<String, Object> payload = Map.of(
-                "CmdletInput", Map.of(
-                        "CmdletName", cmdletName,
-                        "Parameters", parameters
-                )
-        );
-        log.info("Invoking Exchange Online cmdlet {} (delegated) for tenant {}", cmdletName, tenantId);
-        Map response = baseClient.tenantClient(tenantId, accessToken)
-                .post()
-                .uri(INVOKE_COMMAND_URI)
-                .bodyValue(payload)
-                .retrieve()
-                .bodyToMono(Map.class)
-                .block();
-        return response == null ? Map.of() : response;
-    }
-
-    @Recover
-    public Map<String, Object> recoverDelegated(WebClientResponseException e, String tenantId, String accessToken, String cmdletName, Map<String, Object> parameters) {
-        log.error("Exchange Online cmdlet {} (delegated) failed after retries. tenantId={}, error={}, responseBody={}",
-                cmdletName, tenantId, e.getMessage(), e.getResponseBodyAsString());
-        throw e;
-    }
-
     @Recover
     public void recover(WebClientResponseException e, String tenantId, String cmdletName, Map<String, Object> parameters) {
         log.error("Exchange Online cmdlet {} failed after retries. tenantId={}, error={}, responseBody={}",

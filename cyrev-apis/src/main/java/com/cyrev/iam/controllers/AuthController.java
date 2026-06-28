@@ -25,11 +25,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.URI;
-import java.text.ParseException;
 import java.util.Map;
 import java.util.UUID;
-
-import static reactor.netty.http.HttpConnectionLiveness.log;
 
 @RestController
 @RequestMapping("/api/auth")

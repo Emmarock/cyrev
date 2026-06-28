@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -65,6 +64,12 @@ public class EntraController {
         }
 
         saasTenantService.registerTenant(state, tenant, true);
+        try {
+            exchangeBootstrapService.provisionExchangeAdminRole(tenant.toString());
+        } catch (Exception e) {
+            log.error("Automatic Exchange Online role provisioning failed for tenant {}; " +
+                    "admin can fall back to /api/entra/exchange-setup-script: {}", tenant, e.getMessage());
+        }
         String redirectUrl = authService.buildLoginUrl(true, false);
         log.info("Admin has consented :  Redirect URL Retrieved: {}", redirectUrl);
         return ResponseEntity.status(HttpStatus.FOUND)
@@ -147,19 +152,21 @@ public class EntraController {
         return ResponseEntity.ok(new CyrevApiResponse<>(true, "Shared mailboxes retrieved", mailboxes));
     }
 
-    @GetMapping("/exchange-bootstrap/start")
-    public ResponseEntity<CyrevApiResponse<String>> exchangeBootstrapStart(@RequestParam String tenantId) {
-        String url = exchangeBootstrapService.buildAuthorizeUrl(tenantId);
-        return ResponseEntity.ok(new CyrevApiResponse<>(true, "Redirect URL retrieved", url));
+    @GetMapping("/exchange-setup-script")
+    @RelationshipManager
+    public ResponseEntity<CyrevApiResponse<String>> exchangeSetupScript() {
+        String script = exchangeBootstrapService.generateSetupScript();
+        return ResponseEntity.ok(new CyrevApiResponse<>(true, "Exchange Online setup script generated", script));
     }
 
-    @GetMapping("/exchange-bootstrap/callback")
-    public ResponseEntity<Map<String, Object>> exchangeBootstrapCallback(
-            @RequestParam String code,
-            @RequestParam String state
-    ) {
-        Map<String, Object> result = exchangeBootstrapService.handleCallback(code, state);
-        return ResponseEntity.ok(result);
+    @GetMapping("/exchange-setup-verify")
+    @RelationshipManager
+    public ResponseEntity<CyrevApiResponse<Boolean>> exchangeSetupVerify() {
+        boolean ready = exchangeBootstrapService.verifySetup();
+        String message = ready
+                ? "Exchange Online access is set up correctly"
+                : "Exchange Online access isn't set up yet — run the setup script and try again in a few minutes";
+        return ResponseEntity.ok(new CyrevApiResponse<>(ready, message, ready));
     }
 
 }
