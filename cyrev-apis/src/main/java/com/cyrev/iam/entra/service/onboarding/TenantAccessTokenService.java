@@ -14,6 +14,8 @@ public class TenantAccessTokenService {
 
     private static final String EXCHANGE_AUDIENCE = "exchange";
     private static final String EXCHANGE_SCOPE = "https://outlook.office365.com/.default";
+    private static final String ARM_AUDIENCE = "arm";
+    private static final String ARM_SCOPE = "https://management.azure.com/.default";
 
     private final EntraProperties props;
     private final TenantTokenCache cache;
@@ -46,6 +48,16 @@ public class TenantAccessTokenService {
 
         cache.storeToken(tenantId, EXCHANGE_AUDIENCE, response.getAccessToken(), response.getExpiresIn());
 
+        return response.getAccessToken();
+    }
+
+    public String getTenantArmAccessToken(String tenantId) {
+        Optional<String> cached = cache.getToken(tenantId, ARM_AUDIENCE);
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+        EntraTokenResponse response = tokenClient.getToken(tenantId, ARM_SCOPE);
+        cache.storeToken(tenantId, ARM_AUDIENCE, response.getAccessToken(), response.getExpiresIn());
         return response.getAccessToken();
     }
 

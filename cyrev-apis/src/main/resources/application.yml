@@ -132,6 +132,12 @@ sendgrid:
   from-email: info@ayokunmidapo.com
 redis:
   enabled: false
+azure-automation:
+  subscription-id: 205a392a-69e6-4b0a-876b-9d62a25018d2
+  resource-group: CyRev
+  account-name: cyrev-ExchangeAutomation
+  exchange-setup-runbook: ${AUTOMATION_EXCHANGE_SETUP_RUNBOOK:}
+
 token:
   blacklist:
     max-size: 10_000

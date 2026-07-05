@@ -126,7 +126,7 @@ public class ExchangeBootstrapService {
     }
 
     @SuppressWarnings("unchecked")
-    private String lookupServicePrincipalObjectId(String entraTenantId) {
+    public String lookupServicePrincipalObjectId(String entraTenantId) {
         Map<String, Object> response = resilientGraphClient.get(
                 entraTenantId,
                 "/servicePrincipals?$filter=appId eq '" + props.getAppId() + "'"

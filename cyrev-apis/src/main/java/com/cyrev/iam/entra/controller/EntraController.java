@@ -1,6 +1,8 @@
 package com.cyrev.iam.entra.controller;
 
 import com.cyrev.common.dtos.AccessPackageDto;
+import com.cyrev.common.dtos.AutomationJobStatus;
+import com.cyrev.common.entities.TenantContextHolder;
 import com.cyrev.common.dtos.CyrevApiResponse;
 import com.cyrev.common.dtos.EntraGroup;
 import com.cyrev.common.dtos.EntraOrganization;
@@ -10,6 +12,7 @@ import com.cyrev.common.dtos.SharedMailboxDto;
 import com.cyrev.iam.annotations.RelationshipManager;
 import com.cyrev.iam.annotations.TenantAdmin;
 import com.cyrev.iam.entra.service.*;
+import com.cyrev.iam.entra.service.onboarding.AzureAutomationService;
 import com.cyrev.iam.entra.service.onboarding.EntraConsentService;
 import com.cyrev.iam.entra.service.onboarding.ExchangeBootstrapService;
 import com.cyrev.iam.entra.service.onboarding.SaasTenantService;
@@ -41,6 +44,7 @@ public class EntraController {
     private final EntraOrganizationService organizationService;
     private final AuthService authService;
     private final ExchangeBootstrapService exchangeBootstrapService;
+    private final AzureAutomationService azureAutomationService;
 
     @GetMapping("/connect-entra")
     public ResponseEntity<CyrevApiResponse<String>> connect() {
@@ -157,6 +161,23 @@ public class EntraController {
     public ResponseEntity<CyrevApiResponse<String>> exchangeSetupScript() {
         String script = exchangeBootstrapService.generateSetupScript();
         return ResponseEntity.ok(new CyrevApiResponse<>(true, "Exchange Online setup script generated", script));
+    }
+
+    @PostMapping("/exchange-setup-automation")
+    @TenantAdmin
+    public ResponseEntity<CyrevApiResponse<String>> runExchangeSetupViaAutomation() {
+        String tenantId = TenantContextHolder.get().getEntraTenantId();
+        String jobId = azureAutomationService.runExchangeSetup(tenantId);
+        return ResponseEntity.ok(new CyrevApiResponse<>(true,
+                "Exchange setup runbook submitted. Job ID: " + jobId, jobId));
+    }
+
+    @GetMapping("/exchange-setup-automation/{jobId}")
+    @TenantAdmin
+    public ResponseEntity<CyrevApiResponse<AutomationJobStatus>> getAutomationJobStatus(
+            @PathVariable String jobId) {
+        AutomationJobStatus status = azureAutomationService.getJobStatus(jobId);
+        return ResponseEntity.ok(new CyrevApiResponse<>(true, "Job status retrieved", status));
     }
 
     @GetMapping("/exchange-setup-verify")
