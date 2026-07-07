@@ -1,9 +1,9 @@
 package com.cyrev.iam.controllers;
 
+import com.cyrev.common.dtos.BusinessResponseDTO;
 import com.cyrev.common.dtos.CreateBusinessDTO;
 import com.cyrev.common.dtos.CyrevApiResponse;
 import com.cyrev.common.dtos.UpdateBusinessDTO;
-import com.cyrev.common.entities.Business;
 import com.cyrev.common.entities.TenantContext;
 import com.cyrev.common.entities.TenantContextHolder;
 import com.cyrev.iam.annotations.RelationshipManager;
@@ -29,34 +29,34 @@ public class BusinessController {
 
     @PostMapping
     @RelationshipManager
-    public ResponseEntity<CyrevApiResponse<Business>> registerBusiness(@Valid @RequestBody CreateBusinessDTO request) {
+    public ResponseEntity<CyrevApiResponse<BusinessResponseDTO>> registerBusiness(@Valid @RequestBody CreateBusinessDTO request) {
         TenantContext tenant = TenantContextHolder.get();
-        Business business = businessService.registerBusiness(tenant.getInternalTenantId(), request);
+        BusinessResponseDTO business = businessService.registerBusiness(tenant.getInternalTenantId(), request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new CyrevApiResponse<>(true, "Business registered successfully", business));
     }
 
     @GetMapping
     @TenantAdmin
-    public ResponseEntity<CyrevApiResponse<List<Business>>> list() {
+    public ResponseEntity<CyrevApiResponse<List<BusinessResponseDTO>>> list() {
         TenantContext tenant = TenantContextHolder.get();
-        List<Business> businesses = businessService.listForTenant(tenant.getInternalTenantId());
+        List<BusinessResponseDTO> businesses = businessService.listForTenant(tenant.getInternalTenantId());
         return ResponseEntity.ok(new CyrevApiResponse<>(true, "Businesses retrieved", businesses));
     }
 
     @GetMapping("/{id}")
     @TenantAdmin
-    public ResponseEntity<CyrevApiResponse<Business>> get(@PathVariable UUID id) {
+    public ResponseEntity<CyrevApiResponse<BusinessResponseDTO>> get(@PathVariable UUID id) {
         TenantContext tenant = TenantContextHolder.get();
-        Business business = businessService.getForTenant(tenant.getInternalTenantId(), id);
+        BusinessResponseDTO business = businessService.getForTenant(tenant.getInternalTenantId(), id);
         return ResponseEntity.ok(new CyrevApiResponse<>(true, "Business retrieved", business));
     }
 
     @PutMapping("/{id}")
     @TenantAdmin
-    public ResponseEntity<CyrevApiResponse<Business>> update(@PathVariable UUID id, @Valid @RequestBody UpdateBusinessDTO request) {
+    public ResponseEntity<CyrevApiResponse<BusinessResponseDTO>> update(@PathVariable UUID id, @Valid @RequestBody UpdateBusinessDTO request) {
         TenantContext tenant = TenantContextHolder.get();
-        Business business = businessService.updateBusiness(tenant.getInternalTenantId(), id, request);
+        BusinessResponseDTO business = businessService.updateBusiness(tenant.getInternalTenantId(), id, request);
         return ResponseEntity.ok(new CyrevApiResponse<>(true, "Business updated", business));
     }
 }

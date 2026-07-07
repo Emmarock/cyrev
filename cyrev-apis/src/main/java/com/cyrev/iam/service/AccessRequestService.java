@@ -144,6 +144,7 @@ public class AccessRequestService {
         User user = userRepository.findUserByIdAndTenant_Id(userId, tenantInternalId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found in tenant: " + userId));
         if (user.getProviderUserId() == null || user.getProviderUserId().isBlank()) {
+            log.error( "Current user {} has no Entra identity linked; cannot submit access request", userId);
             throw new BadRequestException(
                     "Current user has no Entra identity linked; cannot submit access request");
         }

@@ -1,5 +1,6 @@
 package com.cyrev.iam.service;
 
+import com.cyrev.common.dtos.BusinessResponseDTO;
 import com.cyrev.common.dtos.ContractStatus;
 import com.cyrev.common.dtos.CreateBusinessDTO;
 import com.cyrev.common.dtos.UpdateBusinessDTO;
@@ -31,8 +32,30 @@ public class BusinessService {
     private final SaasTenantRepository saasTenantRepository;
     private final UserRepository userRepository;
 
+    private BusinessResponseDTO toDto(Business b) {
+        User owner = b.getRelationshipOwner();
+        return BusinessResponseDTO.builder()
+                .id(b.getId())
+                .createdAt(b.getCreatedAt())
+                .updatedAt(b.getUpdatedAt())
+                .createdBy(b.getCreatedBy())
+                .updatedBy(b.getUpdatedBy())
+                .version(b.getVersion())
+                .orgCode(b.getOrgCode())
+                .companyName(b.getCompanyName())
+                .contractStartDate(b.getContractStartDate())
+                .contractEndDate(b.getContractEndDate())
+                .contractStatus(b.getContractStatus())
+                .employeeIdFormat(b.getEmployeeIdFormat())
+                .employeeIdSequence(b.getEmployeeIdSequence())
+                .relationshipOwnerId(owner.getId())
+                .relationshipOwnerName(owner.getFirstName() + " " + owner.getLastName())
+                .tenantId(b.getTenant().getId())
+                .build();
+    }
+
     @Transactional
-    public Business registerBusiness(UUID tenantInternalId, CreateBusinessDTO dto) {
+    public BusinessResponseDTO registerBusiness(UUID tenantInternalId, CreateBusinessDTO dto) {
         String normalizedOrgCode = dto.getOrgCode().toUpperCase();
 
         if (businessRepository.existsByOrgCode(normalizedOrgCode)) {
@@ -68,11 +91,11 @@ public class BusinessService {
 
         Business saved = businessRepository.save(business);
         log.info("Registered business {} ({}) under tenant {}", saved.getId(), normalizedOrgCode, tenantInternalId);
-        return saved;
+        return toDto(saved);
     }
 
     @Transactional
-    public Business updateBusiness(UUID tenantInternalId, UUID businessId, UpdateBusinessDTO dto) {
+    public BusinessResponseDTO updateBusiness(UUID tenantInternalId, UUID businessId, UpdateBusinessDTO dto) {
         Business business = requireBusiness(tenantInternalId, businessId);
 
         if (dto.getCompanyName() != null) {
@@ -98,15 +121,19 @@ public class BusinessService {
             throw new BadRequestException("Contract end date cannot be before start date");
         }
 
-        return businessRepository.save(business);
+        return toDto(businessRepository.save(business));
     }
 
-    public List<Business> listForTenant(UUID tenantInternalId) {
-        return businessRepository.findAllByTenant_Id(tenantInternalId);
+    @Transactional(readOnly = true)
+    public List<BusinessResponseDTO> listForTenant(UUID tenantInternalId) {
+        return businessRepository.findAllByTenant_Id(tenantInternalId).stream()
+                .map(this::toDto)
+                .toList();
     }
 
-    public Business getForTenant(UUID tenantInternalId, UUID businessId) {
-        return requireBusiness(tenantInternalId, businessId);
+    @Transactional(readOnly = true)
+    public BusinessResponseDTO getForTenant(UUID tenantInternalId, UUID businessId) {
+        return toDto(requireBusiness(tenantInternalId, businessId));
     }
 
     private Business requireBusiness(UUID tenantInternalId, UUID businessId) {
