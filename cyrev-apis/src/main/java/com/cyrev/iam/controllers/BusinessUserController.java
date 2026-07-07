@@ -47,7 +47,7 @@ public class BusinessUserController {
     }
 
     @GetMapping("/pending")
-    @TenantAdmin
+    @RelationshipManager
     public ResponseEntity<CyrevApiResponse<List<BusinessUserDto>>> listPending() {
         TenantContext tenant = TenantContextHolder.get();
         List<BusinessUserDto> pending = businessUserService.listPendingApprovals(tenant.getInternalTenantId());
@@ -94,7 +94,7 @@ public class BusinessUserController {
     }
 
     @PostMapping("/{id}/offboard")
-    @TenantAdmin
+    @RelationshipManager
     public ResponseEntity<CyrevApiResponse<BusinessUserDto>> offboard(@PathVariable UUID id) {
         TenantContext tenant = TenantContextHolder.get();
         BusinessUserDto offboarded = businessUserService.offboard(

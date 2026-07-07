@@ -37,7 +37,7 @@ public class BusinessController {
     }
 
     @GetMapping
-    @TenantAdmin
+    @RelationshipManager
     public ResponseEntity<CyrevApiResponse<List<BusinessResponseDTO>>> list() {
         TenantContext tenant = TenantContextHolder.get();
         List<BusinessResponseDTO> businesses = businessService.listForTenant(tenant.getInternalTenantId());
@@ -45,7 +45,7 @@ public class BusinessController {
     }
 
     @GetMapping("/{id}")
-    @TenantAdmin
+    @RelationshipManager
     public ResponseEntity<CyrevApiResponse<BusinessResponseDTO>> get(@PathVariable UUID id) {
         TenantContext tenant = TenantContextHolder.get();
         BusinessResponseDTO business = businessService.getForTenant(tenant.getInternalTenantId(), id);
