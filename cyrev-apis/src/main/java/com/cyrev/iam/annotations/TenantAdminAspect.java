@@ -21,7 +21,7 @@ public class TenantAdminAspect {
 
     private final TenantSecurityService tenantSecurityService;
 
-    @Before("@annotation(TenantAdmin)")
+    @Before("@annotation(com.cyrev.iam.annotations.TenantAdmin)")
     public void validateTenantAdmin() {
 
         Authentication authentication = SecurityContextHolder

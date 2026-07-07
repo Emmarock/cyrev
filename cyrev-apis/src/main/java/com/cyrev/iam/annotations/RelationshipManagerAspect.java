@@ -21,7 +21,7 @@ public class RelationshipManagerAspect {
 
     private final TenantSecurityService tenantSecurityService;
 
-    @Before("@annotation(RelationshipManager)")
+    @Before("@annotation(com.cyrev.iam.annotations.RelationshipManager)")
     public void validateRelationshipManager() {
 
         Authentication authentication = SecurityContextHolder
