@@ -3,6 +3,11 @@ spring:
     activate:
       on-profile: prod
 
+cors:
+  allowed-origins:
+    - https://cyrev.cybrooke.com
+    - http://localhost:5173
+
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}

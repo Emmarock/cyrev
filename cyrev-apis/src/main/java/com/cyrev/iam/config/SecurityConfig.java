@@ -31,13 +31,13 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtFilter;
     private final TenantContextFilter tenantContextFilter;
 
-    @Value("${app.base-url}")
-    private String appBaseUrl;
+    @Value("${cors.allowed-origins}")
+    private List<String> allowedOrigins;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(appBaseUrl));
+        config.setAllowedOrigins(allowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Tenant-ID"));
         config.setAllowCredentials(true);
