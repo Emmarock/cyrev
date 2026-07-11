@@ -3,9 +3,7 @@ app:
 api:
   base-url: https://cyrev-service.purpleplant-988aeb98.ukwest.azurecontainerapps.io
 cors:
-  allowed-origins:
-    - https://cyrev.cybrooke.com
-    - http://localhost:5173
+  allowed-origins: "https://cyrev.cybrooke.com,http://localhost:5173"
 spring:
   main:
     lazy-initialization: true
