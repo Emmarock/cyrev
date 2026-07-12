@@ -52,7 +52,7 @@ public class BusinessController {
         return ResponseEntity.ok(new CyrevApiResponse<>(true, "Business retrieved", business));
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     @TenantAdmin
     public ResponseEntity<CyrevApiResponse<BusinessResponseDTO>> update(@PathVariable UUID id, @Valid @RequestBody UpdateBusinessDTO request) {
         TenantContext tenant = TenantContextHolder.get();
