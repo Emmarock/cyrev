@@ -116,6 +116,11 @@ azure:
   tenant-id: ${AZURE_TENANT_ID}
   app-id: ${AZURE_APP_ID}
   client-secret: ${AZURE_CLIENT_SECRET}
+  communication:
+    email:
+      enabled: true
+      connection-string: ${ACS_CONNECTION_STRING}
+      sender-address: ${ACS_SENDER_ADDRESS}
 microsoft:
   graph:
     base-url: https://graph.microsoft.com/v1.0

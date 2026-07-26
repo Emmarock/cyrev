@@ -66,3 +66,10 @@ entra:
 sendgrid:
   api-key: ${SENDGRID_API_KEY:}
   from-email: info@ayokunmidapo.com
+
+azure:
+  communication:
+    email:
+      enabled: false
+      connection-string: "stub-not-used-in-tests"
+      sender-address: DoNotReply@test.azurecomm.net

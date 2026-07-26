@@ -29,7 +29,7 @@ public class EmailEventListener {
     }
 
     NotificationService getEmailNotificationService(){
-        return emailNotificationServiceMap.get(MailProvider.SENDGRID);
+        return emailNotificationServiceMap.get(MailProvider.AZURE_COMMUNICATION_SERVICES);
     }
 
     @Async

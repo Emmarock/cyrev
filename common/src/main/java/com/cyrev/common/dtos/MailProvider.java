@@ -1,5 +1,5 @@
 package com.cyrev.common.dtos;
 
 public enum MailProvider {
-    SENDGRID, MICROSOFT_GRAPH
+    SENDGRID, MICROSOFT_GRAPH, AZURE_COMMUNICATION_SERVICES
 }

@@ -1,5 +1,6 @@
 package com.cyrev.iam;
 
+import com.azure.communication.email.EmailClient;
 import com.cyrev.iam.entra.service.clients.ResilientGraphClient;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -13,5 +14,11 @@ public class TestConfig {
     @Primary
     public ResilientGraphClient resilientGraphClient() {
         return Mockito.mock(ResilientGraphClient.class);
+    }
+
+    @Bean
+    @Primary
+    public EmailClient emailClient() {
+        return Mockito.mock(EmailClient.class);
     }
 }
