@@ -29,7 +29,13 @@ public class EmailEventListener {
     }
 
     NotificationService getEmailNotificationService(){
-        return emailNotificationServiceMap.get(MailProvider.AZURE_COMMUNICATION_SERVICES);
+        NotificationService svc = emailNotificationServiceMap.get(MailProvider.AZURE_COMMUNICATION_SERVICES);
+        if (svc == null) {
+            throw new IllegalStateException(
+                "AzureCommunicationEmailService is not available. " +
+                "Ensure ACS_CONNECTION_STRING and ACS_SENDER_ADDRESS env vars are set and azure.communication.email.enabled=true.");
+        }
+        return svc;
     }
 
     @Async
