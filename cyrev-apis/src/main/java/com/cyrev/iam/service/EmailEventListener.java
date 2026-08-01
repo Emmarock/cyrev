@@ -27,7 +27,6 @@ public class EmailEventListener {
     public void init(){
         emailNotificationServices.forEach(notificationService -> emailNotificationServiceMap.put(notificationService.getProvider(), notificationService));
     }
-
     NotificationService getEmailNotificationService(){
         NotificationService svc = emailNotificationServiceMap.get(MailProvider.AZURE_COMMUNICATION_SERVICES);
         if (svc == null) {
