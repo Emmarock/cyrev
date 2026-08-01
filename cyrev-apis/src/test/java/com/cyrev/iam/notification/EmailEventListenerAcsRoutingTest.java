@@ -9,10 +9,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,28 +30,24 @@ class EmailEventListenerAcsRoutingTest {
         when(acsService.getProvider()).thenReturn(MailProvider.AZURE_COMMUNICATION_SERVICES);
         when(sendGridService.getProvider()).thenReturn(MailProvider.SENDGRID);
         listener = new EmailEventListener(List.of(acsService, sendGridService));
+        ReflectionTestUtils.setField(listener, "activeProvider", "AZURE_COMMUNICATION_SERVICES");
         listener.init();
-        // clear the getProvider() calls made during init so verifyNoInteractions is clean
         clearInvocations(acsService, sendGridService);
     }
 
     @Test
-    void handleEmailEvent_routesToAcsForTextEmail() throws Exception {
-        EmailEvent event = new EmailEvent("user@example.com",
-                Map.of("subject", "Test Subject", "body", "Test body"));
-
-        listener.handleEmailEvent(event);
+    void routesToAcsForTextEmail() throws Exception {
+        listener.handleEmailEvent(new EmailEvent("user@example.com",
+                Map.of("subject", "Test Subject", "body", "Test body")));
 
         verify(acsService).sendTextEmail("user@example.com", "Test Subject", "Test body");
         verifyNoInteractions(sendGridService);
     }
 
     @Test
-    void handleEmailEvent_routesToAcsForHtmlEmail() throws Exception {
-        EmailEvent event = new EmailEvent("user@example.com", "welcome.html",
-                Map.of("firstname", "Alice", "subject", "Welcome"));
-
-        listener.handleEmailEvent(event);
+    void routesToAcsForHtmlEmail() throws Exception {
+        listener.handleEmailEvent(new EmailEvent("user@example.com", "welcome.html",
+                Map.of("firstname", "Alice", "subject", "Welcome")));
 
         verify(acsService).sendHtmlEmail("user@example.com", "welcome.html",
                 Map.of("firstname", "Alice", "subject", "Welcome"));
@@ -57,12 +55,33 @@ class EmailEventListenerAcsRoutingTest {
     }
 
     @Test
-    void handleEmailEvent_doesNotRouteToSendGrid() throws Exception {
-        EmailEvent event = new EmailEvent("user@example.com",
-                Map.of("subject", "Hello", "body", "World"));
+    void routesToSendGridWhenProviderSwitched() throws Exception {
+        ReflectionTestUtils.setField(listener, "activeProvider", "SENDGRID");
 
-        listener.handleEmailEvent(event);
+        listener.handleEmailEvent(new EmailEvent("user@example.com",
+                Map.of("subject", "Hello", "body", "World")));
 
-        verifyNoInteractions(sendGridService);
+        verify(sendGridService).sendTextEmail("user@example.com", "Hello", "World");
+        verifyNoInteractions(acsService);
+    }
+
+    @Test
+    void throwsForUnknownProvider() {
+        ReflectionTestUtils.setField(listener, "activeProvider", "CARRIER_PIGEON");
+
+        assertThatThrownBy(() -> listener.handleEmailEvent(
+                new EmailEvent("user@example.com", Map.of("subject", "s", "body", "b"))))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Unknown mail provider");
+    }
+
+    @Test
+    void throwsWhenProviderNotRegistered() {
+        ReflectionTestUtils.setField(listener, "activeProvider", "MICROSOFT_GRAPH");
+
+        assertThatThrownBy(() -> listener.handleEmailEvent(
+                new EmailEvent("user@example.com", Map.of("subject", "s", "body", "b"))))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("No NotificationService bean is registered");
     }
 }

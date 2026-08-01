@@ -134,6 +134,9 @@ entra:
   signup-redirect-uri: ${api.base-url}/api/auth/signup-callback
   authority: https://login.microsoftonline.com
   auth-token-url: https://login.microsoftonline.com/common/oauth2/v2.0/token
+mail:
+  provider: ${MAIL_PROVIDER:AZURE_COMMUNICATION_SERVICES}
+
 sendgrid:
   api-key: ${SENDGRID_API_KEY}
   from-email: info@ayokunmidapo.com

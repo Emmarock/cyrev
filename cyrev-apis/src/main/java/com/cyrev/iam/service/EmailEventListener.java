@@ -6,6 +6,7 @@ import com.cyrev.common.services.NotificationService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -23,16 +24,27 @@ public class EmailEventListener {
     private final List<NotificationService> emailNotificationServices;
     private final Map<MailProvider, NotificationService> emailNotificationServiceMap = new HashMap<>();
 
+    @Value("${mail.provider:AZURE_COMMUNICATION_SERVICES}")
+    private String activeProvider;
+
     @PostConstruct
     public void init(){
         emailNotificationServices.forEach(notificationService -> emailNotificationServiceMap.put(notificationService.getProvider(), notificationService));
+        log.info("Active email provider: {}", activeProvider);
     }
+
     NotificationService getEmailNotificationService(){
-        NotificationService svc = emailNotificationServiceMap.get(MailProvider.AZURE_COMMUNICATION_SERVICES);
+        MailProvider provider;
+        try {
+            provider = MailProvider.valueOf(activeProvider.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Unknown mail provider configured: '" + activeProvider +
+                "'. Valid values: AZURE_COMMUNICATION_SERVICES, SENDGRID, MICROSOFT_GRAPH");
+        }
+        NotificationService svc = emailNotificationServiceMap.get(provider);
         if (svc == null) {
-            throw new IllegalStateException(
-                "AzureCommunicationEmailService is not available. " +
-                "Ensure ACS_CONNECTION_STRING and ACS_SENDER_ADDRESS env vars are set and azure.communication.email.enabled=true.");
+            throw new IllegalStateException("No NotificationService bean is registered for provider '" + provider +
+                "'. Check that the corresponding service is enabled and its required env vars are set.");
         }
         return svc;
     }

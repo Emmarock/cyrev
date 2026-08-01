@@ -58,6 +58,7 @@ microsoft:
 
 mail:
   sender: info@ayokunmidapo.com
+  provider: SENDGRID
 
 entra:
   tenant-id: ${AZURE_TENANT_ID:0ad4f99a-a964-4b11-b55d-686b61408a0c}
