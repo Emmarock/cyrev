@@ -64,6 +64,7 @@ public class AzureCommunicationEmailService implements NotificationService {
     }
 
     private void send(String to, String subject, String htmlBody, String plainTextBody) {
+        log.info("Sending email from {} to {} with subject {}", senderAddress, to, subject);
         EmailMessage message = new EmailMessage()
                 .setSenderAddress(senderAddress)
                 .setToRecipients(new EmailAddress(to))
