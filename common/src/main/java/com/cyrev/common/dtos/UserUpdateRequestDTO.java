@@ -1,14 +1,9 @@
 package com.cyrev.common.dtos;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
-import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -16,8 +11,15 @@ import java.util.UUID;
 @Builder
 public class UserUpdateRequestDTO {
 
-    @NotBlank(message = "password is required")
+    // profile fields — any authenticated user
+    private String firstName;
+    private String lastName;
+    private String username;
     private String password;
-    @NotBlank(message = "secret is required")
     private String secret;
+    private Boolean mfaEnabled;
+
+    // privileged fields — tenant admin only
+    private Role role;
+    private UserStatus status;
 }

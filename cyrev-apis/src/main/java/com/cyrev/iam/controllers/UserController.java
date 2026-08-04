@@ -93,14 +93,27 @@ public class UserController {
                 ));
     }
 
-    @PutMapping()
-    public ResponseEntity<CyrevApiResponse<User>> updateUser(@CurrentUserId UUID id,
-                                                             @RequestBody UserUpdateRequestDTO updated) {
-        var response =  userService.updateUser(id, updated);
+    @PutMapping("/{id}")
+    public ResponseEntity<CyrevApiResponse<User>> updateUser(@PathVariable UUID id,
+                                                             @Valid @RequestBody UserUpdateRequestDTO updated) {
+        var response = userService.updateUser(id, updated);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new CyrevApiResponse<>(
                         true,
-                        "User updated Successful",
+                        "User updated successfully",
+                        response
+                ));
+    }
+
+    @PatchMapping("/{id}")
+    @TenantAdmin
+    public ResponseEntity<CyrevApiResponse<User>> updateUserPrivileged(@PathVariable UUID id,
+                                                                       @Valid @RequestBody UserUpdateRequestDTO updated) {
+        var response = userService.updateUserPrivileged(id, updated);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new CyrevApiResponse<>(
+                        true,
+                        "User updated successfully",
                         response
                 ));
     }

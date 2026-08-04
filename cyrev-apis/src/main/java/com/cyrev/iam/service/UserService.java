@@ -1,7 +1,9 @@
 package com.cyrev.iam.service;
 
 import com.cyrev.common.dtos.CompleteSignupDTO;
+import com.cyrev.common.dtos.Role;
 import com.cyrev.common.dtos.UserCreationDTO;
+import com.cyrev.common.dtos.UserStatus;
 import com.cyrev.common.dtos.UserUpdateRequestDTO;
 import com.cyrev.common.entities.Address;
 import com.cyrev.common.entities.Organization;
@@ -100,16 +102,49 @@ public class UserService {
         return user;
     }
 
+    @Transactional
     public User updateUser(UUID id, UserUpdateRequestDTO updated) {
         return userRepository.findById(id).map(user -> {
-            if (updated.getPassword() != null) {
+            if (updated.getFirstName() != null) {
+                user.setFirstName(updated.getFirstName());
+            }
+            if (updated.getLastName() != null) {
+                user.setLastName(updated.getLastName());
+            }
+            if (updated.getUsername() != null) {
+                if (userRepository.findByUsername(updated.getUsername())
+                        .filter(existing -> !existing.getId().equals(id))
+                        .isPresent()) {
+                    throw new BadRequestException("Username already taken");
+                }
+                user.setUsername(updated.getUsername());
+            }
+            if (updated.getPassword() != null && !updated.getPassword().isBlank()) {
                 user.setPassword(passwordEncoder.encode(updated.getPassword()));
-                user.setEmailVerified(true);
+            }
+            if (updated.getSecret() != null && !updated.getSecret().isBlank()) {
+                user.setSecret(updated.getSecret());
+            }
+            if (updated.getMfaEnabled() != null) {
+                user.setMfaEnabled(updated.getMfaEnabled());
             }
             return userRepository.save(user);
-        }).orElseThrow(() -> new RuntimeException("Invalid user ID: " + id));
+        }).orElseThrow(() -> new BadRequestException("User not found: " + id));
     }
 
+
+    @Transactional
+    public User updateUserPrivileged(UUID id, UserUpdateRequestDTO updated) {
+        return userRepository.findById(id).map(user -> {
+            if (updated.getRole() != null) {
+                user.setRole(updated.getRole());
+            }
+            if (updated.getStatus() != null) {
+                user.setStatus(updated.getStatus());
+            }
+            return userRepository.save(user);
+        }).orElseThrow(() -> new BadRequestException("User not found: " + id));
+    }
 
     public boolean deleteUser(UUID id) {
         return userRepository.findById(id).map(user -> {
