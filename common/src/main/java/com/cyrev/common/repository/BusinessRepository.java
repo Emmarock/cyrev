@@ -19,6 +19,10 @@ public interface BusinessRepository extends JpaRepository<Business, UUID> {
 
     Optional<Business> findByIdAndTenant_Id(UUID id, UUID tenantId);
 
+    boolean existsByRelationshipOwner_Id(UUID ownerId);
+
+    boolean existsByRelationshipOwner_IdAndIdNot(UUID ownerId, UUID excludedBusinessId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Business> findWithLockingById(UUID id);
 }

@@ -72,6 +72,10 @@ public class BusinessService {
         User relationshipOwner = userRepository.findUserByIdAndTenant_Id(dto.getRelationshipOwnerId(), tenantInternalId)
                 .orElseThrow(() -> new BadRequestException("Relationship owner not found in this tenant"));
 
+        if (businessRepository.existsByRelationshipOwner_Id(dto.getRelationshipOwnerId())) {
+            throw new BadRequestException("This relationship manager is already assigned to another business entity");
+        }
+
         String employeeIdFormat = dto.getEmployeeIdFormat() == null || dto.getEmployeeIdFormat().isBlank()
                 ? DEFAULT_EMPLOYEE_ID_FORMAT
                 : dto.getEmployeeIdFormat();
@@ -113,6 +117,9 @@ public class BusinessService {
         if (dto.getRelationshipOwnerId() != null) {
             User owner = userRepository.findUserByIdAndTenant_Id(dto.getRelationshipOwnerId(), tenantInternalId)
                     .orElseThrow(() -> new BadRequestException("Relationship owner not found in this tenant"));
+            if (businessRepository.existsByRelationshipOwner_IdAndIdNot(dto.getRelationshipOwnerId(), businessId)) {
+                throw new BadRequestException("This relationship manager is already assigned to another business entity");
+            }
             business.setRelationshipOwner(owner);
         }
 
