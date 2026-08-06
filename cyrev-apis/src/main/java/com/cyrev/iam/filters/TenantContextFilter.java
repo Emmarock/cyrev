@@ -130,14 +130,28 @@ public class TenantContextFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
+        String method = request.getMethod();
 
-        List<String> patterns = List.of(
+        // Path-only exclusions (all methods)
+        List<String> pathOnlyPatterns = List.of(
                 "/api/auth/**",
-                "/api/entra/connect-entra",
-                "/api/users/invites",
-                "/api/users/invites/accept"
+                "/api/entra/connect-entra"
         );
+        if (pathOnlyPatterns.stream().anyMatch(p -> matcher.match(p, path))) {
+            return true;
+        }
 
-        return patterns.stream().anyMatch(p -> matcher.match(p, path));
+        // POST-only exclusions — GET /api/users/invites still needs tenant context
+        if ("POST".equalsIgnoreCase(method)) {
+            List<String> postOnlyPatterns = List.of(
+                    "/api/users/invites",
+                    "/api/users/invites/accept"
+            );
+            if (postOnlyPatterns.stream().anyMatch(p -> matcher.match(p, path))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
