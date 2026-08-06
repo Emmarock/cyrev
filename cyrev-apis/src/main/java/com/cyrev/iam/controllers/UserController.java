@@ -70,6 +70,9 @@ public class UserController {
 
     @GetMapping()
     public ResponseEntity<CyrevApiResponse<User>> getUser(@CurrentUserId UUID id) {
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         TenantContext tenant = TenantContextHolder.get();
         User user = tenant == null
                 ? userService.getUser(id)
