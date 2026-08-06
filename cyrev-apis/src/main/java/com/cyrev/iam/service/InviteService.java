@@ -116,7 +116,6 @@ public class InviteService {
     }
 
     public AcceptInviteDTO acceptInvite(AcceptInviteRequest request) {
-
         UserInvite invite = inviteRepository
                 .findByInviteTokenAndDeletedFalse(request.getToken())
                 .orElseThrow(() -> new BadRequestException("Invalid invite token"));
@@ -148,4 +147,5 @@ public class InviteService {
                 .inviteStatus(invite.getStatus())
                 .message("User created successfully").build();
     }
+
 }
