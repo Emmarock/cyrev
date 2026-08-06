@@ -40,6 +40,18 @@ public class InviteService {
         if (inviteRepository.existsByEmailAndStatus(request.getBusinessEmail(), InviteStatus.PENDING)) {
             throw new RuntimeException("User already invited");
         }
+
+        userRepository.findByEmail(request.getBusinessEmail().toLowerCase()).ifPresent(existing -> {
+            if (existing.getStatus() == UserStatus.ACTIVE) {
+                throw new RuntimeException("A user with this email is already registered and active");
+            }
+            if (existing.getStatus() == UserStatus.SUSPENDED
+                    || existing.getStatus() == UserStatus.INACTIVE
+                    || existing.getStatus() == UserStatus.TERMINATED) {
+                throw new RuntimeException("A user with this email exists but their account is disabled");
+            }
+        });
+
         String verificationToken = verificationTokenGenerator.generateToken();
         UserInvite invite = UserInvite.builder()
                 .firstName(request.getFirstName())
