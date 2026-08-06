@@ -59,4 +59,5 @@ public class BusinessController {
         BusinessResponseDTO business = businessService.updateBusiness(tenant.getInternalTenantId(), id, request);
         return ResponseEntity.ok(new CyrevApiResponse<>(true, "Business updated", business));
     }
+
 }

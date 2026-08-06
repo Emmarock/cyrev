@@ -109,4 +109,5 @@ public class BusinessUserController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return auth == null ? "system" : auth.getName();
     }
+
 }
