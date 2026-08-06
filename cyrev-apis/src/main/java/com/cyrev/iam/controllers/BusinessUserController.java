@@ -102,6 +102,7 @@ public class BusinessUserController {
                 id,
                 tenant.getEntraTenantId()
         );
+
         return ResponseEntity.ok(new CyrevApiResponse<>(true, "Business user offboarded", offboarded));
     }
 
