@@ -35,6 +35,13 @@ public class UserController {
         return ResponseEntity.ok(inviteService.sendInvite(inviter,request));
     }
 
+    @PostMapping("/invites/{email}/resend")
+    @TenantAdmin
+    public ResponseEntity<CyrevApiResponse<UserInviteDTO>> resendInvite(@PathVariable String email) {
+        var result = inviteService.resendInvite(email);
+        return ResponseEntity.ok(new CyrevApiResponse<>(true, "Invitation resent successfully", result));
+    }
+
     @PostMapping("/invites/accept")
     public ResponseEntity<AcceptInviteDTO> acceptInvite(@RequestBody AcceptInviteRequest request) {
         AcceptInviteDTO acceptInviteDTO = inviteService.acceptInvite(request);

@@ -63,6 +63,35 @@ public class InviteService {
                 .build();
     }
 
+    @Transactional
+    public UserInviteDTO resendInvite(String email) {
+        UserInvite invite = inviteRepository.findFirstByEmailOrderByCreatedAtDesc(email.toLowerCase())
+                .orElseThrow(() -> new EntityNotFoundException("No invite found for: " + email));
+
+        if (invite.getStatus() == InviteStatus.ACCEPTED) {
+            throw new RuntimeException("Invite already accepted — user has completed registration");
+        }
+        if (invite.getStatus() == InviteStatus.REVOKED) {
+            throw new RuntimeException("Invite has been revoked");
+        }
+
+        String newToken = verificationTokenGenerator.generateToken();
+        invite.setInviteToken(newToken);
+        invite.setStatus(InviteStatus.PENDING);
+        invite.setExpiresAt(Instant.now().plus(7, ChronoUnit.DAYS));
+        inviteRepository.save(invite);
+
+        String invitationLink = emailVerificationService.getInvitationLink(newToken);
+        notificationPublisherService.publishVerificationEvent(invite.getFirstName(), invite.getEmail(), invitationLink);
+
+        return UserInviteDTO.builder()
+                .firstName(invite.getFirstName())
+                .lastName(invite.getLastName())
+                .email(invite.getEmail())
+                .role(invite.getRole())
+                .build();
+    }
+
     public AcceptInviteDTO acceptInvite(AcceptInviteRequest request) {
 
         UserInvite invite = inviteRepository

@@ -10,6 +10,7 @@ import com.cyrev.common.entities.Organization;
 import com.cyrev.common.entities.SaasTenant;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.repository.AddressRepository;
+import com.cyrev.common.repository.BusinessRepository;
 import com.cyrev.common.repository.OrganizationRepository;
 import com.cyrev.common.repository.SaasTenantRepository;
 import com.cyrev.common.repository.UserRepository;
@@ -38,6 +39,7 @@ public class UserService {
     private final NotificationPublisherService notificationPublisherService;
     private final EmailVerificationService emailVerificationService;
     private final SaasTenantRepository saasTenantRepository;
+    private final BusinessRepository businessRepository;
     public List<User> getTenantAllUsers(UUID tenantId) {
         return userRepository.findAllByTenantId(tenantId);
     }
@@ -146,9 +148,16 @@ public class UserService {
         }).orElseThrow(() -> new BadRequestException("User not found: " + id));
     }
 
+    @Transactional
     public boolean deleteUser(UUID id) {
         return userRepository.findById(id).map(user -> {
-            userRepository.delete(user);
+            if (businessRepository.existsByRelationshipOwner_Id(id)) {
+                throw new BadRequestException(
+                        "Cannot delete user: they are assigned as a relationship manager for a business entity. " +
+                        "Reassign the business to another manager first.");
+            }
+            user.setDeleted(true);
+            userRepository.save(user);
             return true;
         }).orElse(false);
     }

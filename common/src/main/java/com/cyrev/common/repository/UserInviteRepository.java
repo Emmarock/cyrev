@@ -12,4 +12,6 @@ public interface UserInviteRepository extends JpaRepository<UserInvite, UUID> {
     Optional<UserInvite> findByInviteTokenAndDeletedFalse(String token);
 
     boolean existsByEmailAndStatus(String email, InviteStatus status);
+
+    Optional<UserInvite> findFirstByEmailOrderByCreatedAtDesc(String email);
 }
