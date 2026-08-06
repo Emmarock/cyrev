@@ -30,6 +30,14 @@ public class UserController {
         this.inviteService = inviteService;
     }
 
+    @GetMapping("/invites")
+    @TenantAdmin
+    public ResponseEntity<CyrevApiResponse<List<UserInviteDTO>>> listInvites() {
+        TenantContext tenant = TenantContextHolder.get();
+        var invites = inviteService.listPendingInvites(tenant.getInternalTenantId());
+        return ResponseEntity.ok(new CyrevApiResponse<>(true, "Invites retrieved successfully", invites));
+    }
+
     @PostMapping("/invites")
     public ResponseEntity<UserInviteDTO> inviteUser(@CurrentUserId UUID inviter, @RequestBody InviteUserRequest request) {
         return ResponseEntity.ok(inviteService.sendInvite(inviter,request));

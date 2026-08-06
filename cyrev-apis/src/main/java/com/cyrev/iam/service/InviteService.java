@@ -1,14 +1,13 @@
 package com.cyrev.iam.service;
 
 import com.cyrev.common.dtos.*;
-import com.cyrev.common.entities.TenantContext;
-import com.cyrev.common.entities.TenantContextHolder;
 import com.cyrev.common.entities.User;
 import com.cyrev.common.entities.UserInvite;
 import com.cyrev.common.repository.UserInviteRepository;
 import com.cyrev.common.repository.UserRepository;
 import com.cyrev.common.services.NotificationPublisherService;
 import com.cyrev.common.services.VerificationTokenGenerator;
+import com.cyrev.iam.exceptions.BadRequestException;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -33,22 +33,44 @@ public class InviteService {
     //TODO: allow user invitation from users who do not have tenant connected
     // to entra to invite other users, who can then connect to entra
 
+    private UserInviteDTO toDto(UserInvite invite) {
+        return UserInviteDTO.builder()
+                .firstName(invite.getFirstName())
+                .lastName(invite.getLastName())
+                .email(invite.getEmail())
+                .role(invite.getRole())
+                .status(invite.getStatus())
+                .expiresAt(invite.getExpiresAt())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserInviteDTO> listPendingInvites(UUID tenantId) {
+        return inviteRepository
+                .findAllByInviter_Tenant_IdAndStatusNotOrderByCreatedAtDesc(tenantId, InviteStatus.ACCEPTED)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
     @Transactional
     public UserInviteDTO sendInvite(UUID inviter, InviteUserRequest request) {
 
         User user = userRepository.findById(inviter).orElseThrow(()-> new EntityNotFoundException("User not found"));
-        if (inviteRepository.existsByEmailAndStatus(request.getBusinessEmail(), InviteStatus.PENDING)) {
-            throw new RuntimeException("User already invited");
+        String normalizedEmail = request.getBusinessEmail().toLowerCase();
+
+        if (inviteRepository.existsByEmailAndStatus(normalizedEmail, InviteStatus.PENDING)) {
+            throw new BadRequestException("An invitation has already been sent to this email");
         }
 
-        userRepository.findByEmail(request.getBusinessEmail().toLowerCase()).ifPresent(existing -> {
+        userRepository.findByEmail(normalizedEmail).ifPresent(existing -> {
             if (existing.getStatus() == UserStatus.ACTIVE) {
-                throw new RuntimeException("A user with this email is already registered and active");
+                throw new BadRequestException("A user with this email is already registered and active");
             }
             if (existing.getStatus() == UserStatus.SUSPENDED
                     || existing.getStatus() == UserStatus.INACTIVE
                     || existing.getStatus() == UserStatus.TERMINATED) {
-                throw new RuntimeException("A user with this email exists but their account is disabled");
+                throw new BadRequestException("A user with this email exists but their account is disabled");
             }
         });
 
@@ -67,12 +89,7 @@ public class InviteService {
         inviteRepository.save(invite);
         String invitationLink = emailVerificationService.getInvitationLink(verificationToken);
         notificationPublisherService.publishVerificationEvent(request.getFirstName(), request.getBusinessEmail(), invitationLink);
-        return UserInviteDTO.builder()
-                .firstName(invite.getFirstName())
-                .lastName(invite.getLastName())
-                .email(invite.getEmail())
-                .role(invite.getRole())
-                .build();
+        return toDto(invite);
     }
 
     @Transactional
@@ -81,10 +98,10 @@ public class InviteService {
                 .orElseThrow(() -> new EntityNotFoundException("No invite found for: " + email));
 
         if (invite.getStatus() == InviteStatus.ACCEPTED) {
-            throw new RuntimeException("Invite already accepted — user has completed registration");
+            throw new BadRequestException("Invite already accepted — user has completed registration");
         }
         if (invite.getStatus() == InviteStatus.REVOKED) {
-            throw new RuntimeException("Invite has been revoked");
+            throw new BadRequestException("Invite has been revoked");
         }
 
         String newToken = verificationTokenGenerator.generateToken();
@@ -95,29 +112,23 @@ public class InviteService {
 
         String invitationLink = emailVerificationService.getInvitationLink(newToken);
         notificationPublisherService.publishVerificationEvent(invite.getFirstName(), invite.getEmail(), invitationLink);
-
-        return UserInviteDTO.builder()
-                .firstName(invite.getFirstName())
-                .lastName(invite.getLastName())
-                .email(invite.getEmail())
-                .role(invite.getRole())
-                .build();
+        return toDto(invite);
     }
 
     public AcceptInviteDTO acceptInvite(AcceptInviteRequest request) {
 
         UserInvite invite = inviteRepository
                 .findByInviteTokenAndDeletedFalse(request.getToken())
-                .orElseThrow(() -> new RuntimeException("Invalid invite"));
+                .orElseThrow(() -> new BadRequestException("Invalid invite token"));
 
         if (invite.getStatus() != InviteStatus.PENDING) {
-            throw new RuntimeException("Invite already used");
+            throw new BadRequestException("Invite is no longer valid");
         }
 
         if (invite.getExpiresAt().isBefore(Instant.now())) {
             invite.setStatus(InviteStatus.EXPIRED);
             inviteRepository.save(invite);
-            throw new RuntimeException("Invite expired");
+            throw new BadRequestException("Invite has expired");
         }
         User inviter = invite.getInviter();
         User user = new User();

@@ -4,6 +4,7 @@ import com.cyrev.common.dtos.InviteStatus;
 import com.cyrev.common.entities.UserInvite;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,4 +15,6 @@ public interface UserInviteRepository extends JpaRepository<UserInvite, UUID> {
     boolean existsByEmailAndStatus(String email, InviteStatus status);
 
     Optional<UserInvite> findFirstByEmailOrderByCreatedAtDesc(String email);
+
+    List<UserInvite> findAllByInviter_Tenant_IdAndStatusNotOrderByCreatedAtDesc(UUID tenantId, InviteStatus status);
 }
