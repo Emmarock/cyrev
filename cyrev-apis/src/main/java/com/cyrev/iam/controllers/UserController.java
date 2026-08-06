@@ -41,6 +41,7 @@ public class UserController {
     @PostMapping("/invites")
     public ResponseEntity<UserInviteDTO> inviteUser(@CurrentUserId UUID inviter, @RequestBody InviteUserRequest request) {
         return ResponseEntity.ok(inviteService.sendInvite(inviter,request));
+
     }
 
     @PostMapping("/invites/{email}/resend")
@@ -54,6 +55,7 @@ public class UserController {
     public ResponseEntity<AcceptInviteDTO> acceptInvite(@RequestBody AcceptInviteRequest request) {
         AcceptInviteDTO acceptInviteDTO = inviteService.acceptInvite(request);
         return ResponseEntity.ok(acceptInviteDTO);
+
     }
     @GetMapping("/all")
     @TenantAdmin
