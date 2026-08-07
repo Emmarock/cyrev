@@ -41,7 +41,6 @@ public class UserController {
     @PostMapping("/invites")
     public ResponseEntity<UserInviteDTO> inviteUser(@CurrentUserId UUID inviter, @RequestBody InviteUserRequest request) {
         return ResponseEntity.ok(inviteService.sendInvite(inviter,request));
-
     }
 
     @PostMapping("/invites/{email}/resend")

@@ -40,10 +40,7 @@ public class AccessRequestController {
 
     @PostMapping("/access-packages")
     @RelationshipManager
-    public ResponseEntity<CyrevApiResponse<GovernanceRequestResponseDto>> requestAccessPackage(
-            @CurrentUserId UUID currentUserId,
-            @Valid @RequestBody AccessPackageAccessRequestDTO request
-    ) {
+    public ResponseEntity<CyrevApiResponse<GovernanceRequestResponseDto>> requestAccessPackage(@CurrentUserId UUID currentUserId, @Valid @RequestBody AccessPackageAccessRequestDTO request) {
         TenantContext tenant = TenantContextHolder.get();
         GovernanceRequestEntity entity = accessRequestService.requestAccessPackage(
                 tenant.getInternalTenantId(),
@@ -56,10 +53,7 @@ public class AccessRequestController {
 
     @PostMapping("/applications")
     @RelationshipManager
-    public ResponseEntity<CyrevApiResponse<GovernanceRequestResponseDto>> requestApplication(
-            @CurrentUserId UUID currentUserId,
-            @Valid @RequestBody ApplicationAccessRequestDTO request
-    ) {
+    public ResponseEntity<CyrevApiResponse<GovernanceRequestResponseDto>> requestApplication(@CurrentUserId UUID currentUserId, @Valid @RequestBody ApplicationAccessRequestDTO request) {
         TenantContext tenant = TenantContextHolder.get();
         GovernanceRequestEntity entity = accessRequestService.requestApplication(
                 tenant.getInternalTenantId(),
@@ -72,10 +66,7 @@ public class AccessRequestController {
 
     @PostMapping("/groups")
     @RelationshipManager
-    public ResponseEntity<CyrevApiResponse<GovernanceRequestResponseDto>> requestGroup(
-            @CurrentUserId UUID currentUserId,
-            @Valid @RequestBody GroupAccessRequestDTO request
-    ) {
+    public ResponseEntity<CyrevApiResponse<GovernanceRequestResponseDto>> requestGroup(@CurrentUserId UUID currentUserId, @Valid @RequestBody GroupAccessRequestDTO request) {
         TenantContext tenant = TenantContextHolder.get();
         GovernanceRequestEntity entity = accessRequestService.requestGroup(
                 tenant.getInternalTenantId(),
@@ -88,10 +79,7 @@ public class AccessRequestController {
 
     @PostMapping("/shared-mailboxes")
     @RelationshipManager
-    public ResponseEntity<CyrevApiResponse<GovernanceRequestResponseDto>> requestSharedMailbox(
-            @CurrentUserId UUID currentUserId,
-            @Valid @RequestBody SharedMailboxAccessRequestDTO request
-    ) {
+    public ResponseEntity<CyrevApiResponse<GovernanceRequestResponseDto>> requestSharedMailbox(@CurrentUserId UUID currentUserId, @Valid @RequestBody SharedMailboxAccessRequestDTO request) {
         TenantContext tenant = TenantContextHolder.get();
         GovernanceRequestEntity entity = accessRequestService.requestSharedMailbox(
                 tenant.getInternalTenantId(),
@@ -104,9 +92,7 @@ public class AccessRequestController {
 
     @GetMapping("/mine")
     @RelationshipManager
-    public ResponseEntity<CyrevApiResponse<List<GovernanceRequestResponseDto>>> myRequests(
-            @CurrentUserId UUID currentUserId
-    ) {
+    public ResponseEntity<CyrevApiResponse<List<GovernanceRequestResponseDto>>> myRequests(@CurrentUserId UUID currentUserId) {
         TenantContext tenant = TenantContextHolder.get();
         List<GovernanceRequestResponseDto> requests = accessRequestService.listMyRequests(
                 tenant.getEntraTenantId(),
